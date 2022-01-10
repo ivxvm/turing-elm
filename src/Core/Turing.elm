@@ -1,7 +1,7 @@
-module Turing exposing (..)
+module Core.Turing exposing (..)
 
-import Rule exposing (Rule)
-import Tape as Tape exposing (Tape)
+import Core.Rule exposing (Rule)
+import Core.Tape as Tape exposing (Tape)
 
 
 type alias Turing a s =

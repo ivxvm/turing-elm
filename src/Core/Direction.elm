@@ -1,4 +1,4 @@
-module Direction exposing (..)
+module Core.Direction exposing (..)
 
 
 type Direction

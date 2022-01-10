@@ -5232,9 +5232,9 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Direction$Left = {$: 'Left'};
-var $author$project$Direction$Right = {$: 'Right'};
-var $author$project$Rule$Rule = F5(
+var $author$project$Core$Direction$Left = {$: 'Left'};
+var $author$project$Core$Direction$Right = {$: 'Right'};
+var $author$project$Core$Rule$Rule = F5(
 	function (currentState, currentSymbol, newSymbol, newState, moveDirection) {
 		return {currentState: currentState, currentSymbol: currentSymbol, moveDirection: moveDirection, newState: newState, newSymbol: newSymbol};
 	});
@@ -5245,12 +5245,12 @@ var $author$project$Main$busyBeaver = {
 	},
 	rules: _List_fromArray(
 		[
-			A5($author$project$Rule$Rule, 'A', '1', '1', 'C', $author$project$Direction$Left),
-			A5($author$project$Rule$Rule, 'A', '0', '1', 'B', $author$project$Direction$Right),
-			A5($author$project$Rule$Rule, 'B', '0', '1', 'A', $author$project$Direction$Left),
-			A5($author$project$Rule$Rule, 'B', '1', '1', 'B', $author$project$Direction$Right),
-			A5($author$project$Rule$Rule, 'C', '0', '1', 'B', $author$project$Direction$Left),
-			A5($author$project$Rule$Rule, 'C', '1', '1', 'X', $author$project$Direction$Right)
+			A5($author$project$Core$Rule$Rule, 'A', '1', '1', 'C', $author$project$Core$Direction$Left),
+			A5($author$project$Core$Rule$Rule, 'A', '0', '1', 'B', $author$project$Core$Direction$Right),
+			A5($author$project$Core$Rule$Rule, 'B', '0', '1', 'A', $author$project$Core$Direction$Left),
+			A5($author$project$Core$Rule$Rule, 'B', '1', '1', 'B', $author$project$Core$Direction$Right),
+			A5($author$project$Core$Rule$Rule, 'C', '0', '1', 'B', $author$project$Core$Direction$Left),
+			A5($author$project$Core$Rule$Rule, 'C', '1', '1', 'X', $author$project$Core$Direction$Right)
 		]),
 	tape: {currentSymbol: '0', emptySymbol: '0', left: _List_Nil, right: _List_Nil}
 };
@@ -5265,14 +5265,14 @@ var $elm$core$Array$repeat = F2(
 				return e;
 			});
 	});
-var $author$project$Direction$toString = function (direction) {
+var $author$project$Core$Direction$toString = function (direction) {
 	if (direction.$ === 'Left') {
 		return 'L';
 	} else {
 		return 'R';
 	}
 };
-var $author$project$Rule$toString = F3(
+var $author$project$Core$Rule$toString = F3(
 	function (ap, sp, rule) {
 		return A2(
 			$elm$core$String$join,
@@ -5283,7 +5283,7 @@ var $author$project$Rule$toString = F3(
 					ap(rule.currentSymbol),
 					ap(rule.newSymbol),
 					sp(rule.newState),
-					$author$project$Direction$toString(rule.moveDirection)
+					$author$project$Core$Direction$toString(rule.moveDirection)
 				]));
 	});
 var $author$project$Main$init = function (_v0) {
@@ -5299,7 +5299,7 @@ var $author$project$Main$init = function (_v0) {
 			prevTurings: _List_Nil,
 			ruleStrings: A2(
 				$elm$core$List$map,
-				A2($author$project$Rule$toString, $elm$core$Basics$identity, $elm$core$Basics$identity),
+				A2($author$project$Core$Rule$toString, $elm$core$Basics$identity, $elm$core$Basics$identity),
 				$author$project$Main$busyBeaver.rules),
 			ruleValidationErrors: A2(
 				$elm$core$Array$repeat,
@@ -7646,11 +7646,11 @@ var $author$project$Main$AnimateComputationStep = F2(
 	function (a, b) {
 		return {$: 'AnimateComputationStep', a: a, b: b};
 	});
-var $author$project$Main$ComputeNextState = {$: 'ComputeNextState'};
-var $author$project$Main$NewSymbolFadein = {$: 'NewSymbolFadein'};
-var $author$project$Main$OldSymbolFadeout = {$: 'OldSymbolFadeout'};
+var $author$project$Model$ComputeNextState = {$: 'ComputeNextState'};
+var $author$project$Model$NewSymbolFadein = {$: 'NewSymbolFadein'};
+var $author$project$Model$OldSymbolFadeout = {$: 'OldSymbolFadeout'};
 var $author$project$Main$ToggleComputation = {$: 'ToggleComputation'};
-var $author$project$Main$UpdateMachineState = {$: 'UpdateMachineState'};
+var $author$project$Model$UpdateMachineState = {$: 'UpdateMachineState'};
 var $elm$core$Basics$always = F2(
 	function (a, _v0) {
 		return a;
@@ -7663,7 +7663,7 @@ var $andrewMacmurray$elm_delay$Delay$after = F2(
 			$elm$core$Basics$always(msg),
 			$elm$core$Process$sleep(time));
 	});
-var $author$project$Tape$shiftLeft = function (tape) {
+var $author$project$Core$Tape$shiftLeft = function (tape) {
 	var _v0 = tape.left;
 	if (_v0.b) {
 		var x = _v0.a;
@@ -7684,7 +7684,7 @@ var $author$project$Tape$shiftLeft = function (tape) {
 			});
 	}
 };
-var $author$project$Tape$shiftRight = function (tape) {
+var $author$project$Core$Tape$shiftRight = function (tape) {
 	var _v0 = tape.right;
 	if (_v0.b) {
 		var x = _v0.a;
@@ -7705,21 +7705,21 @@ var $author$project$Tape$shiftRight = function (tape) {
 			});
 	}
 };
-var $author$project$Tape$shift = F2(
+var $author$project$Core$Tape$shift = F2(
 	function (direction, tape) {
 		if (direction.$ === 'Left') {
-			return $author$project$Tape$shiftLeft(tape);
+			return $author$project$Core$Tape$shiftLeft(tape);
 		} else {
-			return $author$project$Tape$shiftRight(tape);
+			return $author$project$Core$Tape$shiftRight(tape);
 		}
 	});
-var $author$project$Tape$writeSymbol = F2(
+var $author$project$Core$Tape$writeSymbol = F2(
 	function (newSymbol, tape) {
 		return _Utils_update(
 			tape,
 			{currentSymbol: newSymbol});
 	});
-var $author$project$Turing$applyRule = F2(
+var $author$project$Core$Turing$applyRule = F2(
 	function (_v0, turing) {
 		var currentState = _v0.currentState;
 		var currentSymbol = _v0.currentSymbol;
@@ -7732,12 +7732,12 @@ var $author$project$Turing$applyRule = F2(
 				{
 					currentState: newState,
 					tape: A2(
-						$author$project$Tape$shift,
+						$author$project$Core$Tape$shift,
 						moveDirection,
-						A2($author$project$Tape$writeSymbol, newSymbol, turing.tape))
+						A2($author$project$Core$Tape$writeSymbol, newSymbol, turing.tape))
 				}));
 	});
-var $author$project$Turing$findApplicableRule = function (turing) {
+var $author$project$Core$Turing$findApplicableRule = function (turing) {
 	var recurse = F2(
 		function (rules, index) {
 			recurse:
@@ -7764,7 +7764,7 @@ var $author$project$Turing$findApplicableRule = function (turing) {
 		});
 	return A2(recurse, turing.rules, 0);
 };
-var $author$project$Turing$isHalted = function (turing) {
+var $author$project$Core$Turing$isHalted = function (turing) {
 	return turing.isFinalState(turing.currentState);
 };
 var $elm$time$Time$Name = function (a) {
@@ -8230,7 +8230,7 @@ var $elm_community$list_extra$List$Extra$removeAt = F2(
 		}
 	});
 var $author$project$Main$startComputationThread = function (threadId) {
-	return A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Main$ComputeNextState);
+	return A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Model$ComputeNextState);
 };
 var $author$project$Main$restartComputationIfRunning = function (model) {
 	var newComputationThreadId = model.isRunning ? (model.computationThreadId + 1) : model.computationThreadId;
@@ -8341,16 +8341,16 @@ var $author$project$Main$update = F2(
 							model,
 							threadId,
 							function (_v4) {
-								var _v5 = $author$project$Turing$findApplicableRule(model.turing);
+								var _v5 = $author$project$Core$Turing$findApplicableRule(model.turing);
 								if (_v5.$ === 'Just') {
 									var _v6 = _v5.a;
 									var currentlyApplicableRuleIndex = _v6.a;
 									var currentlyApplicableRule = _v6.b;
-									var nextTuring = A2($author$project$Turing$applyRule, currentlyApplicableRule, model.turing);
+									var nextTuring = A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, model.turing);
 									var newModel = _Utils_update(
 										model,
 										{
-											animatedComputationStepState: $elm$core$Maybe$Just($author$project$Main$ComputeNextState),
+											animatedComputationStepState: $elm$core$Maybe$Just($author$project$Model$ComputeNextState),
 											lastAppliedRule: $elm$core$Maybe$Just(currentlyApplicableRule),
 											lastAppliedRuleIndex: $elm$core$Maybe$Just(currentlyApplicableRuleIndex),
 											pendingTuring: nextTuring
@@ -8360,7 +8360,7 @@ var $author$project$Main$update = F2(
 										A2(
 											$andrewMacmurray$elm_delay$Delay$after,
 											250,
-											A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Main$OldSymbolFadeout)));
+											A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Model$OldSymbolFadeout)));
 								} else {
 									return _Utils_Tuple2(
 										model,
@@ -8384,12 +8384,12 @@ var $author$project$Main$update = F2(
 									_Utils_update(
 										model,
 										{
-											animatedComputationStepState: $elm$core$Maybe$Just($author$project$Main$OldSymbolFadeout)
+											animatedComputationStepState: $elm$core$Maybe$Just($author$project$Model$OldSymbolFadeout)
 										}),
 									A2(
 										$andrewMacmurray$elm_delay$Delay$after,
 										1000,
-										A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Main$NewSymbolFadein)));
+										A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Model$NewSymbolFadein)));
 							});
 					case 'NewSymbolFadein':
 						var threadId = msg.a;
@@ -8403,12 +8403,12 @@ var $author$project$Main$update = F2(
 									_Utils_update(
 										model,
 										{
-											animatedComputationStepState: $elm$core$Maybe$Just($author$project$Main$NewSymbolFadein)
+											animatedComputationStepState: $elm$core$Maybe$Just($author$project$Model$NewSymbolFadein)
 										}),
 									A2(
 										$andrewMacmurray$elm_delay$Delay$after,
 										1000,
-										A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Main$UpdateMachineState)));
+										A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Model$UpdateMachineState)));
 							});
 					default:
 						var threadId = msg.a;
@@ -8419,15 +8419,15 @@ var $author$project$Main$update = F2(
 							threadId,
 							function (_v13) {
 								var newTuring = A2($elm$core$Maybe$withDefault, model.turing, model.pendingTuring);
-								var cmd = $author$project$Turing$isHalted(newTuring) ? A2($andrewMacmurray$elm_delay$Delay$after, 0, $author$project$Main$ToggleComputation) : A2(
+								var cmd = $author$project$Core$Turing$isHalted(newTuring) ? A2($andrewMacmurray$elm_delay$Delay$after, 0, $author$project$Main$ToggleComputation) : A2(
 									$andrewMacmurray$elm_delay$Delay$after,
 									250,
-									A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Main$ComputeNextState));
+									A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Model$ComputeNextState));
 								return _Utils_Tuple2(
 									_Utils_update(
 										model,
 										{
-											animatedComputationStepState: $elm$core$Maybe$Just($author$project$Main$UpdateMachineState),
+											animatedComputationStepState: $elm$core$Maybe$Just($author$project$Model$UpdateMachineState),
 											isInitialState: false,
 											pendingTuring: $elm$core$Maybe$Nothing,
 											prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
@@ -8437,7 +8437,7 @@ var $author$project$Main$update = F2(
 							});
 				}
 			case 'StepFw':
-				var _v14 = $author$project$Turing$findApplicableRule(model.turing);
+				var _v14 = $author$project$Core$Turing$findApplicableRule(model.turing);
 				if (_v14.$ === 'Just') {
 					var _v15 = _v14.a;
 					var currentlyApplicableRuleIndex = _v15.a;
@@ -8445,7 +8445,7 @@ var $author$project$Main$update = F2(
 					var newTuring = A2(
 						$elm$core$Maybe$withDefault,
 						model.turing,
-						A2($author$project$Turing$applyRule, currentlyApplicableRule, model.turing));
+						A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, model.turing));
 					var _v16 = $author$project$Main$restartComputationIfRunning(model);
 					var newComputationThreadId = _v16.a;
 					var cmd = _v16.b;
@@ -8522,7 +8522,7 @@ var $rtfeldman$elm_css$Html$Styled$Attributes$class = $rtfeldman$elm_css$Html$St
 var $author$project$Main$ResetComputation = {$: 'ResetComputation'};
 var $author$project$Main$StepBw = {$: 'StepBw'};
 var $author$project$Main$StepFw = {$: 'StepFw'};
-var $author$project$CssExtra$classIf = F2(
+var $author$project$Utils$AttributeExtra$classIf = F2(
 	function (condition, className) {
 		return condition ? $rtfeldman$elm_css$Html$Styled$Attributes$class(className) : $rtfeldman$elm_css$Html$Styled$Attributes$class('');
 	});
@@ -8572,7 +8572,7 @@ var $rtfeldman$elm_css$Html$Styled$Attributes$classList = function (classes) {
 				$elm$core$Tuple$first,
 				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
 };
-var $author$project$Main$onClickIf = F2(
+var $author$project$Utils$AttributeExtra$onClickIf = F2(
 	function (cond, msg) {
 		return cond ? $rtfeldman$elm_css$Html$Styled$Events$onClick(msg) : $rtfeldman$elm_css$Html$Styled$Attributes$classList(_List_Nil);
 	});
@@ -8586,7 +8586,7 @@ var $rtfeldman$elm_css$VirtualDom$Styled$text = function (str) {
 var $rtfeldman$elm_css$Html$Styled$text = $rtfeldman$elm_css$VirtualDom$Styled$text;
 var $author$project$Main$controlsHtml = function (model) {
 	var toggleBtnText = model.isRunning ? 'stop' : 'start';
-	var isHalted = $author$project$Turing$isHalted(model.turing);
+	var isHalted = $author$project$Core$Turing$isHalted(model.turing);
 	return A2(
 		$rtfeldman$elm_css$Html$Styled$div,
 		_List_fromArray(
@@ -8608,8 +8608,8 @@ var $author$project$Main$controlsHtml = function (model) {
 						_List_fromArray(
 							[
 								$rtfeldman$elm_css$Html$Styled$Attributes$class('ctrl-step-bw'),
-								A2($author$project$CssExtra$classIf, model.isInitialState, 'disabled'),
-								A2($author$project$Main$onClickIf, !model.isInitialState, $author$project$Main$StepBw)
+								A2($author$project$Utils$AttributeExtra$classIf, model.isInitialState, 'disabled'),
+								A2($author$project$Utils$AttributeExtra$onClickIf, !model.isInitialState, $author$project$Main$StepBw)
 							]),
 						_List_fromArray(
 							[
@@ -8642,8 +8642,8 @@ var $author$project$Main$controlsHtml = function (model) {
 						_List_fromArray(
 							[
 								$rtfeldman$elm_css$Html$Styled$Attributes$class('ctrl-step-fw'),
-								A2($author$project$CssExtra$classIf, isHalted, 'disabled'),
-								A2($author$project$Main$onClickIf, !isHalted, $author$project$Main$StepFw)
+								A2($author$project$Utils$AttributeExtra$classIf, isHalted, 'disabled'),
+								A2($author$project$Utils$AttributeExtra$onClickIf, !isHalted, $author$project$Main$StepFw)
 							]),
 						_List_fromArray(
 							[
@@ -8841,9 +8841,9 @@ var $author$project$Main$tapeCellHtml = F4(
 				[
 					$rtfeldman$elm_css$Html$Styled$Attributes$class('tape-cell'),
 					$rtfeldman$elm_css$Html$Styled$Attributes$class('centered'),
-					A2($author$project$CssExtra$classIf, isCurrent, 'current'),
-					A2($author$project$CssExtra$classIf, isFadingOut, 'fadeout'),
-					A2($author$project$CssExtra$classIf, isFadingIn, 'fadein')
+					A2($author$project$Utils$AttributeExtra$classIf, isCurrent, 'current'),
+					A2($author$project$Utils$AttributeExtra$classIf, isFadingOut, 'fadeout'),
+					A2($author$project$Utils$AttributeExtra$classIf, isFadingIn, 'fadein')
 				]),
 			_List_fromArray(
 				[
@@ -8871,7 +8871,7 @@ var $elm$core$List$repeat = F2(
 	function (n, value) {
 		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
 	});
-var $author$project$Tape$toSymbolList = F2(
+var $author$project$Core$Tape$toSymbolList = F2(
 	function (minSize, tape) {
 		var leftLen = $elm$core$List$length(tape.left);
 		var sizeToPad = ((minSize - leftLen) - 1) - $elm$core$List$length(tape.right);
@@ -8897,10 +8897,10 @@ var $author$project$Tape$toSymbolList = F2(
 var $author$project$Main$stateAndTapeHtml = function (model) {
 	var isFadeoutState = _Utils_eq(
 		model.animatedComputationStepState,
-		$elm$core$Maybe$Just($author$project$Main$OldSymbolFadeout));
+		$elm$core$Maybe$Just($author$project$Model$OldSymbolFadeout));
 	var isFadeinState = _Utils_eq(
 		model.animatedComputationStepState,
-		$elm$core$Maybe$Just($author$project$Main$NewSymbolFadein));
+		$elm$core$Maybe$Just($author$project$Model$NewSymbolFadein));
 	var renderedState = isFadeinState ? A3(
 		$elm_community$maybe_extra$Maybe$Extra$unwrap,
 		model.turing.currentState,
@@ -8908,7 +8908,7 @@ var $author$project$Main$stateAndTapeHtml = function (model) {
 			return r.newState;
 		},
 		model.lastAppliedRule) : model.turing.currentState;
-	var _v0 = A2($author$project$Tape$toSymbolList, 24, model.turing.tape);
+	var _v0 = A2($author$project$Core$Tape$toSymbolList, 24, model.turing.tape);
 	var tapeSymbols = _v0.a;
 	var currentSymbolIndex = _v0.b;
 	var tapeCells = A2(
@@ -8940,8 +8940,8 @@ var $author$project$Main$stateAndTapeHtml = function (model) {
 					[
 						$rtfeldman$elm_css$Html$Styled$Attributes$class('state'),
 						$rtfeldman$elm_css$Html$Styled$Attributes$class('centered'),
-						A2($author$project$CssExtra$classIf, isFadeoutState, 'fadeout'),
-						A2($author$project$CssExtra$classIf, isFadeinState, 'fadein')
+						A2($author$project$Utils$AttributeExtra$classIf, isFadeoutState, 'fadeout'),
+						A2($author$project$Utils$AttributeExtra$classIf, isFadeinState, 'fadein')
 					]),
 				_List_fromArray(
 					[

@@ -3,21 +3,22 @@ module Main exposing (..)
 import Array exposing (Array)
 import Array.Extra as Array
 import Browser
+import Core.Direction exposing (Direction(..))
+import Core.Rule exposing (..)
+import Core.Tape
+import Core.Turing exposing (Turing)
 import Css exposing (..)
-import CssExtra exposing (..)
 import Delay exposing (..)
-import Direction exposing (Direction(..))
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Html.Styled.Events exposing (onClick, onInput)
 import List
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Rule exposing (..)
-import Tape
+import Model exposing (..)
 import Task
 import Time
-import Turing exposing (Turing)
+import Utils.AttributeExtra exposing (..)
 
 
 busyBeaver : Turing String String
@@ -46,26 +47,11 @@ main =
         }
 
 
-type alias Model =
-    { ruleStrings : List String
-    , ruleValidationErrors : Array (Maybe String)
-    , turing : Turing String String
-    , pendingTuring : Maybe (Turing String String)
-    , prevTurings : List (Turing String String)
-    , lastAppliedRule : Maybe (Rule String String)
-    , lastAppliedRuleIndex : Maybe Int
-    , computationThreadId : Int
-    , animatedComputationStepState : Maybe AnimatedComputationStepState
-    , isRunning : Bool
-    , isInitialState : Bool
-    }
-
-
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { ruleStrings =
             busyBeaver.rules
-                |> List.map (Rule.toString identity identity)
+                |> List.map (Core.Rule.toString identity identity)
       , ruleValidationErrors = Array.repeat (List.length busyBeaver.rules) Nothing
       , turing = busyBeaver
       , pendingTuring = Nothing
@@ -79,13 +65,6 @@ init _ =
       }
     , Cmd.none
     )
-
-
-type AnimatedComputationStepState
-    = ComputeNextState
-    | OldSymbolFadeout
-    | NewSymbolFadein
-    | UpdateMachineState
 
 
 type Msg
@@ -176,11 +155,11 @@ update msg model =
         AnimateComputationStep threadId ComputeNextState ->
             whenThreadIsAlive model threadId <|
                 \() ->
-                    case Turing.findApplicableRule model.turing of
+                    case Core.Turing.findApplicableRule model.turing of
                         Just ( currentlyApplicableRuleIndex, currentlyApplicableRule ) ->
                             let
                                 nextTuring =
-                                    Turing.applyRule currentlyApplicableRule model.turing
+                                    Core.Turing.applyRule currentlyApplicableRule model.turing
 
                                 newModel =
                                     { model
@@ -219,7 +198,7 @@ update msg model =
                             Maybe.withDefault model.turing model.pendingTuring
 
                         cmd =
-                            if Turing.isHalted newTuring then
+                            if Core.Turing.isHalted newTuring then
                                 Delay.after 0 ToggleComputation
 
                             else
@@ -236,14 +215,14 @@ update msg model =
                     )
 
         StepFw ->
-            case Turing.findApplicableRule model.turing of
+            case Core.Turing.findApplicableRule model.turing of
                 Just ( currentlyApplicableRuleIndex, currentlyApplicableRule ) ->
                     let
                         ( newComputationThreadId, cmd ) =
                             restartComputationIfRunning model
 
                         newTuring =
-                            Turing.applyRule currentlyApplicableRule model.turing
+                            Core.Turing.applyRule currentlyApplicableRule model.turing
                                 |> Maybe.withDefault model.turing
                     in
                     ( { model
@@ -372,7 +351,7 @@ stateAndTapeHtml : Model -> Html Msg
 stateAndTapeHtml model =
     let
         ( tapeSymbols, currentSymbolIndex ) =
-            Tape.toSymbolList 24 model.turing.tape
+            Core.Tape.toSymbolList 24 model.turing.tape
 
         isFadeoutState =
             model.animatedComputationStepState == Just OldSymbolFadeout
@@ -423,15 +402,6 @@ stateAndTapeHtml model =
         ]
 
 
-onClickIf : Bool -> msg -> Attribute msg
-onClickIf cond msg =
-    if cond then
-        onClick msg
-
-    else
-        classList []
-
-
 controlsHtml : Model -> Html Msg
 controlsHtml model =
     let
@@ -443,7 +413,7 @@ controlsHtml model =
                 "start"
 
         isHalted =
-            Turing.isHalted model.turing
+            Core.Turing.isHalted model.turing
     in
     div [ class "centered" ]
         [ div [ class "controls" ]

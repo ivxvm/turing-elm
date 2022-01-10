@@ -1,6 +1,6 @@
-module Tape exposing (..)
+module Core.Tape exposing (..)
 
-import Direction exposing (Direction(..))
+import Core.Direction exposing (Direction(..))
 
 
 type alias Tape a =

@@ -1,6 +1,6 @@
-module Rule exposing (..)
+module Core.Rule exposing (..)
 
-import Direction exposing (Direction)
+import Core.Direction as Direction exposing (Direction)
 
 
 type alias Rule a s =
