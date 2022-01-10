@@ -1,15 +1,9 @@
-module Model exposing (..)
+module App.Model exposing (..)
 
+import App.ComputationWorkflow.Types exposing (..)
 import Array exposing (Array)
-import Core.Rule exposing (Rule)
-import Core.Turing exposing (Turing)
-
-
-type AnimatedComputationStepState
-    = ComputeNextState
-    | OldSymbolFadeout
-    | NewSymbolFadein
-    | UpdateMachineState
+import Core.Rule exposing (..)
+import Core.Turing exposing (..)
 
 
 type alias Model =
@@ -20,8 +14,7 @@ type alias Model =
     , prevTurings : List (Turing String String)
     , lastAppliedRule : Maybe (Rule String String)
     , lastAppliedRuleIndex : Maybe Int
-    , computationThreadId : Int
-    , animatedComputationStepState : Maybe AnimatedComputationStepState
+    , activeComputationWorkflow : ComputationWorkflow
     , isRunning : Bool
     , isInitialState : Bool
     }

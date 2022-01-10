@@ -1,12 +1,16 @@
 module Main exposing (..)
 
-import Array exposing (Array)
+import App.ComputationWorkflow as ComputationWorkflow exposing (..)
+import App.ComputationWorkflow.Types exposing (..)
+import App.Model exposing (..)
+import App.Msg exposing (..)
+import Array
 import Array.Extra as Array
 import Browser
 import Core.Direction exposing (Direction(..))
 import Core.Rule exposing (..)
 import Core.Tape
-import Core.Turing exposing (Turing)
+import Core.Turing as Turing exposing (Turing)
 import Css exposing (..)
 import Delay exposing (..)
 import Html.Styled exposing (..)
@@ -15,9 +19,6 @@ import Html.Styled.Events exposing (onClick, onInput)
 import List
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Model exposing (..)
-import Task
-import Time
 import Utils.AttributeExtra exposing (..)
 
 
@@ -58,29 +59,12 @@ init _ =
       , prevTurings = []
       , lastAppliedRule = Nothing
       , lastAppliedRuleIndex = Nothing
-      , computationThreadId = 0
-      , animatedComputationStepState = Nothing
+      , activeComputationWorkflow = ComputationWorkflow.init
       , isRunning = False
       , isInitialState = True
       }
     , Cmd.none
     )
-
-
-type Msg
-    = AddRule
-    | RemoveRule Int
-    | UpdateRule Int String
-    | ToggleComputation
-    | ResetComputation
-    | AnimateComputationStep Int AnimatedComputationStepState
-    | StepFw
-    | StepBw
-
-
-startComputationThread : Int -> Msg
-startComputationThread threadId =
-    AnimateComputationStep threadId ComputeNextState
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -111,32 +95,31 @@ update msg model =
 
         ToggleComputation ->
             let
-                newComputationThreadId =
+                newComputationWorkflow =
                     if model.isRunning then
-                        model.computationThreadId + 1
+                        ComputationWorkflow.reset model.activeComputationWorkflow
 
                     else
-                        model.computationThreadId
+                        model.activeComputationWorkflow
 
                 cmd =
                     if model.isRunning then
                         Cmd.none
 
                     else
-                        Task.perform (\_ -> startComputationThread newComputationThreadId) Time.now
+                        ComputationWorkflow.start newComputationWorkflow
             in
             ( { model
                 | isRunning = not model.isRunning
-                , computationThreadId = newComputationThreadId
                 , pendingTuring = Nothing
-                , animatedComputationStepState = Nothing
+                , activeComputationWorkflow = newComputationWorkflow
               }
             , cmd
             )
 
         ResetComputation ->
             let
-                ( newComputationThreadId, cmd ) =
+                ( newComputationWorkflow, cmd ) =
                     restartComputationIfRunning model
             in
             ( { model
@@ -145,84 +128,24 @@ update msg model =
                 , lastAppliedRuleIndex = Nothing
                 , pendingTuring = Nothing
                 , prevTurings = []
-                , animatedComputationStepState = Nothing
-                , computationThreadId = newComputationThreadId
+                , activeComputationWorkflow = newComputationWorkflow
                 , isInitialState = True
               }
             , cmd
             )
 
-        AnimateComputationStep threadId ComputeNextState ->
-            whenThreadIsAlive model threadId <|
-                \() ->
-                    case Core.Turing.findApplicableRule model.turing of
-                        Just ( currentlyApplicableRuleIndex, currentlyApplicableRule ) ->
-                            let
-                                nextTuring =
-                                    Core.Turing.applyRule currentlyApplicableRule model.turing
-
-                                newModel =
-                                    { model
-                                        | pendingTuring = nextTuring
-                                        , lastAppliedRule = Just currentlyApplicableRule
-                                        , lastAppliedRuleIndex = Just currentlyApplicableRuleIndex
-                                        , animatedComputationStepState = Just ComputeNextState
-                                    }
-                            in
-                            ( newModel
-                            , Delay.after 250 (AnimateComputationStep threadId OldSymbolFadeout)
-                            )
-
-                        Nothing ->
-                            ( model, Task.perform (\_ -> ToggleComputation) Time.now )
-
-        AnimateComputationStep threadId OldSymbolFadeout ->
-            whenThreadIsAlive model threadId <|
-                \() ->
-                    ( { model | animatedComputationStepState = Just OldSymbolFadeout }
-                    , Delay.after 1000 (AnimateComputationStep threadId NewSymbolFadein)
-                    )
-
-        AnimateComputationStep threadId NewSymbolFadein ->
-            whenThreadIsAlive model threadId <|
-                \() ->
-                    ( { model | animatedComputationStepState = Just NewSymbolFadein }
-                    , Delay.after 1000 (AnimateComputationStep threadId UpdateMachineState)
-                    )
-
-        AnimateComputationStep threadId UpdateMachineState ->
-            whenThreadIsAlive model threadId <|
-                \() ->
-                    let
-                        newTuring =
-                            Maybe.withDefault model.turing model.pendingTuring
-
-                        cmd =
-                            if Core.Turing.isHalted newTuring then
-                                Delay.after 0 ToggleComputation
-
-                            else
-                                Delay.after 250 (AnimateComputationStep threadId ComputeNextState)
-                    in
-                    ( { model
-                        | animatedComputationStepState = Just UpdateMachineState
-                        , turing = newTuring
-                        , pendingTuring = Nothing
-                        , prevTurings = model.turing :: model.prevTurings
-                        , isInitialState = False
-                      }
-                    , cmd
-                    )
+        ProcessComputationWorkflow workflow ->
+            ComputationWorkflow.update workflow model
 
         StepFw ->
-            case Core.Turing.findApplicableRule model.turing of
+            case Turing.findApplicableRule model.turing of
                 Just ( currentlyApplicableRuleIndex, currentlyApplicableRule ) ->
                     let
-                        ( newComputationThreadId, cmd ) =
+                        ( newComputationWorkflow, cmd ) =
                             restartComputationIfRunning model
 
                         newTuring =
-                            Core.Turing.applyRule currentlyApplicableRule model.turing
+                            Turing.applyRule currentlyApplicableRule model.turing
                                 |> Maybe.withDefault model.turing
                     in
                     ( { model
@@ -231,8 +154,7 @@ update msg model =
                         , pendingTuring = Nothing
                         , lastAppliedRule = Just currentlyApplicableRule
                         , lastAppliedRuleIndex = Just currentlyApplicableRuleIndex
-                        , animatedComputationStepState = Nothing
-                        , computationThreadId = newComputationThreadId
+                        , activeComputationWorkflow = newComputationWorkflow
                         , isInitialState = False
                       }
                     , cmd
@@ -243,17 +165,16 @@ update msg model =
 
         StepBw ->
             let
-                ( newComputationThreadId, cmd ) =
+                ( newComputationWorkflow, cmd ) =
                     restartComputationIfRunning model
             in
             case model.prevTurings of
                 prevTuring :: restPrevTurings ->
                     ( { model
-                        | computationThreadId = newComputationThreadId
-                        , turing = prevTuring
+                        | turing = prevTuring
                         , prevTurings = restPrevTurings
                         , pendingTuring = Nothing
-                        , animatedComputationStepState = Nothing
+                        , activeComputationWorkflow = newComputationWorkflow
                         , isInitialState = List.isEmpty restPrevTurings
                       }
                     , cmd
@@ -263,33 +184,24 @@ update msg model =
                     ( model, Cmd.none )
 
 
-restartComputationIfRunning : Model -> ( Int, Cmd Msg )
+restartComputationIfRunning : Model -> ( ComputationWorkflow, Cmd Msg )
 restartComputationIfRunning model =
     let
-        newComputationThreadId =
+        newComputationWorkflow =
             if model.isRunning then
-                model.computationThreadId + 1
+                ComputationWorkflow.reset model.activeComputationWorkflow
 
             else
-                model.computationThreadId
+                model.activeComputationWorkflow
 
         cmd =
             if model.isRunning then
-                Task.perform (\_ -> startComputationThread newComputationThreadId) Time.now
+                ComputationWorkflow.start newComputationWorkflow
 
             else
                 Cmd.none
     in
-    ( newComputationThreadId, cmd )
-
-
-whenThreadIsAlive : Model -> Int -> (() -> ( Model, Cmd Msg )) -> ( Model, Cmd Msg )
-whenThreadIsAlive model threadId fn =
-    if threadId == model.computationThreadId then
-        fn ()
-
-    else
-        ( model, Cmd.none )
+    ( newComputationWorkflow, cmd )
 
 
 rulesListEntryHtml : Model -> Int -> String -> Html Msg
@@ -354,10 +266,10 @@ stateAndTapeHtml model =
             Core.Tape.toSymbolList 24 model.turing.tape
 
         isFadeoutState =
-            model.animatedComputationStepState == Just OldSymbolFadeout
+            model.activeComputationWorkflow.step == Just OldSymbolFadeout
 
         isFadeinState =
-            model.animatedComputationStepState == Just NewSymbolFadein
+            model.activeComputationWorkflow.step == Just NewSymbolFadein
 
         renderedState =
             if isFadeinState then
@@ -413,7 +325,7 @@ controlsHtml model =
                 "start"
 
         isHalted =
-            Core.Turing.isHalted model.turing
+            Turing.isHalted model.turing
     in
     div [ class "centered" ]
         [ div [ class "controls" ]

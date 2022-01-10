@@ -5254,6 +5254,7 @@ var $author$project$Main$busyBeaver = {
 		]),
 	tape: {currentSymbol: '0', emptySymbol: '0', left: _List_Nil, right: _List_Nil}
 };
+var $author$project$App$ComputationWorkflow$init = {id: 0, step: $elm$core$Maybe$Nothing};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm$core$Array$repeat = F2(
@@ -5289,8 +5290,7 @@ var $author$project$Core$Rule$toString = F3(
 var $author$project$Main$init = function (_v0) {
 	return _Utils_Tuple2(
 		{
-			animatedComputationStepState: $elm$core$Maybe$Nothing,
-			computationThreadId: 0,
+			activeComputationWorkflow: $author$project$App$ComputationWorkflow$init,
 			isInitialState: true,
 			isRunning: false,
 			lastAppliedRule: $elm$core$Maybe$Nothing,
@@ -7642,27 +7642,6 @@ var $rtfeldman$elm_css$VirtualDom$Styled$toUnstyled = function (vdom) {
 	}
 };
 var $rtfeldman$elm_css$Html$Styled$toUnstyled = $rtfeldman$elm_css$VirtualDom$Styled$toUnstyled;
-var $author$project$Main$AnimateComputationStep = F2(
-	function (a, b) {
-		return {$: 'AnimateComputationStep', a: a, b: b};
-	});
-var $author$project$Model$ComputeNextState = {$: 'ComputeNextState'};
-var $author$project$Model$NewSymbolFadein = {$: 'NewSymbolFadein'};
-var $author$project$Model$OldSymbolFadeout = {$: 'OldSymbolFadeout'};
-var $author$project$Main$ToggleComputation = {$: 'ToggleComputation'};
-var $author$project$Model$UpdateMachineState = {$: 'UpdateMachineState'};
-var $elm$core$Basics$always = F2(
-	function (a, _v0) {
-		return a;
-	});
-var $elm$core$Process$sleep = _Process_sleep;
-var $andrewMacmurray$elm_delay$Delay$after = F2(
-	function (time, msg) {
-		return A2(
-			$elm$core$Task$perform,
-			$elm$core$Basics$always(msg),
-			$elm$core$Process$sleep(time));
-	});
 var $author$project$Core$Tape$shiftLeft = function (tape) {
 	var _v0 = tape.left;
 	if (_v0.b) {
@@ -7764,25 +7743,6 @@ var $author$project$Core$Turing$findApplicableRule = function (turing) {
 		});
 	return A2(recurse, turing.rules, 0);
 };
-var $author$project$Core$Turing$isHalted = function (turing) {
-	return turing.isFinalState(turing.currentState);
-};
-var $elm$time$Time$Name = function (a) {
-	return {$: 'Name', a: a};
-};
-var $elm$time$Time$Offset = function (a) {
-	return {$: 'Offset', a: a};
-};
-var $elm$time$Time$Zone = F2(
-	function (a, b) {
-		return {$: 'Zone', a: a, b: b};
-	});
-var $elm$time$Time$customZone = $elm$time$Time$Zone;
-var $elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
-var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
 var $elm$core$Elm$JsArray$push = _JsArray_push;
 var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
 var $elm$core$Basics$ge = _Utils_ge;
@@ -8229,19 +8189,52 @@ var $elm_community$list_extra$List$Extra$removeAt = F2(
 			}
 		}
 	});
-var $author$project$Main$startComputationThread = function (threadId) {
-	return A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Model$ComputeNextState);
+var $author$project$App$ComputationWorkflow$reset = function (workflow) {
+	return {id: workflow.id + 1, step: $elm$core$Maybe$Nothing};
 };
-var $author$project$Main$restartComputationIfRunning = function (model) {
-	var newComputationThreadId = model.isRunning ? (model.computationThreadId + 1) : model.computationThreadId;
-	var cmd = model.isRunning ? A2(
+var $author$project$App$ComputationWorkflow$Types$ComputeNextState = {$: 'ComputeNextState'};
+var $author$project$App$Msg$ProcessComputationWorkflow = function (a) {
+	return {$: 'ProcessComputationWorkflow', a: a};
+};
+var $elm$time$Time$Name = function (a) {
+	return {$: 'Name', a: a};
+};
+var $elm$time$Time$Offset = function (a) {
+	return {$: 'Offset', a: a};
+};
+var $elm$time$Time$Zone = F2(
+	function (a, b) {
+		return {$: 'Zone', a: a, b: b};
+	});
+var $elm$time$Time$customZone = $elm$time$Time$Zone;
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
+var $author$project$App$ComputationWorkflow$start = function (workflow) {
+	return A2(
 		$elm$core$Task$perform,
 		function (_v0) {
-			return $author$project$Main$startComputationThread(newComputationThreadId);
+			return $author$project$App$Msg$ProcessComputationWorkflow(
+				_Utils_update(
+					workflow,
+					{
+						step: $elm$core$Maybe$Just(
+							A2($elm$core$Maybe$withDefault, $author$project$App$ComputationWorkflow$Types$ComputeNextState, workflow.step))
+					}));
 		},
-		$elm$time$Time$now) : $elm$core$Platform$Cmd$none;
-	return _Utils_Tuple2(newComputationThreadId, cmd);
+		$elm$time$Time$now);
 };
+var $author$project$Main$restartComputationIfRunning = function (model) {
+	var newComputationWorkflow = model.isRunning ? $author$project$App$ComputationWorkflow$reset(model.activeComputationWorkflow) : model.activeComputationWorkflow;
+	var cmd = model.isRunning ? $author$project$App$ComputationWorkflow$start(newComputationWorkflow) : $elm$core$Platform$Cmd$none;
+	return _Utils_Tuple2(newComputationWorkflow, cmd);
+};
+var $elm$core$Basics$always = F2(
+	function (a, _v0) {
+		return a;
+	});
 var $elm_community$list_extra$List$Extra$updateAt = F3(
 	function (index, fn, list) {
 		if (index < 0) {
@@ -8270,9 +8263,122 @@ var $elm_community$list_extra$List$Extra$setAt = F2(
 			index,
 			$elm$core$Basics$always(value));
 	});
-var $author$project$Main$whenThreadIsAlive = F3(
-	function (model, threadId, fn) {
-		return _Utils_eq(threadId, model.computationThreadId) ? fn(_Utils_Tuple0) : _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+var $author$project$App$ComputationWorkflow$Types$NewSymbolFadein = {$: 'NewSymbolFadein'};
+var $author$project$App$ComputationWorkflow$Types$OldSymbolFadeout = {$: 'OldSymbolFadeout'};
+var $author$project$App$Msg$ToggleComputation = {$: 'ToggleComputation'};
+var $author$project$App$ComputationWorkflow$Types$UpdateMachineState = {$: 'UpdateMachineState'};
+var $elm$core$Process$sleep = _Process_sleep;
+var $andrewMacmurray$elm_delay$Delay$after = F2(
+	function (time, msg) {
+		return A2(
+			$elm$core$Task$perform,
+			$elm$core$Basics$always(msg),
+			$elm$core$Process$sleep(time));
+	});
+var $author$project$Core$Turing$isHalted = function (turing) {
+	return turing.isFinalState(turing.currentState);
+};
+var $author$project$App$ComputationWorkflow$update = F2(
+	function (workflow, model) {
+		if (!_Utils_eq(workflow.id, model.activeComputationWorkflow.id)) {
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		} else {
+			var _v0 = workflow.step;
+			if (_v0.$ === 'Just') {
+				switch (_v0.a.$) {
+					case 'ComputeNextState':
+						var _v1 = _v0.a;
+						var _v2 = $author$project$Core$Turing$findApplicableRule(model.turing);
+						if (_v2.$ === 'Just') {
+							var _v3 = _v2.a;
+							var currentlyApplicableRuleIndex = _v3.a;
+							var currentlyApplicableRule = _v3.b;
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										activeComputationWorkflow: workflow,
+										lastAppliedRule: $elm$core$Maybe$Just(currentlyApplicableRule),
+										lastAppliedRuleIndex: $elm$core$Maybe$Just(currentlyApplicableRuleIndex),
+										pendingTuring: A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, model.turing)
+									}),
+								A2(
+									$andrewMacmurray$elm_delay$Delay$after,
+									250,
+									$author$project$App$Msg$ProcessComputationWorkflow(
+										_Utils_update(
+											workflow,
+											{
+												step: $elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Types$OldSymbolFadeout)
+											}))));
+						} else {
+							return _Utils_Tuple2(
+								model,
+								A2(
+									$elm$core$Task$perform,
+									function (_v4) {
+										return $author$project$App$Msg$ToggleComputation;
+									},
+									$elm$time$Time$now));
+						}
+					case 'OldSymbolFadeout':
+						var _v5 = _v0.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{activeComputationWorkflow: workflow}),
+							A2(
+								$andrewMacmurray$elm_delay$Delay$after,
+								1000,
+								$author$project$App$Msg$ProcessComputationWorkflow(
+									_Utils_update(
+										workflow,
+										{
+											step: $elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Types$NewSymbolFadein)
+										}))));
+					case 'NewSymbolFadein':
+						var _v6 = _v0.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{activeComputationWorkflow: workflow}),
+							A2(
+								$andrewMacmurray$elm_delay$Delay$after,
+								1000,
+								$author$project$App$Msg$ProcessComputationWorkflow(
+									_Utils_update(
+										workflow,
+										{
+											step: $elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Types$UpdateMachineState)
+										}))));
+					default:
+						var _v7 = _v0.a;
+						var newTuring = A2($elm$core$Maybe$withDefault, model.turing, model.pendingTuring);
+						var cmd = $author$project$Core$Turing$isHalted(newTuring) ? A2($andrewMacmurray$elm_delay$Delay$after, 0, $author$project$App$Msg$ToggleComputation) : A2(
+							$andrewMacmurray$elm_delay$Delay$after,
+							250,
+							$author$project$App$Msg$ProcessComputationWorkflow(
+								_Utils_update(
+									workflow,
+									{
+										step: $elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Types$ComputeNextState)
+									})));
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									activeComputationWorkflow: workflow,
+									isInitialState: false,
+									pendingTuring: $elm$core$Maybe$Nothing,
+									prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
+									turing: newTuring
+								}),
+							cmd);
+				}
+			} else {
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			}
+		}
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
@@ -8310,151 +8416,43 @@ var $author$project$Main$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'ToggleComputation':
-				var newComputationThreadId = model.isRunning ? (model.computationThreadId + 1) : model.computationThreadId;
-				var cmd = model.isRunning ? $elm$core$Platform$Cmd$none : A2(
-					$elm$core$Task$perform,
-					function (_v1) {
-						return $author$project$Main$startComputationThread(newComputationThreadId);
-					},
-					$elm$time$Time$now);
+				var newComputationWorkflow = model.isRunning ? $author$project$App$ComputationWorkflow$reset(model.activeComputationWorkflow) : model.activeComputationWorkflow;
+				var cmd = model.isRunning ? $elm$core$Platform$Cmd$none : $author$project$App$ComputationWorkflow$start(newComputationWorkflow);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{animatedComputationStepState: $elm$core$Maybe$Nothing, computationThreadId: newComputationThreadId, isRunning: !model.isRunning, pendingTuring: $elm$core$Maybe$Nothing}),
+						{activeComputationWorkflow: newComputationWorkflow, isRunning: !model.isRunning, pendingTuring: $elm$core$Maybe$Nothing}),
 					cmd);
 			case 'ResetComputation':
-				var _v2 = $author$project$Main$restartComputationIfRunning(model);
-				var newComputationThreadId = _v2.a;
-				var cmd = _v2.b;
+				var _v1 = $author$project$Main$restartComputationIfRunning(model);
+				var newComputationWorkflow = _v1.a;
+				var cmd = _v1.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{animatedComputationStepState: $elm$core$Maybe$Nothing, computationThreadId: newComputationThreadId, isInitialState: true, lastAppliedRule: $elm$core$Maybe$Nothing, lastAppliedRuleIndex: $elm$core$Maybe$Nothing, pendingTuring: $elm$core$Maybe$Nothing, prevTurings: _List_Nil, turing: $author$project$Main$busyBeaver}),
+						{activeComputationWorkflow: newComputationWorkflow, isInitialState: true, lastAppliedRule: $elm$core$Maybe$Nothing, lastAppliedRuleIndex: $elm$core$Maybe$Nothing, pendingTuring: $elm$core$Maybe$Nothing, prevTurings: _List_Nil, turing: $author$project$Main$busyBeaver}),
 					cmd);
-			case 'AnimateComputationStep':
-				switch (msg.b.$) {
-					case 'ComputeNextState':
-						var threadId = msg.a;
-						var _v3 = msg.b;
-						return A3(
-							$author$project$Main$whenThreadIsAlive,
-							model,
-							threadId,
-							function (_v4) {
-								var _v5 = $author$project$Core$Turing$findApplicableRule(model.turing);
-								if (_v5.$ === 'Just') {
-									var _v6 = _v5.a;
-									var currentlyApplicableRuleIndex = _v6.a;
-									var currentlyApplicableRule = _v6.b;
-									var nextTuring = A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, model.turing);
-									var newModel = _Utils_update(
-										model,
-										{
-											animatedComputationStepState: $elm$core$Maybe$Just($author$project$Model$ComputeNextState),
-											lastAppliedRule: $elm$core$Maybe$Just(currentlyApplicableRule),
-											lastAppliedRuleIndex: $elm$core$Maybe$Just(currentlyApplicableRuleIndex),
-											pendingTuring: nextTuring
-										});
-									return _Utils_Tuple2(
-										newModel,
-										A2(
-											$andrewMacmurray$elm_delay$Delay$after,
-											250,
-											A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Model$OldSymbolFadeout)));
-								} else {
-									return _Utils_Tuple2(
-										model,
-										A2(
-											$elm$core$Task$perform,
-											function (_v7) {
-												return $author$project$Main$ToggleComputation;
-											},
-											$elm$time$Time$now));
-								}
-							});
-					case 'OldSymbolFadeout':
-						var threadId = msg.a;
-						var _v8 = msg.b;
-						return A3(
-							$author$project$Main$whenThreadIsAlive,
-							model,
-							threadId,
-							function (_v9) {
-								return _Utils_Tuple2(
-									_Utils_update(
-										model,
-										{
-											animatedComputationStepState: $elm$core$Maybe$Just($author$project$Model$OldSymbolFadeout)
-										}),
-									A2(
-										$andrewMacmurray$elm_delay$Delay$after,
-										1000,
-										A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Model$NewSymbolFadein)));
-							});
-					case 'NewSymbolFadein':
-						var threadId = msg.a;
-						var _v10 = msg.b;
-						return A3(
-							$author$project$Main$whenThreadIsAlive,
-							model,
-							threadId,
-							function (_v11) {
-								return _Utils_Tuple2(
-									_Utils_update(
-										model,
-										{
-											animatedComputationStepState: $elm$core$Maybe$Just($author$project$Model$NewSymbolFadein)
-										}),
-									A2(
-										$andrewMacmurray$elm_delay$Delay$after,
-										1000,
-										A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Model$UpdateMachineState)));
-							});
-					default:
-						var threadId = msg.a;
-						var _v12 = msg.b;
-						return A3(
-							$author$project$Main$whenThreadIsAlive,
-							model,
-							threadId,
-							function (_v13) {
-								var newTuring = A2($elm$core$Maybe$withDefault, model.turing, model.pendingTuring);
-								var cmd = $author$project$Core$Turing$isHalted(newTuring) ? A2($andrewMacmurray$elm_delay$Delay$after, 0, $author$project$Main$ToggleComputation) : A2(
-									$andrewMacmurray$elm_delay$Delay$after,
-									250,
-									A2($author$project$Main$AnimateComputationStep, threadId, $author$project$Model$ComputeNextState));
-								return _Utils_Tuple2(
-									_Utils_update(
-										model,
-										{
-											animatedComputationStepState: $elm$core$Maybe$Just($author$project$Model$UpdateMachineState),
-											isInitialState: false,
-											pendingTuring: $elm$core$Maybe$Nothing,
-											prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
-											turing: newTuring
-										}),
-									cmd);
-							});
-				}
+			case 'ProcessComputationWorkflow':
+				var workflow = msg.a;
+				return A2($author$project$App$ComputationWorkflow$update, workflow, model);
 			case 'StepFw':
-				var _v14 = $author$project$Core$Turing$findApplicableRule(model.turing);
-				if (_v14.$ === 'Just') {
-					var _v15 = _v14.a;
-					var currentlyApplicableRuleIndex = _v15.a;
-					var currentlyApplicableRule = _v15.b;
+				var _v2 = $author$project$Core$Turing$findApplicableRule(model.turing);
+				if (_v2.$ === 'Just') {
+					var _v3 = _v2.a;
+					var currentlyApplicableRuleIndex = _v3.a;
+					var currentlyApplicableRule = _v3.b;
 					var newTuring = A2(
 						$elm$core$Maybe$withDefault,
 						model.turing,
 						A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, model.turing));
-					var _v16 = $author$project$Main$restartComputationIfRunning(model);
-					var newComputationThreadId = _v16.a;
-					var cmd = _v16.b;
+					var _v4 = $author$project$Main$restartComputationIfRunning(model);
+					var newComputationWorkflow = _v4.a;
+					var cmd = _v4.b;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
-								animatedComputationStepState: $elm$core$Maybe$Nothing,
-								computationThreadId: newComputationThreadId,
+								activeComputationWorkflow: newComputationWorkflow,
 								isInitialState: false,
 								lastAppliedRule: $elm$core$Maybe$Just(currentlyApplicableRule),
 								lastAppliedRuleIndex: $elm$core$Maybe$Just(currentlyApplicableRuleIndex),
@@ -8467,19 +8465,18 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
 			default:
-				var _v17 = $author$project$Main$restartComputationIfRunning(model);
-				var newComputationThreadId = _v17.a;
-				var cmd = _v17.b;
-				var _v18 = model.prevTurings;
-				if (_v18.b) {
-					var prevTuring = _v18.a;
-					var restPrevTurings = _v18.b;
+				var _v5 = $author$project$Main$restartComputationIfRunning(model);
+				var newComputationWorkflow = _v5.a;
+				var cmd = _v5.b;
+				var _v6 = model.prevTurings;
+				if (_v6.b) {
+					var prevTuring = _v6.a;
+					var restPrevTurings = _v6.b;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
-								animatedComputationStepState: $elm$core$Maybe$Nothing,
-								computationThreadId: newComputationThreadId,
+								activeComputationWorkflow: newComputationWorkflow,
 								isInitialState: $elm$core$List$isEmpty(restPrevTurings),
 								pendingTuring: $elm$core$Maybe$Nothing,
 								prevTurings: restPrevTurings,
@@ -8519,9 +8516,9 @@ var $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $rtfeldman$elm_css$Html$Styled$Attributes$class = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('className');
-var $author$project$Main$ResetComputation = {$: 'ResetComputation'};
-var $author$project$Main$StepBw = {$: 'StepBw'};
-var $author$project$Main$StepFw = {$: 'StepFw'};
+var $author$project$App$Msg$ResetComputation = {$: 'ResetComputation'};
+var $author$project$App$Msg$StepBw = {$: 'StepBw'};
+var $author$project$App$Msg$StepFw = {$: 'StepFw'};
 var $author$project$Utils$AttributeExtra$classIf = F2(
 	function (condition, className) {
 		return condition ? $rtfeldman$elm_css$Html$Styled$Attributes$class(className) : $rtfeldman$elm_css$Html$Styled$Attributes$class('');
@@ -8609,7 +8606,7 @@ var $author$project$Main$controlsHtml = function (model) {
 							[
 								$rtfeldman$elm_css$Html$Styled$Attributes$class('ctrl-step-bw'),
 								A2($author$project$Utils$AttributeExtra$classIf, model.isInitialState, 'disabled'),
-								A2($author$project$Utils$AttributeExtra$onClickIf, !model.isInitialState, $author$project$Main$StepBw)
+								A2($author$project$Utils$AttributeExtra$onClickIf, !model.isInitialState, $author$project$App$Msg$StepBw)
 							]),
 						_List_fromArray(
 							[
@@ -8620,7 +8617,7 @@ var $author$project$Main$controlsHtml = function (model) {
 						_List_fromArray(
 							[
 								$rtfeldman$elm_css$Html$Styled$Attributes$class('ctrl-toggle'),
-								$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$ToggleComputation)
+								$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$App$Msg$ToggleComputation)
 							]),
 						_List_fromArray(
 							[
@@ -8631,7 +8628,7 @@ var $author$project$Main$controlsHtml = function (model) {
 						_List_fromArray(
 							[
 								$rtfeldman$elm_css$Html$Styled$Attributes$class('ctrl-reset'),
-								$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$ResetComputation)
+								$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$App$Msg$ResetComputation)
 							]),
 						_List_fromArray(
 							[
@@ -8643,7 +8640,7 @@ var $author$project$Main$controlsHtml = function (model) {
 							[
 								$rtfeldman$elm_css$Html$Styled$Attributes$class('ctrl-step-fw'),
 								A2($author$project$Utils$AttributeExtra$classIf, isHalted, 'disabled'),
-								A2($author$project$Utils$AttributeExtra$onClickIf, !isHalted, $author$project$Main$StepFw)
+								A2($author$project$Utils$AttributeExtra$onClickIf, !isHalted, $author$project$App$Msg$StepFw)
 							]),
 						_List_fromArray(
 							[
@@ -8652,12 +8649,12 @@ var $author$project$Main$controlsHtml = function (model) {
 					]))
 			]));
 };
-var $author$project$Main$AddRule = {$: 'AddRule'};
+var $author$project$App$Msg$AddRule = {$: 'AddRule'};
 var $rtfeldman$elm_css$Html$Styled$button = $rtfeldman$elm_css$Html$Styled$node('button');
-var $author$project$Main$RemoveRule = function (a) {
+var $author$project$App$Msg$RemoveRule = function (a) {
 	return {$: 'RemoveRule', a: a};
 };
-var $author$project$Main$UpdateRule = F2(
+var $author$project$App$Msg$UpdateRule = F2(
 	function (a, b) {
 		return {$: 'UpdateRule', a: a, b: b};
 	});
@@ -8775,7 +8772,7 @@ var $author$project$Main$rulesListEntryHtml = F3(
 							$rtfeldman$elm_css$Html$Styled$Attributes$value(ruleString),
 							$rtfeldman$elm_css$Html$Styled$Attributes$class('rule-input'),
 							$rtfeldman$elm_css$Html$Styled$Events$onInput(
-							$author$project$Main$UpdateRule(ruleIndex))
+							$author$project$App$Msg$UpdateRule(ruleIndex))
 						]),
 					_List_Nil),
 					A2(
@@ -8784,7 +8781,7 @@ var $author$project$Main$rulesListEntryHtml = F3(
 						[
 							$rtfeldman$elm_css$Html$Styled$Attributes$class('remove-rule'),
 							$rtfeldman$elm_css$Html$Styled$Events$onClick(
-							$author$project$Main$RemoveRule(ruleIndex))
+							$author$project$App$Msg$RemoveRule(ruleIndex))
 						]),
 					_List_fromArray(
 						[
@@ -8824,7 +8821,7 @@ var $author$project$Main$rulesListHtml = function (model) {
 						_List_fromArray(
 							[
 								$rtfeldman$elm_css$Html$Styled$Attributes$class('add-rule'),
-								$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$AddRule)
+								$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$App$Msg$AddRule)
 							]),
 						_List_fromArray(
 							[
@@ -8896,11 +8893,11 @@ var $author$project$Core$Tape$toSymbolList = F2(
 	});
 var $author$project$Main$stateAndTapeHtml = function (model) {
 	var isFadeoutState = _Utils_eq(
-		model.animatedComputationStepState,
-		$elm$core$Maybe$Just($author$project$Model$OldSymbolFadeout));
+		model.activeComputationWorkflow.step,
+		$elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Types$OldSymbolFadeout));
 	var isFadeinState = _Utils_eq(
-		model.animatedComputationStepState,
-		$elm$core$Maybe$Just($author$project$Model$NewSymbolFadein));
+		model.activeComputationWorkflow.step,
+		$elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Types$NewSymbolFadein));
 	var renderedState = isFadeinState ? A3(
 		$elm_community$maybe_extra$Maybe$Extra$unwrap,
 		model.turing.currentState,
