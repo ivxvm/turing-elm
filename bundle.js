@@ -5255,6 +5255,9 @@ var $author$project$Main$busyBeaver = {
 	tape: {currentSymbol: '0', emptySymbol: '0', left: _List_Nil, right: _List_Nil}
 };
 var $author$project$App$ComputationWorkflow$init = {id: 0, step: $elm$core$Maybe$Nothing};
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm$core$Array$repeat = F2(
@@ -5293,9 +5296,9 @@ var $author$project$Main$init = function (_v0) {
 			activeComputationWorkflow: $author$project$App$ComputationWorkflow$init,
 			isInitialState: true,
 			isRunning: false,
-			lastAppliedRule: $elm$core$Maybe$Nothing,
-			lastAppliedRuleIndex: $elm$core$Maybe$Nothing,
+			lastAppliedRuleIndex: -1,
 			pendingTuring: $elm$core$Maybe$Nothing,
+			prevAppliedRuleIndexes: _List_Nil,
 			prevTurings: _List_Nil,
 			ruleStrings: A2(
 				$elm$core$List$map,
@@ -6657,9 +6660,6 @@ var $rtfeldman$elm_css$ElmCssVendor$Murmur3$hashString = F2(
 	});
 var $rtfeldman$elm_css$Hash$murmurSeed = 15739;
 var $elm$core$String$fromList = _String_fromList;
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var $elm$core$Basics$modBy = _Basics_modBy;
 var $rtfeldman$elm_hex$Hex$unsafeToDigit = function (num) {
 	unsafeToDigit:
@@ -8298,9 +8298,9 @@ var $author$project$App$ComputationWorkflow$update = F2(
 									model,
 									{
 										activeComputationWorkflow: workflow,
-										lastAppliedRule: $elm$core$Maybe$Just(currentlyApplicableRule),
-										lastAppliedRuleIndex: $elm$core$Maybe$Just(currentlyApplicableRuleIndex),
-										pendingTuring: A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, model.turing)
+										lastAppliedRuleIndex: currentlyApplicableRuleIndex,
+										pendingTuring: A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, model.turing),
+										prevAppliedRuleIndexes: A2($elm$core$List$cons, model.lastAppliedRuleIndex, model.prevAppliedRuleIndexes)
 									}),
 								A2(
 									$andrewMacmurray$elm_delay$Delay$after,
@@ -8430,7 +8430,7 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{activeComputationWorkflow: newComputationWorkflow, isInitialState: true, lastAppliedRule: $elm$core$Maybe$Nothing, lastAppliedRuleIndex: $elm$core$Maybe$Nothing, pendingTuring: $elm$core$Maybe$Nothing, prevTurings: _List_Nil, turing: $author$project$Main$busyBeaver}),
+						{activeComputationWorkflow: newComputationWorkflow, isInitialState: true, lastAppliedRuleIndex: -1, pendingTuring: $elm$core$Maybe$Nothing, prevAppliedRuleIndexes: _List_Nil, prevTurings: _List_Nil, turing: $author$project$Main$busyBeaver}),
 					cmd);
 			case 'ProcessComputationWorkflow':
 				var workflow = msg.a;
@@ -8454,9 +8454,9 @@ var $author$project$Main$update = F2(
 							{
 								activeComputationWorkflow: newComputationWorkflow,
 								isInitialState: false,
-								lastAppliedRule: $elm$core$Maybe$Just(currentlyApplicableRule),
-								lastAppliedRuleIndex: $elm$core$Maybe$Just(currentlyApplicableRuleIndex),
+								lastAppliedRuleIndex: currentlyApplicableRuleIndex,
 								pendingTuring: $elm$core$Maybe$Nothing,
+								prevAppliedRuleIndexes: A2($elm$core$List$cons, model.lastAppliedRuleIndex, model.prevAppliedRuleIndexes),
 								prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
 								turing: newTuring
 							}),
@@ -8468,17 +8468,23 @@ var $author$project$Main$update = F2(
 				var _v5 = $author$project$Main$restartComputationIfRunning(model);
 				var newComputationWorkflow = _v5.a;
 				var cmd = _v5.b;
-				var _v6 = model.prevTurings;
-				if (_v6.b) {
-					var prevTuring = _v6.a;
-					var restPrevTurings = _v6.b;
+				var _v6 = _Utils_Tuple2(model.prevTurings, model.prevAppliedRuleIndexes);
+				if (_v6.a.b && _v6.b.b) {
+					var _v7 = _v6.a;
+					var prevTuring = _v7.a;
+					var restPrevTurings = _v7.b;
+					var _v8 = _v6.b;
+					var prevRuleIndex = _v8.a;
+					var restPrevRuleIndexes = _v8.b;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
 								activeComputationWorkflow: newComputationWorkflow,
 								isInitialState: $elm$core$List$isEmpty(restPrevTurings),
+								lastAppliedRuleIndex: prevRuleIndex,
 								pendingTuring: $elm$core$Maybe$Nothing,
+								prevAppliedRuleIndexes: restPrevRuleIndexes,
 								prevTurings: restPrevTurings,
 								turing: prevTuring
 							}),
@@ -8771,6 +8777,10 @@ var $author$project$Main$rulesListEntryHtml = F3(
 							$rtfeldman$elm_css$Html$Styled$Attributes$placeholder('Rule description'),
 							$rtfeldman$elm_css$Html$Styled$Attributes$value(ruleString),
 							$rtfeldman$elm_css$Html$Styled$Attributes$class('rule-input'),
+							A2(
+							$author$project$Utils$AttributeExtra$classIf,
+							_Utils_eq(ruleIndex, model.lastAppliedRuleIndex),
+							'last-applied-rule'),
 							$rtfeldman$elm_css$Html$Styled$Events$onInput(
 							$author$project$App$Msg$UpdateRule(ruleIndex))
 						]),
@@ -8830,6 +8840,11 @@ var $author$project$Main$rulesListHtml = function (model) {
 					]))
 			]));
 };
+var $elm_community$list_extra$List$Extra$getAt = F2(
+	function (idx, xs) {
+		return (idx < 0) ? $elm$core$Maybe$Nothing : $elm$core$List$head(
+			A2($elm$core$List$drop, idx, xs));
+	});
 var $author$project$Main$tapeCellHtml = F4(
 	function (symbol, isCurrent, isFadingOut, isFadingIn) {
 		return A2(
@@ -8892,6 +8907,7 @@ var $author$project$Core$Tape$toSymbolList = F2(
 		return _Utils_Tuple2(symbols, currentSymbolIndex);
 	});
 var $author$project$Main$stateAndTapeHtml = function (model) {
+	var lastAppliedRule = A2($elm_community$list_extra$List$Extra$getAt, model.lastAppliedRuleIndex, model.turing.rules);
 	var isFadeoutState = _Utils_eq(
 		model.activeComputationWorkflow.step,
 		$elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Types$OldSymbolFadeout));
@@ -8904,7 +8920,7 @@ var $author$project$Main$stateAndTapeHtml = function (model) {
 		function (r) {
 			return r.newState;
 		},
-		model.lastAppliedRule) : model.turing.currentState;
+		lastAppliedRule) : model.turing.currentState;
 	var _v0 = A2($author$project$Core$Tape$toSymbolList, 24, model.turing.tape);
 	var tapeSymbols = _v0.a;
 	var currentSymbolIndex = _v0.b;
@@ -8919,7 +8935,7 @@ var $author$project$Main$stateAndTapeHtml = function (model) {
 					function (r) {
 						return r.newSymbol;
 					},
-					model.lastAppliedRule) : symbol;
+					lastAppliedRule) : symbol;
 				return A4($author$project$Main$tapeCellHtml, renderedSymbol, isCurrent, isCurrent && isFadeoutState, isCurrent && isFadeinState);
 			}),
 		tapeSymbols);

@@ -4,7 +4,12 @@ import Core.Direction as Direction exposing (Direction)
 
 
 type alias Rule a s =
-    { currentState : s, currentSymbol : a, newSymbol : a, newState : s, moveDirection : Direction }
+    { currentState : s
+    , currentSymbol : a
+    , newSymbol : a
+    , newState : s
+    , moveDirection : Direction
+    }
 
 
 toString : (a -> String) -> (s -> String) -> Rule a s -> String

@@ -19,6 +19,10 @@ header {
     font-weight: bold;
 }
 
+input:focus {
+    outline: 1px solid #66FCF1 !important;
+}
+
 .centered {
     display: flex;
     align-items: center;
@@ -160,6 +164,10 @@ header {
     font-weight: bold;
     background-color: #0B0C10;
     color: #C5C6C7;
+}
+
+.rule-input.last-applied-rule {
+    outline: 1px solid #45A29E;
 }
 
 .add-rule,

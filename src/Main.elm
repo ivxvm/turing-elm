@@ -57,8 +57,8 @@ init _ =
       , turing = busyBeaver
       , pendingTuring = Nothing
       , prevTurings = []
-      , lastAppliedRule = Nothing
-      , lastAppliedRuleIndex = Nothing
+      , lastAppliedRuleIndex = -1
+      , prevAppliedRuleIndexes = []
       , activeComputationWorkflow = ComputationWorkflow.init
       , isRunning = False
       , isInitialState = True
@@ -124,8 +124,8 @@ update msg model =
             in
             ( { model
                 | turing = busyBeaver
-                , lastAppliedRule = Nothing
-                , lastAppliedRuleIndex = Nothing
+                , lastAppliedRuleIndex = -1
+                , prevAppliedRuleIndexes = []
                 , pendingTuring = Nothing
                 , prevTurings = []
                 , activeComputationWorkflow = newComputationWorkflow
@@ -152,8 +152,8 @@ update msg model =
                         | turing = newTuring
                         , prevTurings = model.turing :: model.prevTurings
                         , pendingTuring = Nothing
-                        , lastAppliedRule = Just currentlyApplicableRule
-                        , lastAppliedRuleIndex = Just currentlyApplicableRuleIndex
+                        , lastAppliedRuleIndex = currentlyApplicableRuleIndex
+                        , prevAppliedRuleIndexes = model.lastAppliedRuleIndex :: model.prevAppliedRuleIndexes
                         , activeComputationWorkflow = newComputationWorkflow
                         , isInitialState = False
                       }
@@ -168,19 +168,21 @@ update msg model =
                 ( newComputationWorkflow, cmd ) =
                     restartComputationIfRunning model
             in
-            case model.prevTurings of
-                prevTuring :: restPrevTurings ->
+            case ( model.prevTurings, model.prevAppliedRuleIndexes ) of
+                ( prevTuring :: restPrevTurings, prevRuleIndex :: restPrevRuleIndexes ) ->
                     ( { model
                         | turing = prevTuring
                         , prevTurings = restPrevTurings
                         , pendingTuring = Nothing
+                        , lastAppliedRuleIndex = prevRuleIndex
+                        , prevAppliedRuleIndexes = restPrevRuleIndexes
                         , activeComputationWorkflow = newComputationWorkflow
                         , isInitialState = List.isEmpty restPrevTurings
                       }
                     , cmd
                     )
 
-                [] ->
+                _ ->
                     ( model, Cmd.none )
 
 
@@ -221,6 +223,7 @@ rulesListEntryHtml model ruleIndex ruleString =
             [ placeholder "Rule description"
             , value ruleString
             , class "rule-input"
+            , classIf (ruleIndex == model.lastAppliedRuleIndex) "last-applied-rule"
             , onInput (UpdateRule ruleIndex)
             ]
             []
@@ -271,9 +274,12 @@ stateAndTapeHtml model =
         isFadeinState =
             model.activeComputationWorkflow.step == Just NewSymbolFadein
 
+        lastAppliedRule =
+            List.getAt model.lastAppliedRuleIndex model.turing.rules
+
         renderedState =
             if isFadeinState then
-                Maybe.unwrap model.turing.currentState (\r -> r.newState) model.lastAppliedRule
+                Maybe.unwrap model.turing.currentState (\r -> r.newState) lastAppliedRule
 
             else
                 model.turing.currentState
@@ -288,7 +294,7 @@ stateAndTapeHtml model =
 
                             renderedSymbol =
                                 if isCurrent && isFadeinState then
-                                    Maybe.unwrap symbol (\r -> r.newSymbol) model.lastAppliedRule
+                                    Maybe.unwrap symbol (\r -> r.newSymbol) lastAppliedRule
 
                                 else
                                     symbol

@@ -12,8 +12,8 @@ type alias Model =
     , turing : Turing String String
     , pendingTuring : Maybe (Turing String String)
     , prevTurings : List (Turing String String)
-    , lastAppliedRule : Maybe (Rule String String)
-    , lastAppliedRuleIndex : Maybe Int
+    , lastAppliedRuleIndex : Int
+    , prevAppliedRuleIndexes : List Int
     , activeComputationWorkflow : ComputationWorkflow
     , isRunning : Bool
     , isInitialState : Bool
