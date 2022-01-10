@@ -1,0 +1,187 @@
+html,
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    background-color: #0B0C10;
+    padding: 0;
+    padding-top: 16px;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    font-family: "Gill Sans", sans-serif;
+}
+
+header {
+    color: #66FCF1;
+    font-size: 48px;
+    font-weight: bold;
+}
+
+.centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.app-container {
+    width: 480px;
+    min-height: 300px;
+    background-color: #1F2833;
+    margin-top: 8px;
+    padding: 16px;
+    padding-top: 24px;
+}
+
+.state-and-tape-container {
+    display: flex;
+    flex-direction: row;
+    margin-left: 4px;
+    margin-bottom: 16px;
+}
+
+.state {
+    box-sizing: border-box;
+    min-width: 64px;
+    min-height: 64px;
+    max-height: 64px;
+    font-size: 48px;
+    font-weight: bold;
+    color: #C5C6C7;
+    border: 4px double #C5C6C7;
+    transition: color 1s ease;
+}
+
+.state.fadeout {
+    color: transparent;
+}
+
+.tape {
+    mix-blend-mode: hard-light;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    margin-left: 8px;
+    margin-right: 8px;
+    position: relative;
+}
+
+.tape::after {
+    position: absolute;
+    content: "";
+    left: 0px;
+    top: 0px;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(to right, gray 0%, transparent 30%, transparent 70%, gray);
+    pointer-events: none;
+}
+
+.tape-cell {
+    min-width: 48px;
+    min-height: 48px;
+    border: 2px solid #C5C6C7;
+    border-right: 0;
+    font-size: 24px;
+    color: #C5C6C7;
+    transition: color 1s ease, border 1s ease;
+}
+
+.tape-cell.current {
+    color: #66FCF1;
+    border: 2px solid #66FCF1;
+    border-right: 0;
+}
+
+.tape-cell.current.fadeout {
+    color: transparent;
+}
+
+.tape-cell.current.fadein {
+    color: #66FCF1;
+}
+
+.tape-cell.current + * {
+    border-left: 2px solid #66FCF1;
+}
+
+.controls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    border: 2px solid #45A29E;
+    border-radius: 16px;
+    color: #45A29E;
+    user-select: none;
+    overflow: hidden;
+}
+
+.controls > * {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+ .controls > *:not(:first-child) {
+    border-left: 2px solid #45A29E;
+}
+
+.controls > *.disabled {
+    color: #1F2833;
+}
+
+.controls > *:hover:not(.disabled) {
+    color: #66FCF1;
+    cursor: pointer;
+    background-color: #45A29E;
+}
+
+.rules-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.rules-list-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    margin-bottom: 4px;
+}
+
+.rule-input {
+    width: 100%;
+    border: 0;
+    border-radius: 16px;
+    padding-left: 16px;
+    font-weight: bold;
+    background-color: #0B0C10;
+    color: #C5C6C7;
+}
+
+.add-rule,
+.remove-rule {
+    cursor: pointer;
+    border: 0;
+    border-radius: 0;
+    background-color: transparent;
+    color: #45A29E;
+    font-weight: bold;
+}
+
+.add-rule:hover,
+.remove-rule:hover {
+    color: #66FCF1;
+}
+
+.add-rule {
+    font-size: 32px;
+    line-height: 16px;
+}
+
+.remove-rule {
+    font-size: 20px;
+}
