@@ -5,3 +5,7 @@ Elm can't deal with cyclic module dependencies on its own, code should be restru
 (the way I did it here is separate ComputationWorkflow Impl/Type files for functions and type definition)
 
 Elm doesn't seem to have module reexports, neither an alternative to folder/index.js
+
+Elm doesn't have nested record update syntax
+this works: { obj | field = newValue }
+this doesn't: { obj | field = { obj.field | other = ... } }
