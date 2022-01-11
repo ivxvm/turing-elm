@@ -1,7 +1,8 @@
 module Main exposing (..)
 
-import App.ComputationWorkflow as ComputationWorkflow exposing (..)
-import App.ComputationWorkflow.Types exposing (..)
+import App.ComputationWorkflow.Impl as ComputationWorkflow exposing (..)
+import App.ComputationWorkflow.Step exposing (..)
+import App.ComputationWorkflow.Type exposing (..)
 import App.Model exposing (..)
 import App.Msg exposing (..)
 import Array

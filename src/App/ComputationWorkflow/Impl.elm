@@ -1,6 +1,7 @@
-module App.ComputationWorkflow exposing (..)
+module App.ComputationWorkflow.Impl exposing (..)
 
-import App.ComputationWorkflow.Types exposing (ComputationWorkflow, ComputationWorkflowStep(..))
+import App.ComputationWorkflow.Step exposing (..)
+import App.ComputationWorkflow.Type exposing (..)
 import App.Model exposing (..)
 import App.Msg exposing (..)
 import Core.Turing as Turing

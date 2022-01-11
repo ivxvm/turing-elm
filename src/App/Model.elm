@@ -1,6 +1,6 @@
 module App.Model exposing (..)
 
-import App.ComputationWorkflow.Types exposing (..)
+import App.ComputationWorkflow.Type exposing (..)
 import Array exposing (Array)
 import Core.Rule exposing (..)
 import Core.Turing exposing (..)
