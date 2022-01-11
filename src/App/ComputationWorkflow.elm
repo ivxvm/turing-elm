@@ -44,8 +44,7 @@ update workflow model =
                     Just ( currentlyApplicableRuleIndex, currentlyApplicableRule ) ->
                         ( { model
                             | pendingTuring = Turing.applyRule currentlyApplicableRule model.turing
-                            , lastAppliedRuleIndex = currentlyApplicableRuleIndex
-                            , prevAppliedRuleIndexes = model.lastAppliedRuleIndex :: model.prevAppliedRuleIndexes
+                            , pendingRuleIndex = currentlyApplicableRuleIndex
                             , activeComputationWorkflow = workflow
                           }
                         , Delay.after 250 (ProcessComputationWorkflow { workflow | step = Just OldSymbolFadeout })
@@ -81,6 +80,8 @@ update workflow model =
                     , turing = newTuring
                     , pendingTuring = Nothing
                     , prevTurings = model.turing :: model.prevTurings
+                    , lastAppliedRuleIndex = model.pendingRuleIndex
+                    , prevAppliedRuleIndexes = model.lastAppliedRuleIndex :: model.prevAppliedRuleIndexes
                     , isInitialState = False
                   }
                 , cmd

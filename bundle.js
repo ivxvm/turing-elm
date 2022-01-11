@@ -5297,6 +5297,7 @@ var $author$project$Main$init = function (_v0) {
 			isInitialState: true,
 			isRunning: false,
 			lastAppliedRuleIndex: -1,
+			pendingRuleIndex: -1,
 			pendingTuring: $elm$core$Maybe$Nothing,
 			prevAppliedRuleIndexes: _List_Nil,
 			prevTurings: _List_Nil,
@@ -8298,9 +8299,8 @@ var $author$project$App$ComputationWorkflow$update = F2(
 									model,
 									{
 										activeComputationWorkflow: workflow,
-										lastAppliedRuleIndex: currentlyApplicableRuleIndex,
-										pendingTuring: A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, model.turing),
-										prevAppliedRuleIndexes: A2($elm$core$List$cons, model.lastAppliedRuleIndex, model.prevAppliedRuleIndexes)
+										pendingRuleIndex: currentlyApplicableRuleIndex,
+										pendingTuring: A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, model.turing)
 									}),
 								A2(
 									$andrewMacmurray$elm_delay$Delay$after,
@@ -8369,7 +8369,9 @@ var $author$project$App$ComputationWorkflow$update = F2(
 								{
 									activeComputationWorkflow: workflow,
 									isInitialState: false,
+									lastAppliedRuleIndex: model.pendingRuleIndex,
 									pendingTuring: $elm$core$Maybe$Nothing,
+									prevAppliedRuleIndexes: A2($elm$core$List$cons, model.lastAppliedRuleIndex, model.prevAppliedRuleIndexes),
 									prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
 									turing: newTuring
 								}),
@@ -8430,7 +8432,7 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{activeComputationWorkflow: newComputationWorkflow, isInitialState: true, lastAppliedRuleIndex: -1, pendingTuring: $elm$core$Maybe$Nothing, prevAppliedRuleIndexes: _List_Nil, prevTurings: _List_Nil, turing: $author$project$Main$busyBeaver}),
+						{activeComputationWorkflow: newComputationWorkflow, isInitialState: true, lastAppliedRuleIndex: -1, pendingRuleIndex: -1, pendingTuring: $elm$core$Maybe$Nothing, prevAppliedRuleIndexes: _List_Nil, prevTurings: _List_Nil, turing: $author$project$Main$busyBeaver}),
 					cmd);
 			case 'ProcessComputationWorkflow':
 				var workflow = msg.a;
@@ -8455,6 +8457,7 @@ var $author$project$Main$update = F2(
 								activeComputationWorkflow: newComputationWorkflow,
 								isInitialState: false,
 								lastAppliedRuleIndex: currentlyApplicableRuleIndex,
+								pendingRuleIndex: -1,
 								pendingTuring: $elm$core$Maybe$Nothing,
 								prevAppliedRuleIndexes: A2($elm$core$List$cons, model.lastAppliedRuleIndex, model.prevAppliedRuleIndexes),
 								prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
@@ -8483,6 +8486,7 @@ var $author$project$Main$update = F2(
 								activeComputationWorkflow: newComputationWorkflow,
 								isInitialState: $elm$core$List$isEmpty(restPrevTurings),
 								lastAppliedRuleIndex: prevRuleIndex,
+								pendingRuleIndex: -1,
 								pendingTuring: $elm$core$Maybe$Nothing,
 								prevAppliedRuleIndexes: restPrevRuleIndexes,
 								prevTurings: restPrevTurings,
@@ -8761,6 +8765,7 @@ var $author$project$Main$rulesListEntryHtml = F3(
 				return 'invalid';
 			},
 			validationError);
+		var highlightedRuleIndex = model.isRunning ? model.pendingRuleIndex : model.lastAppliedRuleIndex;
 		return A2(
 			$rtfeldman$elm_css$Html$Styled$div,
 			_List_fromArray(
@@ -8779,8 +8784,8 @@ var $author$project$Main$rulesListEntryHtml = F3(
 							$rtfeldman$elm_css$Html$Styled$Attributes$class('rule-input'),
 							A2(
 							$author$project$Utils$AttributeExtra$classIf,
-							_Utils_eq(ruleIndex, model.lastAppliedRuleIndex),
-							'last-applied-rule'),
+							_Utils_eq(ruleIndex, highlightedRuleIndex),
+							'highlighted-rule'),
 							$rtfeldman$elm_css$Html$Styled$Events$onInput(
 							$author$project$App$Msg$UpdateRule(ruleIndex))
 						]),

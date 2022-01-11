@@ -13,6 +13,7 @@ type alias Model =
     , pendingTuring : Maybe (Turing String String)
     , prevTurings : List (Turing String String)
     , lastAppliedRuleIndex : Int
+    , pendingRuleIndex : Int
     , prevAppliedRuleIndexes : List Int
     , activeComputationWorkflow : ComputationWorkflow
     , isRunning : Bool
