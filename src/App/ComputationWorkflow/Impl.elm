@@ -2,7 +2,7 @@ module App.ComputationWorkflow.Impl exposing (..)
 
 import App.ComputationWorkflow.Step exposing (..)
 import App.ComputationWorkflow.Type exposing (..)
-import App.Model exposing (..)
+import App.Model as Model exposing (..)
 import App.Msg exposing (..)
 import Core.Turing as Turing
 import Delay
@@ -76,15 +76,16 @@ update workflow model =
                         else
                             Delay.after 250 (ProcessComputationWorkflow { workflow | step = Just ComputeNextState })
                 in
-                ( { model
-                    | activeComputationWorkflow = workflow
-                    , turing = newTuring
-                    , pendingTuring = Nothing
-                    , prevTurings = model.turing :: model.prevTurings
-                    , lastAppliedRuleIndex = model.pendingRuleIndex
-                    , prevAppliedRuleIndexes = model.lastAppliedRuleIndex :: model.prevAppliedRuleIndexes
-                    , isInitialState = False
-                  }
+                ( Model.invalidateEditFields
+                    { model
+                        | activeComputationWorkflow = workflow
+                        , turing = newTuring
+                        , pendingTuring = Nothing
+                        , prevTurings = model.turing :: model.prevTurings
+                        , lastAppliedRuleIndex = model.pendingRuleIndex
+                        , prevAppliedRuleIndexes = model.lastAppliedRuleIndex :: model.prevAppliedRuleIndexes
+                        , isInitialState = False
+                    }
                 , cmd
                 )
 

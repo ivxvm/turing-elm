@@ -15,6 +15,7 @@
             "elm-community/basics-extra": "4.1.0",
             "elm-community/list-extra": "8.5.1",
             "elm-community/maybe-extra": "5.3.0",
+            "elm-community/result-extra": "2.4.0",
             "rtfeldman/elm-css": "17.0.1"
         },
         "indirect": {

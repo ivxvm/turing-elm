@@ -1,5 +1,6 @@
 module Core.Turing exposing (..)
 
+import Basics.Extra exposing (flip)
 import Core.Rule exposing (Rule)
 import Core.Tape as Tape exposing (Tape)
 
@@ -10,6 +11,16 @@ type alias Turing a s =
     , isFinalState : s -> Bool
     , rules : List (Rule a s)
     }
+
+
+setTape : Tape a -> Turing a s -> Turing a s
+setTape tape turing =
+    { turing | tape = tape }
+
+
+asTapeIn : Turing a s -> Tape a -> Turing a s
+asTapeIn =
+    flip setTape
 
 
 isHalted : Turing a s -> Bool

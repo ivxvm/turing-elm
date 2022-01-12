@@ -54,6 +54,21 @@ input:focus {
     font-weight: bold;
     color: #C5C6C7;
     border: 4px double #C5C6C7;
+
+}
+
+.state.editing-toggled,
+.state:hover {
+    color: #66FCF1;
+    border: 4px double #66FCF1;
+}
+
+.state:hover {
+    cursor: pointer;
+}
+
+.state.fadeout,
+.state.fadein {
     transition: color 1s ease;
 }
 
@@ -144,6 +159,74 @@ input:focus {
     background-color: #45A29E;
 }
 
+.edit-state-and-tape-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 20px;
+    padding-left: 32px;
+    padding-right: 32px;
+}
+
+.edit-state-and-tape-container.disabled {
+    display: none;
+}
+
+.edit-state-and-tape-container input {
+    width: 133px;
+    border: 0;
+    font-weight: bold;
+    background-color: #0B0C10;
+    color: #C5C6C7;
+    height: 28px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.edit-state-and-tape-container input.invalid {
+    outline: 1px solid red !important;
+}
+
+.edit-state-and-tape-container input + span {
+    position: relative;
+
+}
+
+.edit-state-and-tape-container input + span::before {
+    position: absolute;
+    bottom: -16px;
+    right: -1px;
+    border-radius: 5px;
+    color: red;
+    content: attr(error);
+    width: 133px;
+    font-size: 12px;
+    text-align: center;
+    text-transform: lowercase;
+    transition: all 0.1s ease;
+    opacity: 0;
+}
+
+.edit-state-and-tape-container input:hover + span::before {
+    opacity: 1;
+}
+
+.current-state-input {
+    padding-left: 16px;
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
+}
+
+.current-empty-symbol-input {
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+.current-tape-input {
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
+}
+
 .rules-container {
     display: flex;
     flex-direction: column;
@@ -178,6 +261,7 @@ input:focus {
     background-color: transparent;
     color: #45A29E;
     font-weight: bold;
+    min-width: 24px;
 }
 
 .add-rule:hover,

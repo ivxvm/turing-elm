@@ -3,15 +3,15 @@ module Main exposing (..)
 import App.ComputationWorkflow.Impl as ComputationWorkflow exposing (..)
 import App.ComputationWorkflow.Step exposing (..)
 import App.ComputationWorkflow.Type exposing (..)
-import App.Model exposing (..)
+import App.Model as Model exposing (..)
 import App.Msg exposing (..)
 import Array
 import Array.Extra as Array
 import Browser
 import Core.Direction exposing (Direction(..))
-import Core.Rule exposing (..)
-import Core.Tape
-import Core.Turing as Turing exposing (Turing)
+import Core.Rule as Rule exposing (..)
+import Core.Tape as Tape exposing (..)
+import Core.Turing as Turing exposing (..)
 import Css exposing (..)
 import Delay exposing (..)
 import Html.Styled exposing (..)
@@ -20,7 +20,9 @@ import Html.Styled.Events exposing (onClick, onInput)
 import List
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Result.Extra as Result
 import Utils.AttributeExtra exposing (..)
+import Utils.ListExtra as List
 
 
 busyBeaver : Turing String String
@@ -42,20 +44,26 @@ busyBeaver =
 main : Program () Model Msg
 main =
     Browser.element
-        { init = init
+        { init = \() -> init busyBeaver
         , update = update
         , view = view >> toUnstyled
         , subscriptions = \_ -> Sub.none
         }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
+init : Turing String String -> ( Model, Cmd Msg )
+init turing =
     ( { ruleStrings =
-            busyBeaver.rules
-                |> List.map (Core.Rule.toString identity identity)
-      , ruleValidationErrors = Array.repeat (List.length busyBeaver.rules) Nothing
-      , turing = busyBeaver
+            turing.rules
+                |> List.map (Rule.toString identity identity)
+      , ruleValidationErrors = Array.repeat (List.length turing.rules) Nothing
+      , currentStateString = turing.currentState
+      , currentStateValidationError = Nothing
+      , currentEmptySymbolString = turing.tape.emptySymbol
+      , currentEmptySymbolValidationError = Nothing
+      , currentTapeString = Tape.toTapeString identity turing.tape
+      , currentTapeValidationError = Nothing
+      , turing = turing
       , pendingTuring = Nothing
       , prevTurings = []
       , lastAppliedRuleIndex = -1
@@ -64,6 +72,7 @@ init _ =
       , activeComputationWorkflow = ComputationWorkflow.init
       , isRunning = False
       , isInitialState = True
+      , isEditingStateAndTape = False
       }
     , Cmd.none
     )
@@ -92,6 +101,80 @@ update msg model =
             ( { model
                 | ruleStrings = List.setAt index newValue model.ruleStrings
               }
+            , Cmd.none
+            )
+
+        UpdateState newValue ->
+            let
+                sanitizedValue =
+                    String.trim newValue
+
+                validationError =
+                    Model.validateStateString sanitizedValue
+
+                turing =
+                    model.turing
+            in
+            ( { model
+                | currentStateString = newValue
+                , currentStateValidationError = validationError
+                , turing = Maybe.unwrap { turing | currentState = sanitizedValue } (\_ -> turing) validationError
+              }
+            , Cmd.none
+            )
+
+        UpdateEmptySymbol newValue ->
+            let
+                sanitizedValue =
+                    String.trim newValue
+
+                validationError =
+                    Model.validateEmptySymbolString sanitizedValue
+            in
+            ( { model
+                | currentEmptySymbolString = newValue
+                , currentEmptySymbolValidationError = validationError
+                , turing =
+                    Maybe.unpack
+                        (\() ->
+                            sanitizedValue
+                                |> asEmptySymbolIn model.turing.tape
+                                |> asTapeIn model.turing
+                        )
+                        (\_ -> model.turing)
+                        validationError
+              }
+            , Cmd.none
+            )
+
+        UpdateTape newValue ->
+            let
+                sanitizedValue =
+                    String.trim newValue
+
+                validationError =
+                    Model.validateTapeString sanitizedValue
+
+                newTape =
+                    if Maybe.isNothing validationError then
+                        Tape.fromString Just model.turing.tape.emptySymbol sanitizedValue
+
+                    else
+                        Err "Validation error"
+            in
+            ( { model
+                | currentTapeString = newValue
+                , currentTapeValidationError = Maybe.or validationError (Result.error newTape)
+                , turing =
+                    newTape
+                        |> Result.withDefault model.turing.tape
+                        |> asTapeIn model.turing
+              }
+            , Cmd.none
+            )
+
+        ToggleEditStateTape ->
+            ( { model | isEditingStateAndTape = not model.isEditingStateAndTape }
             , Cmd.none
             )
 
@@ -124,16 +207,17 @@ update msg model =
                 ( newComputationWorkflow, cmd ) =
                     restartComputationIfRunning model
             in
-            ( { model
-                | turing = busyBeaver
-                , pendingTuring = Nothing
-                , prevTurings = []
-                , lastAppliedRuleIndex = -1
-                , pendingRuleIndex = -1
-                , prevAppliedRuleIndexes = []
-                , activeComputationWorkflow = newComputationWorkflow
-                , isInitialState = True
-              }
+            ( Model.invalidateEditFields
+                { model
+                    | turing = busyBeaver
+                    , pendingTuring = Nothing
+                    , prevTurings = []
+                    , lastAppliedRuleIndex = -1
+                    , pendingRuleIndex = -1
+                    , prevAppliedRuleIndexes = []
+                    , activeComputationWorkflow = newComputationWorkflow
+                    , isInitialState = True
+                }
             , cmd
             )
 
@@ -151,16 +235,17 @@ update msg model =
                             Turing.applyRule currentlyApplicableRule model.turing
                                 |> Maybe.withDefault model.turing
                     in
-                    ( { model
-                        | turing = newTuring
-                        , pendingTuring = Nothing
-                        , prevTurings = model.turing :: model.prevTurings
-                        , lastAppliedRuleIndex = currentlyApplicableRuleIndex
-                        , pendingRuleIndex = -1
-                        , prevAppliedRuleIndexes = model.lastAppliedRuleIndex :: model.prevAppliedRuleIndexes
-                        , activeComputationWorkflow = newComputationWorkflow
-                        , isInitialState = False
-                      }
+                    ( Model.invalidateEditFields
+                        { model
+                            | turing = newTuring
+                            , pendingTuring = Nothing
+                            , prevTurings = model.turing :: model.prevTurings
+                            , lastAppliedRuleIndex = currentlyApplicableRuleIndex
+                            , pendingRuleIndex = -1
+                            , prevAppliedRuleIndexes = model.lastAppliedRuleIndex :: model.prevAppliedRuleIndexes
+                            , activeComputationWorkflow = newComputationWorkflow
+                            , isInitialState = False
+                        }
                     , cmd
                     )
 
@@ -174,16 +259,17 @@ update msg model =
             in
             case ( model.prevTurings, model.prevAppliedRuleIndexes ) of
                 ( prevTuring :: restPrevTurings, prevRuleIndex :: restPrevRuleIndexes ) ->
-                    ( { model
-                        | turing = prevTuring
-                        , pendingTuring = Nothing
-                        , prevTurings = restPrevTurings
-                        , lastAppliedRuleIndex = prevRuleIndex
-                        , pendingRuleIndex = -1
-                        , prevAppliedRuleIndexes = restPrevRuleIndexes
-                        , activeComputationWorkflow = newComputationWorkflow
-                        , isInitialState = List.isEmpty restPrevTurings
-                      }
+                    ( Model.invalidateEditFields
+                        { model
+                            | turing = prevTuring
+                            , pendingTuring = Nothing
+                            , prevTurings = restPrevTurings
+                            , lastAppliedRuleIndex = prevRuleIndex
+                            , pendingRuleIndex = -1
+                            , prevAppliedRuleIndexes = restPrevRuleIndexes
+                            , activeComputationWorkflow = newComputationWorkflow
+                            , isInitialState = List.isEmpty restPrevTurings
+                        }
                     , cmd
                     )
 
@@ -278,7 +364,7 @@ stateAndTapeHtml : Model -> Html Msg
 stateAndTapeHtml model =
     let
         ( tapeSymbols, currentSymbolIndex ) =
-            Core.Tape.toSymbolList 24 model.turing.tape
+            Tape.toSymbolList 24 model.turing.tape
 
         isFadeoutState =
             model.activeComputationWorkflow.step == Just OldSymbolFadeout
@@ -324,11 +410,55 @@ stateAndTapeHtml model =
             , class "centered"
             , classIf isFadeoutState "fadeout"
             , classIf isFadeinState "fadein"
+            , classIf model.isEditingStateAndTape "editing-toggled"
+            , onClick ToggleEditStateTape
             ]
             [ text renderedState ]
         , div
             [ class "tape", class "centered" ]
             tapeCells
+        ]
+
+
+editStateAndTapeHtml : Model -> Html Msg
+editStateAndTapeHtml model =
+    div
+        [ class "edit-state-and-tape-container"
+        , classIf (not model.isEditingStateAndTape) "disabled"
+        ]
+        [ input
+            [ placeholder "State"
+            , value model.currentStateString
+            , class "current-state-input"
+            , classIf (Maybe.isJust model.currentStateValidationError) "invalid"
+            , onInput UpdateState
+            ]
+            []
+        , span
+            [ attribute "error" (Maybe.withDefault "" model.currentStateValidationError) ]
+            []
+        , input
+            [ placeholder "∅"
+            , value model.currentEmptySymbolString
+            , class "current-empty-symbol-input"
+            , classIf (Maybe.isJust model.currentEmptySymbolValidationError) "invalid"
+            , onInput UpdateEmptySymbol
+            ]
+            []
+        , span
+            [ attribute "error" (Maybe.withDefault "" model.currentEmptySymbolValidationError) ]
+            []
+        , input
+            [ placeholder "Tape"
+            , value model.currentTapeString
+            , class "current-tape-input"
+            , classIf (Maybe.isJust model.currentTapeValidationError) "invalid"
+            , onInput UpdateTape
+            ]
+            []
+        , span
+            [ attribute "error" (Maybe.withDefault "" model.currentTapeValidationError) ]
+            []
         ]
 
 
@@ -378,6 +508,7 @@ view model =
     div
         [ class "app-container" ]
         [ stateAndTapeHtml model
+        , editStateAndTapeHtml model
         , controlsHtml model
         , rulesListHtml model
         ]

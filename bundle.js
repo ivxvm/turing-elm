@@ -80,271 +80,6 @@ function A9(fun, a, b, c, d, e, f, g, h, i) {
 console.warn('Compiled in DEV mode. Follow the advice at https://elm-lang.org/0.19.1/optimize for better performance and smaller assets.');
 
 
-// EQUALITY
-
-function _Utils_eq(x, y)
-{
-	for (
-		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
-		isEqual && (pair = stack.pop());
-		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
-		)
-	{}
-
-	return isEqual;
-}
-
-function _Utils_eqHelp(x, y, depth, stack)
-{
-	if (x === y)
-	{
-		return true;
-	}
-
-	if (typeof x !== 'object' || x === null || y === null)
-	{
-		typeof x === 'function' && _Debug_crash(5);
-		return false;
-	}
-
-	if (depth > 100)
-	{
-		stack.push(_Utils_Tuple2(x,y));
-		return true;
-	}
-
-	/**/
-	if (x.$ === 'Set_elm_builtin')
-	{
-		x = $elm$core$Set$toList(x);
-		y = $elm$core$Set$toList(y);
-	}
-	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
-	{
-		x = $elm$core$Dict$toList(x);
-		y = $elm$core$Dict$toList(y);
-	}
-	//*/
-
-	/**_UNUSED/
-	if (x.$ < 0)
-	{
-		x = $elm$core$Dict$toList(x);
-		y = $elm$core$Dict$toList(y);
-	}
-	//*/
-
-	for (var key in x)
-	{
-		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
-var _Utils_equal = F2(_Utils_eq);
-var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
-
-
-
-// COMPARISONS
-
-// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
-// the particular integer values assigned to LT, EQ, and GT.
-
-function _Utils_cmp(x, y, ord)
-{
-	if (typeof x !== 'object')
-	{
-		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
-	}
-
-	/**/
-	if (x instanceof String)
-	{
-		var a = x.valueOf();
-		var b = y.valueOf();
-		return a === b ? 0 : a < b ? -1 : 1;
-	}
-	//*/
-
-	/**_UNUSED/
-	if (typeof x.$ === 'undefined')
-	//*/
-	/**/
-	if (x.$[0] === '#')
-	//*/
-	{
-		return (ord = _Utils_cmp(x.a, y.a))
-			? ord
-			: (ord = _Utils_cmp(x.b, y.b))
-				? ord
-				: _Utils_cmp(x.c, y.c);
-	}
-
-	// traverse conses until end of a list or a mismatch
-	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
-	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
-}
-
-var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
-var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
-var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
-var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
-
-var _Utils_compare = F2(function(x, y)
-{
-	var n = _Utils_cmp(x, y);
-	return n < 0 ? $elm$core$Basics$LT : n ? $elm$core$Basics$GT : $elm$core$Basics$EQ;
-});
-
-
-// COMMON VALUES
-
-var _Utils_Tuple0_UNUSED = 0;
-var _Utils_Tuple0 = { $: '#0' };
-
-function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
-function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
-
-function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
-function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
-
-function _Utils_chr_UNUSED(c) { return c; }
-function _Utils_chr(c) { return new String(c); }
-
-
-// RECORDS
-
-function _Utils_update(oldRecord, updatedFields)
-{
-	var newRecord = {};
-
-	for (var key in oldRecord)
-	{
-		newRecord[key] = oldRecord[key];
-	}
-
-	for (var key in updatedFields)
-	{
-		newRecord[key] = updatedFields[key];
-	}
-
-	return newRecord;
-}
-
-
-// APPEND
-
-var _Utils_append = F2(_Utils_ap);
-
-function _Utils_ap(xs, ys)
-{
-	// append Strings
-	if (typeof xs === 'string')
-	{
-		return xs + ys;
-	}
-
-	// append Lists
-	if (!xs.b)
-	{
-		return ys;
-	}
-	var root = _List_Cons(xs.a, ys);
-	xs = xs.b
-	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
-	{
-		curr = curr.b = _List_Cons(xs.a, ys);
-	}
-	return root;
-}
-
-
-
-var _List_Nil_UNUSED = { $: 0 };
-var _List_Nil = { $: '[]' };
-
-function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
-function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
-
-
-var _List_cons = F2(_List_Cons);
-
-function _List_fromArray(arr)
-{
-	var out = _List_Nil;
-	for (var i = arr.length; i--; )
-	{
-		out = _List_Cons(arr[i], out);
-	}
-	return out;
-}
-
-function _List_toArray(xs)
-{
-	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
-	{
-		out.push(xs.a);
-	}
-	return out;
-}
-
-var _List_map2 = F3(function(f, xs, ys)
-{
-	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
-	{
-		arr.push(A2(f, xs.a, ys.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map3 = F4(function(f, xs, ys, zs)
-{
-	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A3(f, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map4 = F5(function(f, ws, xs, ys, zs)
-{
-	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
-{
-	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_sortBy = F2(function(f, xs)
-{
-	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
-		return _Utils_cmp(f(a), f(b));
-	}));
-});
-
-var _List_sortWith = F2(function(f, xs)
-{
-	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
-		var ord = A2(f, a, b);
-		return ord === $elm$core$Basics$EQ ? 0 : ord === $elm$core$Basics$LT ? -1 : 1;
-	}));
-});
-
-
-
 var _JsArray_empty = [];
 
 function _JsArray_singleton(value)
@@ -790,6 +525,271 @@ function _Debug_regionToString(region)
 	}
 	return 'on lines ' + region.start.line + ' through ' + region.end.line;
 }
+
+
+
+// EQUALITY
+
+function _Utils_eq(x, y)
+{
+	for (
+		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
+		isEqual && (pair = stack.pop());
+		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
+		)
+	{}
+
+	return isEqual;
+}
+
+function _Utils_eqHelp(x, y, depth, stack)
+{
+	if (x === y)
+	{
+		return true;
+	}
+
+	if (typeof x !== 'object' || x === null || y === null)
+	{
+		typeof x === 'function' && _Debug_crash(5);
+		return false;
+	}
+
+	if (depth > 100)
+	{
+		stack.push(_Utils_Tuple2(x,y));
+		return true;
+	}
+
+	/**/
+	if (x.$ === 'Set_elm_builtin')
+	{
+		x = $elm$core$Set$toList(x);
+		y = $elm$core$Set$toList(y);
+	}
+	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
+	{
+		x = $elm$core$Dict$toList(x);
+		y = $elm$core$Dict$toList(y);
+	}
+	//*/
+
+	/**_UNUSED/
+	if (x.$ < 0)
+	{
+		x = $elm$core$Dict$toList(x);
+		y = $elm$core$Dict$toList(y);
+	}
+	//*/
+
+	for (var key in x)
+	{
+		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+var _Utils_equal = F2(_Utils_eq);
+var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
+
+
+
+// COMPARISONS
+
+// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
+// the particular integer values assigned to LT, EQ, and GT.
+
+function _Utils_cmp(x, y, ord)
+{
+	if (typeof x !== 'object')
+	{
+		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
+	}
+
+	/**/
+	if (x instanceof String)
+	{
+		var a = x.valueOf();
+		var b = y.valueOf();
+		return a === b ? 0 : a < b ? -1 : 1;
+	}
+	//*/
+
+	/**_UNUSED/
+	if (typeof x.$ === 'undefined')
+	//*/
+	/**/
+	if (x.$[0] === '#')
+	//*/
+	{
+		return (ord = _Utils_cmp(x.a, y.a))
+			? ord
+			: (ord = _Utils_cmp(x.b, y.b))
+				? ord
+				: _Utils_cmp(x.c, y.c);
+	}
+
+	// traverse conses until end of a list or a mismatch
+	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
+	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
+}
+
+var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
+var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
+var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
+var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
+
+var _Utils_compare = F2(function(x, y)
+{
+	var n = _Utils_cmp(x, y);
+	return n < 0 ? $elm$core$Basics$LT : n ? $elm$core$Basics$GT : $elm$core$Basics$EQ;
+});
+
+
+// COMMON VALUES
+
+var _Utils_Tuple0_UNUSED = 0;
+var _Utils_Tuple0 = { $: '#0' };
+
+function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
+function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
+
+function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
+function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
+
+function _Utils_chr_UNUSED(c) { return c; }
+function _Utils_chr(c) { return new String(c); }
+
+
+// RECORDS
+
+function _Utils_update(oldRecord, updatedFields)
+{
+	var newRecord = {};
+
+	for (var key in oldRecord)
+	{
+		newRecord[key] = oldRecord[key];
+	}
+
+	for (var key in updatedFields)
+	{
+		newRecord[key] = updatedFields[key];
+	}
+
+	return newRecord;
+}
+
+
+// APPEND
+
+var _Utils_append = F2(_Utils_ap);
+
+function _Utils_ap(xs, ys)
+{
+	// append Strings
+	if (typeof xs === 'string')
+	{
+		return xs + ys;
+	}
+
+	// append Lists
+	if (!xs.b)
+	{
+		return ys;
+	}
+	var root = _List_Cons(xs.a, ys);
+	xs = xs.b
+	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		curr = curr.b = _List_Cons(xs.a, ys);
+	}
+	return root;
+}
+
+
+
+var _List_Nil_UNUSED = { $: 0 };
+var _List_Nil = { $: '[]' };
+
+function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
+function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
+
+
+var _List_cons = F2(_List_Cons);
+
+function _List_fromArray(arr)
+{
+	var out = _List_Nil;
+	for (var i = arr.length; i--; )
+	{
+		out = _List_Cons(arr[i], out);
+	}
+	return out;
+}
+
+function _List_toArray(xs)
+{
+	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		out.push(xs.a);
+	}
+	return out;
+}
+
+var _List_map2 = F3(function(f, xs, ys)
+{
+	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
+	{
+		arr.push(A2(f, xs.a, ys.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map3 = F4(function(f, xs, ys, zs)
+{
+	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A3(f, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map4 = F5(function(f, ws, xs, ys, zs)
+{
+	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
+{
+	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_sortBy = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		return _Utils_cmp(f(a), f(b));
+	}));
+});
+
+var _List_sortWith = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		var ord = A2(f, a, b);
+		return ord === $elm$core$Basics$EQ ? 0 : ord === $elm$core$Basics$LT ? -1 : 1;
+	}));
+});
 
 
 
@@ -4438,15 +4438,31 @@ function _Time_getZoneName()
 		callback(_Scheduler_succeed(name));
 	});
 }
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
-var $elm$core$Basics$EQ = {$: 'EQ'};
-var $elm$core$Basics$GT = {$: 'GT'};
-var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$List$cons = _List_cons;
+var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
+var $elm$core$Array$foldr = F3(
+	function (func, baseCase, _v0) {
+		var tree = _v0.c;
+		var tail = _v0.d;
+		var helper = F2(
+			function (node, acc) {
+				if (node.$ === 'SubTree') {
+					var subTree = node.a;
+					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
+				} else {
+					var values = node.a;
+					return A3($elm$core$Elm$JsArray$foldr, func, acc, values);
+				}
+			});
+		return A3(
+			$elm$core$Elm$JsArray$foldr,
+			helper,
+			A3($elm$core$Elm$JsArray$foldr, func, baseCase, tail),
+			tree);
+	});
+var $elm$core$Array$toList = function (array) {
+	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
+};
 var $elm$core$Dict$foldr = F3(
 	function (func, acc, t) {
 		foldr:
@@ -4499,30 +4515,37 @@ var $elm$core$Set$toList = function (_v0) {
 	var dict = _v0.a;
 	return $elm$core$Dict$keys(dict);
 };
-var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
-var $elm$core$Array$foldr = F3(
-	function (func, baseCase, _v0) {
-		var tree = _v0.c;
-		var tail = _v0.d;
-		var helper = F2(
-			function (node, acc) {
-				if (node.$ === 'SubTree') {
-					var subTree = node.a;
-					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
-				} else {
-					var values = node.a;
-					return A3($elm$core$Elm$JsArray$foldr, func, acc, values);
-				}
-			});
-		return A3(
-			$elm$core$Elm$JsArray$foldr,
-			helper,
-			A3($elm$core$Elm$JsArray$foldr, func, baseCase, tail),
-			tree);
+var $elm$core$Basics$EQ = {$: 'EQ'};
+var $elm$core$Basics$GT = {$: 'GT'};
+var $elm$core$Basics$LT = {$: 'LT'};
+var $author$project$Core$Direction$Left = {$: 'Left'};
+var $author$project$Core$Direction$Right = {$: 'Right'};
+var $author$project$Core$Rule$Rule = F5(
+	function (currentState, currentSymbol, newSymbol, newState, moveDirection) {
+		return {currentState: currentState, currentSymbol: currentSymbol, moveDirection: moveDirection, newState: newState, newSymbol: newSymbol};
 	});
-var $elm$core$Array$toList = function (array) {
-	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
+var $elm$core$Basics$eq = _Utils_equal;
+var $author$project$Main$busyBeaver = {
+	currentState: 'A',
+	isFinalState: function (s) {
+		return s === 'X';
+	},
+	rules: _List_fromArray(
+		[
+			A5($author$project$Core$Rule$Rule, 'A', '1', '1', 'C', $author$project$Core$Direction$Left),
+			A5($author$project$Core$Rule$Rule, 'A', '0', '1', 'B', $author$project$Core$Direction$Right),
+			A5($author$project$Core$Rule$Rule, 'B', '0', '1', 'A', $author$project$Core$Direction$Left),
+			A5($author$project$Core$Rule$Rule, 'B', '1', '1', 'B', $author$project$Core$Direction$Right),
+			A5($author$project$Core$Rule$Rule, 'C', '0', '1', 'B', $author$project$Core$Direction$Left),
+			A5($author$project$Core$Rule$Rule, 'C', '1', '1', 'X', $author$project$Core$Direction$Right)
+		]),
+	tape: {currentSymbol: '0', emptySymbol: '0', left: _List_Nil, right: _List_Nil}
 };
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -4792,7 +4815,6 @@ var $elm$core$Basics$apR = F2(
 	function (x, f) {
 		return f(x);
 	});
-var $elm$core$Basics$eq = _Utils_equal;
 var $elm$core$Basics$floor = _Basics_floor;
 var $elm$core$Elm$JsArray$length = _JsArray_length;
 var $elm$core$Basics$gt = _Utils_gt;
@@ -5232,28 +5254,6 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Core$Direction$Left = {$: 'Left'};
-var $author$project$Core$Direction$Right = {$: 'Right'};
-var $author$project$Core$Rule$Rule = F5(
-	function (currentState, currentSymbol, newSymbol, newState, moveDirection) {
-		return {currentState: currentState, currentSymbol: currentSymbol, moveDirection: moveDirection, newState: newState, newSymbol: newSymbol};
-	});
-var $author$project$Main$busyBeaver = {
-	currentState: 'A',
-	isFinalState: function (s) {
-		return s === 'X';
-	},
-	rules: _List_fromArray(
-		[
-			A5($author$project$Core$Rule$Rule, 'A', '1', '1', 'C', $author$project$Core$Direction$Left),
-			A5($author$project$Core$Rule$Rule, 'A', '0', '1', 'B', $author$project$Core$Direction$Right),
-			A5($author$project$Core$Rule$Rule, 'B', '0', '1', 'A', $author$project$Core$Direction$Left),
-			A5($author$project$Core$Rule$Rule, 'B', '1', '1', 'B', $author$project$Core$Direction$Right),
-			A5($author$project$Core$Rule$Rule, 'C', '0', '1', 'B', $author$project$Core$Direction$Left),
-			A5($author$project$Core$Rule$Rule, 'C', '1', '1', 'X', $author$project$Core$Direction$Right)
-		]),
-	tape: {currentSymbol: '0', emptySymbol: '0', left: _List_Nil, right: _List_Nil}
-};
 var $author$project$App$ComputationWorkflow$Impl$init = {id: 0, step: $elm$core$Maybe$Nothing};
 var $elm$core$Basics$negate = function (n) {
 	return -n;
@@ -5290,10 +5290,53 @@ var $author$project$Core$Rule$toString = F3(
 					$author$project$Core$Direction$toString(rule.moveDirection)
 				]));
 	});
-var $author$project$Main$init = function (_v0) {
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
+	});
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
+};
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $author$project$Core$Tape$toTapeString = F2(
+	function (symToString, tape) {
+		return A2(
+			$elm$core$String$join,
+			' ',
+			$elm$core$List$concat(
+				_List_fromArray(
+					[
+						A2($elm$core$List$map, symToString, tape.left),
+						_List_fromArray(
+						[
+							$elm$core$String$concat(
+							_List_fromArray(
+								[
+									'[',
+									symToString(tape.currentSymbol),
+									']'
+								]))
+						]),
+						A2($elm$core$List$map, symToString, tape.right)
+					])));
+	});
+var $author$project$Main$init = function (turing) {
 	return _Utils_Tuple2(
 		{
 			activeComputationWorkflow: $author$project$App$ComputationWorkflow$Impl$init,
+			currentEmptySymbolString: turing.tape.emptySymbol,
+			currentEmptySymbolValidationError: $elm$core$Maybe$Nothing,
+			currentStateString: turing.currentState,
+			currentStateValidationError: $elm$core$Maybe$Nothing,
+			currentTapeString: A2($author$project$Core$Tape$toTapeString, $elm$core$Basics$identity, turing.tape),
+			currentTapeValidationError: $elm$core$Maybe$Nothing,
+			isEditingStateAndTape: false,
 			isInitialState: true,
 			isRunning: false,
 			lastAppliedRuleIndex: -1,
@@ -5304,12 +5347,12 @@ var $author$project$Main$init = function (_v0) {
 			ruleStrings: A2(
 				$elm$core$List$map,
 				A2($author$project$Core$Rule$toString, $elm$core$Basics$identity, $elm$core$Basics$identity),
-				$author$project$Main$busyBeaver.rules),
+				turing.rules),
 			ruleValidationErrors: A2(
 				$elm$core$Array$repeat,
-				$elm$core$List$length($author$project$Main$busyBeaver.rules),
+				$elm$core$List$length(turing.rules),
 				$elm$core$Maybe$Nothing),
-			turing: $author$project$Main$busyBeaver
+			turing: turing
 		},
 		$elm$core$Platform$Cmd$none);
 };
@@ -5825,14 +5868,6 @@ var $rtfeldman$elm_css$Css$Structure$compactHelp = F2(
 var $rtfeldman$elm_css$Css$Structure$Keyframes = function (a) {
 	return {$: 'Keyframes', a: a};
 };
-var $elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
-		}
-	});
 var $rtfeldman$elm_css$Css$Structure$withKeyframeDeclarations = F2(
 	function (keyframesByName, compactedDeclarations) {
 		return A2(
@@ -6191,9 +6226,6 @@ var $rtfeldman$elm_css$Css$Structure$Output$prettyPrint = function (_v0) {
 					'\n\n',
 					A2($elm$core$List$map, $rtfeldman$elm_css$Css$Structure$Output$prettyPrintDeclaration, declarations))
 				])));
-};
-var $elm$core$List$concat = function (lists) {
-	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
 };
 var $elm$core$List$concatMap = F2(
 	function (f, list) {
@@ -7717,6 +7749,32 @@ var $author$project$Core$Turing$applyRule = F2(
 						A2($author$project$Core$Tape$writeSymbol, newSymbol, turing.tape))
 				}));
 	});
+var $elm_community$basics_extra$Basics$Extra$flip = F3(
+	function (f, b, a) {
+		return A2(f, a, b);
+	});
+var $author$project$Core$Tape$setEmptySymbol = F2(
+	function (symbol, tape) {
+		return _Utils_update(
+			tape,
+			{emptySymbol: symbol});
+	});
+var $author$project$Core$Tape$asEmptySymbolIn = $elm_community$basics_extra$Basics$Extra$flip($author$project$Core$Tape$setEmptySymbol);
+var $author$project$Core$Turing$setTape = F2(
+	function (tape, turing) {
+		return _Utils_update(
+			turing,
+			{tape: tape});
+	});
+var $author$project$Core$Turing$asTapeIn = $elm_community$basics_extra$Basics$Extra$flip($author$project$Core$Turing$setTape);
+var $elm_community$result_extra$Result$Extra$error = function (result) {
+	if (result.$ === 'Ok') {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		var err = result.a;
+		return $elm$core$Maybe$Just(err);
+	}
+};
 var $author$project$Core$Turing$findApplicableRule = function (turing) {
 	var recurse = F2(
 		function (rules, index) {
@@ -7744,6 +7802,234 @@ var $author$project$Core$Turing$findApplicableRule = function (turing) {
 		});
 	return A2(recurse, turing.rules, 0);
 };
+var $elm$core$Result$andThen = F2(
+	function (callback, result) {
+		if (result.$ === 'Ok') {
+			var value = result.a;
+			return callback(value);
+		} else {
+			var msg = result.a;
+			return $elm$core$Result$Err(msg);
+		}
+	});
+var $elm_community$maybe_extra$Maybe$Extra$combineHelp = F2(
+	function (list, acc) {
+		combineHelp:
+		while (true) {
+			if (list.b) {
+				var head = list.a;
+				var tail = list.b;
+				if (head.$ === 'Just') {
+					var a = head.a;
+					var $temp$list = tail,
+						$temp$acc = A2($elm$core$List$cons, a, acc);
+					list = $temp$list;
+					acc = $temp$acc;
+					continue combineHelp;
+				} else {
+					return $elm$core$Maybe$Nothing;
+				}
+			} else {
+				return $elm$core$Maybe$Just(
+					$elm$core$List$reverse(acc));
+			}
+		}
+	});
+var $elm_community$maybe_extra$Maybe$Extra$combine = function (list) {
+	return A2($elm_community$maybe_extra$Maybe$Extra$combineHelp, list, _List_Nil);
+};
+var $elm$core$String$endsWith = _String_endsWith;
+var $elm_community$list_extra$List$Extra$findIndexHelp = F3(
+	function (index, predicate, list) {
+		findIndexHelp:
+		while (true) {
+			if (!list.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (predicate(x)) {
+					return $elm$core$Maybe$Just(index);
+				} else {
+					var $temp$index = index + 1,
+						$temp$predicate = predicate,
+						$temp$list = xs;
+					index = $temp$index;
+					predicate = $temp$predicate;
+					list = $temp$list;
+					continue findIndexHelp;
+				}
+			}
+		}
+	});
+var $elm_community$list_extra$List$Extra$findIndex = $elm_community$list_extra$List$Extra$findIndexHelp(0);
+var $elm$core$Result$fromMaybe = F2(
+	function (err, maybe) {
+		if (maybe.$ === 'Just') {
+			var v = maybe.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			return $elm$core$Result$Err(err);
+		}
+	});
+var $elm$core$Result$map = F2(
+	function (func, ra) {
+		if (ra.$ === 'Ok') {
+			var a = ra.a;
+			return $elm$core$Result$Ok(
+				func(a));
+		} else {
+			var e = ra.a;
+			return $elm$core$Result$Err(e);
+		}
+	});
+var $elm$core$Tuple$mapSecond = F2(
+	function (func, _v0) {
+		var x = _v0.a;
+		var y = _v0.b;
+		return _Utils_Tuple2(
+			x,
+			func(y));
+	});
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
+var $elm_community$list_extra$List$Extra$splitAt = F2(
+	function (n, xs) {
+		return _Utils_Tuple2(
+			A2($elm$core$List$take, n, xs),
+			A2($elm$core$List$drop, n, xs));
+	});
+var $elm_community$maybe_extra$Maybe$Extra$unwrap = F3(
+	function (_default, f, m) {
+		if (m.$ === 'Nothing') {
+			return _default;
+		} else {
+			var a = m.a;
+			return f(a);
+		}
+	});
+var $author$project$Core$Tape$fromString = F3(
+	function (parseSymbol, emptySymbol, string) {
+		var unwrapSecond = function (_v4) {
+			var a = _v4.a;
+			var mb = _v4.b;
+			return A3(
+				$elm_community$maybe_extra$Maybe$Extra$unwrap,
+				$elm$core$Maybe$Nothing,
+				function (b) {
+					return $elm$core$Maybe$Just(
+						_Utils_Tuple2(a, b));
+				},
+				mb);
+		};
+		var substrings = A2(
+			$elm$core$List$filter,
+			A2($elm$core$Basics$composeL, $elm$core$Basics$not, $elm$core$String$isEmpty),
+			A2($elm$core$String$split, ' ', string));
+		var parseOptionalBrackets = function (s) {
+			var isBracketed = A2($elm$core$String$startsWith, '[', s) && A2($elm$core$String$endsWith, ']', s);
+			var remainingChars = isBracketed ? A3($elm$core$String$slice, 1, -1, s) : s;
+			return _Utils_Tuple2(isBracketed, remainingChars);
+		};
+		var maybeSymbols = $elm_community$maybe_extra$Maybe$Extra$combine(
+			A2(
+				$elm$core$List$map,
+				function (s) {
+					return unwrapSecond(
+						A2(
+							$elm$core$Tuple$mapSecond,
+							parseSymbol,
+							parseOptionalBrackets(s)));
+				},
+				substrings));
+		return A2(
+			$elm$core$Result$andThen,
+			function (_v0) {
+				var symbols = _v0.a;
+				var focusedSymbolIndex = _v0.b;
+				var _v1 = A2($elm_community$list_extra$List$Extra$splitAt, focusedSymbolIndex, symbols);
+				if (_v1.b.b) {
+					var left = _v1.a;
+					var _v2 = _v1.b;
+					var _v3 = _v2.a;
+					var current = _v3.b;
+					var right = _v2.b;
+					return $elm$core$Result$Ok(
+						{
+							currentSymbol: current,
+							emptySymbol: emptySymbol,
+							left: A2($elm$core$List$map, $elm$core$Tuple$second, left),
+							right: A2($elm$core$List$map, $elm$core$Tuple$second, right)
+						});
+				} else {
+					return $elm$core$Result$Err('Unexpected split error');
+				}
+			},
+			A2(
+				$elm$core$Result$andThen,
+				function (symbols) {
+					return A2(
+						$elm$core$Result$map,
+						function (index) {
+							return _Utils_Tuple2(symbols, index);
+						},
+						A2(
+							$elm$core$Result$fromMaybe,
+							'Initial symbol not specified',
+							A2($elm_community$list_extra$List$Extra$findIndex, $elm$core$Tuple$first, symbols)));
+				},
+				A2($elm$core$Result$fromMaybe, 'Parse error', maybeSymbols)));
+	});
+var $author$project$App$Model$invalidateEditFields = function (model) {
+	return _Utils_update(
+		model,
+		{
+			currentEmptySymbolString: model.turing.tape.emptySymbol,
+			currentEmptySymbolValidationError: $elm$core$Maybe$Nothing,
+			currentStateString: model.turing.currentState,
+			currentStateValidationError: $elm$core$Maybe$Nothing,
+			currentTapeString: A2($author$project$Core$Tape$toTapeString, $elm$core$Basics$identity, model.turing.tape),
+			currentTapeValidationError: $elm$core$Maybe$Nothing
+		});
+};
+var $elm_community$maybe_extra$Maybe$Extra$isNothing = function (m) {
+	if (m.$ === 'Nothing') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm_community$maybe_extra$Maybe$Extra$or = F2(
+	function (ma, mb) {
+		if (ma.$ === 'Nothing') {
+			return mb;
+		} else {
+			return ma;
+		}
+	});
 var $elm$core$Elm$JsArray$push = _JsArray_push;
 var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
 var $elm$core$Basics$ge = _Utils_ge;
@@ -7934,27 +8220,6 @@ var $elm$core$Array$length = function (_v0) {
 	var len = _v0.a;
 	return len;
 };
-var $elm$core$List$drop = F2(
-	function (n, list) {
-		drop:
-		while (true) {
-			if (n <= 0) {
-				return list;
-			} else {
-				if (!list.b) {
-					return list;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs;
-					n = $temp$n;
-					list = $temp$list;
-					continue drop;
-				}
-			}
-		}
-	});
 var $elm$core$Array$tailIndex = function (len) {
 	return (len >>> 5) << 5;
 };
@@ -8264,6 +8529,16 @@ var $elm_community$list_extra$List$Extra$setAt = F2(
 			index,
 			$elm$core$Basics$always(value));
 	});
+var $elm$core$String$trim = _String_trim;
+var $elm_community$maybe_extra$Maybe$Extra$unpack = F3(
+	function (_default, f, m) {
+		if (m.$ === 'Nothing') {
+			return _default(_Utils_Tuple0);
+		} else {
+			var a = m.a;
+			return f(a);
+		}
+	});
 var $author$project$App$ComputationWorkflow$Step$NewSymbolFadein = {$: 'NewSymbolFadein'};
 var $author$project$App$ComputationWorkflow$Step$OldSymbolFadeout = {$: 'OldSymbolFadeout'};
 var $author$project$App$Msg$ToggleComputation = {$: 'ToggleComputation'};
@@ -8364,22 +8639,41 @@ var $author$project$App$ComputationWorkflow$Impl$update = F2(
 										step: $elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Step$ComputeNextState)
 									})));
 						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									activeComputationWorkflow: workflow,
-									isInitialState: false,
-									lastAppliedRuleIndex: model.pendingRuleIndex,
-									pendingTuring: $elm$core$Maybe$Nothing,
-									prevAppliedRuleIndexes: A2($elm$core$List$cons, model.lastAppliedRuleIndex, model.prevAppliedRuleIndexes),
-									prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
-									turing: newTuring
-								}),
+							$author$project$App$Model$invalidateEditFields(
+								_Utils_update(
+									model,
+									{
+										activeComputationWorkflow: workflow,
+										isInitialState: false,
+										lastAppliedRuleIndex: model.pendingRuleIndex,
+										pendingTuring: $elm$core$Maybe$Nothing,
+										prevAppliedRuleIndexes: A2($elm$core$List$cons, model.lastAppliedRuleIndex, model.prevAppliedRuleIndexes),
+										prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
+										turing: newTuring
+									})),
 							cmd);
 				}
 			} else {
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			}
+		}
+	});
+var $author$project$App$Model$validateEmptySymbolString = function (emptySymbol) {
+	return $elm$core$String$isEmpty(emptySymbol) ? $elm$core$Maybe$Just('Empty symbol unspecified') : $elm$core$Maybe$Nothing;
+};
+var $author$project$App$Model$validateStateString = function (stateString) {
+	return $elm$core$String$isEmpty(stateString) ? $elm$core$Maybe$Just('State unspecified') : $elm$core$Maybe$Nothing;
+};
+var $author$project$App$Model$validateTapeString = function (tapeString) {
+	return $elm$core$String$isEmpty(tapeString) ? $elm$core$Maybe$Just('Tape unspecified') : $elm$core$Maybe$Nothing;
+};
+var $elm$core$Result$withDefault = F2(
+	function (def, result) {
+		if (result.$ === 'Ok') {
+			var a = result.a;
+			return a;
+		} else {
+			return def;
 		}
 	});
 var $author$project$Main$update = F2(
@@ -8417,6 +8711,78 @@ var $author$project$Main$update = F2(
 							ruleStrings: A3($elm_community$list_extra$List$Extra$setAt, index, newValue, model.ruleStrings)
 						}),
 					$elm$core$Platform$Cmd$none);
+			case 'UpdateState':
+				var newValue = msg.a;
+				var turing = model.turing;
+				var sanitizedValue = $elm$core$String$trim(newValue);
+				var validationError = $author$project$App$Model$validateStateString(sanitizedValue);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							currentStateString: newValue,
+							currentStateValidationError: validationError,
+							turing: A3(
+								$elm_community$maybe_extra$Maybe$Extra$unwrap,
+								_Utils_update(
+									turing,
+									{currentState: sanitizedValue}),
+								function (_v1) {
+									return turing;
+								},
+								validationError)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UpdateEmptySymbol':
+				var newValue = msg.a;
+				var sanitizedValue = $elm$core$String$trim(newValue);
+				var validationError = $author$project$App$Model$validateEmptySymbolString(sanitizedValue);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							currentEmptySymbolString: newValue,
+							currentEmptySymbolValidationError: validationError,
+							turing: A3(
+								$elm_community$maybe_extra$Maybe$Extra$unpack,
+								function (_v2) {
+									return A2(
+										$author$project$Core$Turing$asTapeIn,
+										model.turing,
+										A2($author$project$Core$Tape$asEmptySymbolIn, model.turing.tape, sanitizedValue));
+								},
+								function (_v3) {
+									return model.turing;
+								},
+								validationError)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UpdateTape':
+				var newValue = msg.a;
+				var sanitizedValue = $elm$core$String$trim(newValue);
+				var validationError = $author$project$App$Model$validateTapeString(sanitizedValue);
+				var newTape = $elm_community$maybe_extra$Maybe$Extra$isNothing(validationError) ? A3($author$project$Core$Tape$fromString, $elm$core$Maybe$Just, model.turing.tape.emptySymbol, sanitizedValue) : $elm$core$Result$Err('Validation error');
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							currentTapeString: newValue,
+							currentTapeValidationError: A2(
+								$elm_community$maybe_extra$Maybe$Extra$or,
+								validationError,
+								$elm_community$result_extra$Result$Extra$error(newTape)),
+							turing: A2(
+								$author$project$Core$Turing$asTapeIn,
+								model.turing,
+								A2($elm$core$Result$withDefault, model.turing.tape, newTape))
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'ToggleEditStateTape':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{isEditingStateAndTape: !model.isEditingStateAndTape}),
+					$elm$core$Platform$Cmd$none);
 			case 'ToggleComputation':
 				var newComputationWorkflow = model.isRunning ? $author$project$App$ComputationWorkflow$Impl$reset(model.activeComputationWorkflow) : model.activeComputationWorkflow;
 				var cmd = model.isRunning ? $elm$core$Platform$Cmd$none : $author$project$App$ComputationWorkflow$Impl$start(newComputationWorkflow);
@@ -8426,72 +8792,75 @@ var $author$project$Main$update = F2(
 						{activeComputationWorkflow: newComputationWorkflow, isRunning: !model.isRunning, pendingTuring: $elm$core$Maybe$Nothing}),
 					cmd);
 			case 'ResetComputation':
-				var _v1 = $author$project$Main$restartComputationIfRunning(model);
-				var newComputationWorkflow = _v1.a;
-				var cmd = _v1.b;
+				var _v4 = $author$project$Main$restartComputationIfRunning(model);
+				var newComputationWorkflow = _v4.a;
+				var cmd = _v4.b;
 				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{activeComputationWorkflow: newComputationWorkflow, isInitialState: true, lastAppliedRuleIndex: -1, pendingRuleIndex: -1, pendingTuring: $elm$core$Maybe$Nothing, prevAppliedRuleIndexes: _List_Nil, prevTurings: _List_Nil, turing: $author$project$Main$busyBeaver}),
+					$author$project$App$Model$invalidateEditFields(
+						_Utils_update(
+							model,
+							{activeComputationWorkflow: newComputationWorkflow, isInitialState: true, lastAppliedRuleIndex: -1, pendingRuleIndex: -1, pendingTuring: $elm$core$Maybe$Nothing, prevAppliedRuleIndexes: _List_Nil, prevTurings: _List_Nil, turing: $author$project$Main$busyBeaver})),
 					cmd);
 			case 'ProcessComputationWorkflow':
 				var workflow = msg.a;
 				return A2($author$project$App$ComputationWorkflow$Impl$update, workflow, model);
 			case 'StepFw':
-				var _v2 = $author$project$Core$Turing$findApplicableRule(model.turing);
-				if (_v2.$ === 'Just') {
-					var _v3 = _v2.a;
-					var currentlyApplicableRuleIndex = _v3.a;
-					var currentlyApplicableRule = _v3.b;
+				var _v5 = $author$project$Core$Turing$findApplicableRule(model.turing);
+				if (_v5.$ === 'Just') {
+					var _v6 = _v5.a;
+					var currentlyApplicableRuleIndex = _v6.a;
+					var currentlyApplicableRule = _v6.b;
 					var newTuring = A2(
 						$elm$core$Maybe$withDefault,
 						model.turing,
 						A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, model.turing));
-					var _v4 = $author$project$Main$restartComputationIfRunning(model);
-					var newComputationWorkflow = _v4.a;
-					var cmd = _v4.b;
+					var _v7 = $author$project$Main$restartComputationIfRunning(model);
+					var newComputationWorkflow = _v7.a;
+					var cmd = _v7.b;
 					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								activeComputationWorkflow: newComputationWorkflow,
-								isInitialState: false,
-								lastAppliedRuleIndex: currentlyApplicableRuleIndex,
-								pendingRuleIndex: -1,
-								pendingTuring: $elm$core$Maybe$Nothing,
-								prevAppliedRuleIndexes: A2($elm$core$List$cons, model.lastAppliedRuleIndex, model.prevAppliedRuleIndexes),
-								prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
-								turing: newTuring
-							}),
+						$author$project$App$Model$invalidateEditFields(
+							_Utils_update(
+								model,
+								{
+									activeComputationWorkflow: newComputationWorkflow,
+									isInitialState: false,
+									lastAppliedRuleIndex: currentlyApplicableRuleIndex,
+									pendingRuleIndex: -1,
+									pendingTuring: $elm$core$Maybe$Nothing,
+									prevAppliedRuleIndexes: A2($elm$core$List$cons, model.lastAppliedRuleIndex, model.prevAppliedRuleIndexes),
+									prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
+									turing: newTuring
+								})),
 						cmd);
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
 			default:
-				var _v5 = $author$project$Main$restartComputationIfRunning(model);
-				var newComputationWorkflow = _v5.a;
-				var cmd = _v5.b;
-				var _v6 = _Utils_Tuple2(model.prevTurings, model.prevAppliedRuleIndexes);
-				if (_v6.a.b && _v6.b.b) {
-					var _v7 = _v6.a;
-					var prevTuring = _v7.a;
-					var restPrevTurings = _v7.b;
-					var _v8 = _v6.b;
-					var prevRuleIndex = _v8.a;
-					var restPrevRuleIndexes = _v8.b;
+				var _v8 = $author$project$Main$restartComputationIfRunning(model);
+				var newComputationWorkflow = _v8.a;
+				var cmd = _v8.b;
+				var _v9 = _Utils_Tuple2(model.prevTurings, model.prevAppliedRuleIndexes);
+				if (_v9.a.b && _v9.b.b) {
+					var _v10 = _v9.a;
+					var prevTuring = _v10.a;
+					var restPrevTurings = _v10.b;
+					var _v11 = _v9.b;
+					var prevRuleIndex = _v11.a;
+					var restPrevRuleIndexes = _v11.b;
 					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								activeComputationWorkflow: newComputationWorkflow,
-								isInitialState: $elm$core$List$isEmpty(restPrevTurings),
-								lastAppliedRuleIndex: prevRuleIndex,
-								pendingRuleIndex: -1,
-								pendingTuring: $elm$core$Maybe$Nothing,
-								prevAppliedRuleIndexes: restPrevRuleIndexes,
-								prevTurings: restPrevTurings,
-								turing: prevTuring
-							}),
+						$author$project$App$Model$invalidateEditFields(
+							_Utils_update(
+								model,
+								{
+									activeComputationWorkflow: newComputationWorkflow,
+									isInitialState: $elm$core$List$isEmpty(restPrevTurings),
+									lastAppliedRuleIndex: prevRuleIndex,
+									pendingRuleIndex: -1,
+									pendingTuring: $elm$core$Maybe$Nothing,
+									prevAppliedRuleIndexes: restPrevRuleIndexes,
+									prevTurings: restPrevTurings,
+									turing: prevTuring
+								})),
 						cmd);
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -8564,10 +8933,6 @@ var $rtfeldman$elm_css$Html$Styled$Events$onClick = function (msg) {
 		$rtfeldman$elm_css$Html$Styled$Events$on,
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
-};
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
 };
 var $rtfeldman$elm_css$Html$Styled$Attributes$classList = function (classes) {
 	return $rtfeldman$elm_css$Html$Styled$Attributes$class(
@@ -8659,6 +9024,159 @@ var $author$project$Main$controlsHtml = function (model) {
 					]))
 			]));
 };
+var $author$project$App$Msg$UpdateEmptySymbol = function (a) {
+	return {$: 'UpdateEmptySymbol', a: a};
+};
+var $author$project$App$Msg$UpdateState = function (a) {
+	return {$: 'UpdateState', a: a};
+};
+var $author$project$App$Msg$UpdateTape = function (a) {
+	return {$: 'UpdateTape', a: a};
+};
+var $elm$virtual_dom$VirtualDom$attribute = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_attribute,
+			_VirtualDom_noOnOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var $rtfeldman$elm_css$VirtualDom$Styled$attribute = F2(
+	function (key, value) {
+		return A3(
+			$rtfeldman$elm_css$VirtualDom$Styled$Attribute,
+			A2($elm$virtual_dom$VirtualDom$attribute, key, value),
+			_List_Nil,
+			'');
+	});
+var $rtfeldman$elm_css$Html$Styled$Attributes$attribute = $rtfeldman$elm_css$VirtualDom$Styled$attribute;
+var $rtfeldman$elm_css$Html$Styled$input = $rtfeldman$elm_css$Html$Styled$node('input');
+var $elm_community$maybe_extra$Maybe$Extra$isJust = function (m) {
+	if (m.$ === 'Nothing') {
+		return false;
+	} else {
+		return true;
+	}
+};
+var $rtfeldman$elm_css$Html$Styled$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$rtfeldman$elm_css$VirtualDom$Styled$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $rtfeldman$elm_css$Html$Styled$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $rtfeldman$elm_css$Html$Styled$Events$onInput = function (tagger) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$rtfeldman$elm_css$Html$Styled$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $rtfeldman$elm_css$Html$Styled$Events$targetValue)));
+};
+var $rtfeldman$elm_css$Html$Styled$Attributes$placeholder = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('placeholder');
+var $rtfeldman$elm_css$Html$Styled$span = $rtfeldman$elm_css$Html$Styled$node('span');
+var $rtfeldman$elm_css$Html$Styled$Attributes$value = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('value');
+var $author$project$Main$editStateAndTapeHtml = function (model) {
+	return A2(
+		$rtfeldman$elm_css$Html$Styled$div,
+		_List_fromArray(
+			[
+				$rtfeldman$elm_css$Html$Styled$Attributes$class('edit-state-and-tape-container'),
+				A2($author$project$Utils$AttributeExtra$classIf, !model.isEditingStateAndTape, 'disabled')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$rtfeldman$elm_css$Html$Styled$input,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$placeholder('State'),
+						$rtfeldman$elm_css$Html$Styled$Attributes$value(model.currentStateString),
+						$rtfeldman$elm_css$Html$Styled$Attributes$class('current-state-input'),
+						A2(
+						$author$project$Utils$AttributeExtra$classIf,
+						$elm_community$maybe_extra$Maybe$Extra$isJust(model.currentStateValidationError),
+						'invalid'),
+						$rtfeldman$elm_css$Html$Styled$Events$onInput($author$project$App$Msg$UpdateState)
+					]),
+				_List_Nil),
+				A2(
+				$rtfeldman$elm_css$Html$Styled$span,
+				_List_fromArray(
+					[
+						A2(
+						$rtfeldman$elm_css$Html$Styled$Attributes$attribute,
+						'error',
+						A2($elm$core$Maybe$withDefault, '', model.currentStateValidationError))
+					]),
+				_List_Nil),
+				A2(
+				$rtfeldman$elm_css$Html$Styled$input,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$placeholder('∅'),
+						$rtfeldman$elm_css$Html$Styled$Attributes$value(model.currentEmptySymbolString),
+						$rtfeldman$elm_css$Html$Styled$Attributes$class('current-empty-symbol-input'),
+						A2(
+						$author$project$Utils$AttributeExtra$classIf,
+						$elm_community$maybe_extra$Maybe$Extra$isJust(model.currentEmptySymbolValidationError),
+						'invalid'),
+						$rtfeldman$elm_css$Html$Styled$Events$onInput($author$project$App$Msg$UpdateEmptySymbol)
+					]),
+				_List_Nil),
+				A2(
+				$rtfeldman$elm_css$Html$Styled$span,
+				_List_fromArray(
+					[
+						A2(
+						$rtfeldman$elm_css$Html$Styled$Attributes$attribute,
+						'error',
+						A2($elm$core$Maybe$withDefault, '', model.currentEmptySymbolValidationError))
+					]),
+				_List_Nil),
+				A2(
+				$rtfeldman$elm_css$Html$Styled$input,
+				_List_fromArray(
+					[
+						$rtfeldman$elm_css$Html$Styled$Attributes$placeholder('Tape'),
+						$rtfeldman$elm_css$Html$Styled$Attributes$value(model.currentTapeString),
+						$rtfeldman$elm_css$Html$Styled$Attributes$class('current-tape-input'),
+						A2(
+						$author$project$Utils$AttributeExtra$classIf,
+						$elm_community$maybe_extra$Maybe$Extra$isJust(model.currentTapeValidationError),
+						'invalid'),
+						$rtfeldman$elm_css$Html$Styled$Events$onInput($author$project$App$Msg$UpdateTape)
+					]),
+				_List_Nil),
+				A2(
+				$rtfeldman$elm_css$Html$Styled$span,
+				_List_fromArray(
+					[
+						A2(
+						$rtfeldman$elm_css$Html$Styled$Attributes$attribute,
+						'error',
+						A2($elm$core$Maybe$withDefault, '', model.currentTapeValidationError))
+					]),
+				_List_Nil)
+			]));
+};
 var $author$project$App$Msg$AddRule = {$: 'AddRule'};
 var $rtfeldman$elm_css$Html$Styled$button = $rtfeldman$elm_css$Html$Styled$node('button');
 var $author$project$App$Msg$RemoveRule = function (a) {
@@ -8701,7 +9219,6 @@ var $elm$core$Array$get = F2(
 			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
 			A3($elm$core$Array$getHelp, startShift, index, tree)));
 	});
-var $rtfeldman$elm_css$Html$Styled$input = $rtfeldman$elm_css$Html$Styled$node('input');
 var $elm_community$maybe_extra$Maybe$Extra$join = function (mx) {
 	if (mx.$ === 'Just') {
 		var x = mx.a;
@@ -8710,50 +9227,6 @@ var $elm_community$maybe_extra$Maybe$Extra$join = function (mx) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $rtfeldman$elm_css$Html$Styled$Events$alwaysStop = function (x) {
-	return _Utils_Tuple2(x, true);
-};
-var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 'MayStopPropagation', a: a};
-};
-var $rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn = F2(
-	function (event, decoder) {
-		return A2(
-			$rtfeldman$elm_css$VirtualDom$Styled$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
-	});
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $rtfeldman$elm_css$Html$Styled$Events$targetValue = A2(
-	$elm$json$Json$Decode$at,
-	_List_fromArray(
-		['target', 'value']),
-	$elm$json$Json$Decode$string);
-var $rtfeldman$elm_css$Html$Styled$Events$onInput = function (tagger) {
-	return A2(
-		$rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn,
-		'input',
-		A2(
-			$elm$json$Json$Decode$map,
-			$rtfeldman$elm_css$Html$Styled$Events$alwaysStop,
-			A2($elm$json$Json$Decode$map, tagger, $rtfeldman$elm_css$Html$Styled$Events$targetValue)));
-};
-var $rtfeldman$elm_css$Html$Styled$Attributes$placeholder = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('placeholder');
-var $elm_community$maybe_extra$Maybe$Extra$unwrap = F3(
-	function (_default, f, m) {
-		if (m.$ === 'Nothing') {
-			return _default;
-		} else {
-			var a = m.a;
-			return f(a);
-		}
-	});
-var $rtfeldman$elm_css$Html$Styled$Attributes$value = $rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('value');
 var $author$project$Main$rulesListEntryHtml = F3(
 	function (model, ruleIndex, ruleString) {
 		var validationError = $elm_community$maybe_extra$Maybe$Extra$join(
@@ -8845,6 +9318,7 @@ var $author$project$Main$rulesListHtml = function (model) {
 					]))
 			]));
 };
+var $author$project$App$Msg$ToggleEditStateTape = {$: 'ToggleEditStateTape'};
 var $elm_community$list_extra$List$Extra$getAt = F2(
 	function (idx, xs) {
 		return (idx < 0) ? $elm$core$Maybe$Nothing : $elm$core$List$head(
@@ -8959,7 +9433,9 @@ var $author$project$Main$stateAndTapeHtml = function (model) {
 						$rtfeldman$elm_css$Html$Styled$Attributes$class('state'),
 						$rtfeldman$elm_css$Html$Styled$Attributes$class('centered'),
 						A2($author$project$Utils$AttributeExtra$classIf, isFadeoutState, 'fadeout'),
-						A2($author$project$Utils$AttributeExtra$classIf, isFadeinState, 'fadein')
+						A2($author$project$Utils$AttributeExtra$classIf, isFadeinState, 'fadein'),
+						A2($author$project$Utils$AttributeExtra$classIf, model.isEditingStateAndTape, 'editing-toggled'),
+						$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$App$Msg$ToggleEditStateTape)
 					]),
 				_List_fromArray(
 					[
@@ -8985,14 +9461,17 @@ var $author$project$Main$view = function (model) {
 		_List_fromArray(
 			[
 				$author$project$Main$stateAndTapeHtml(model),
+				$author$project$Main$editStateAndTapeHtml(model),
 				$author$project$Main$controlsHtml(model),
 				$author$project$Main$rulesListHtml(model)
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{
-		init: $author$project$Main$init,
-		subscriptions: function (_v0) {
+		init: function (_v0) {
+			return $author$project$Main$init($author$project$Main$busyBeaver);
+		},
+		subscriptions: function (_v1) {
 			return $elm$core$Platform$Sub$none;
 		},
 		update: $author$project$Main$update,
