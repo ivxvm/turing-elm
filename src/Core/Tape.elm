@@ -65,29 +65,18 @@ writeSymbol newSymbol tape =
     { tape | currentSymbol = newSymbol }
 
 
-toSymbolList : Int -> Tape a -> ( List a, Int )
-toSymbolList minSideSize tape =
+toSymbolList : Tape a -> ( List a, Int )
+toSymbolList tape =
     let
-        leftLen =
-            List.length tape.left
-
-        leftPaddingSize =
-            max 0 (minSideSize - leftLen)
-
-        rightPaddingSize =
-            max 0 (minSideSize - List.length tape.right)
-
         symbols =
             List.concat
-                [ List.repeat leftPaddingSize tape.emptySymbol
-                , tape.left
+                [ tape.left
                 , [ tape.currentSymbol ]
                 , tape.right
-                , List.repeat rightPaddingSize tape.emptySymbol
                 ]
 
         currentSymbolIndex =
-            leftPaddingSize + leftLen
+            List.length tape.left
     in
     ( symbols, currentSymbolIndex )
 

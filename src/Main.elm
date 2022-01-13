@@ -5,6 +5,7 @@ import App.ComputationWorkflow.Step exposing (..)
 import App.ComputationWorkflow.Type exposing (..)
 import App.Model as Model exposing (..)
 import App.Msg exposing (..)
+import App.Ports exposing (..)
 import Array
 import Array.Extra as Array
 import Browser
@@ -218,7 +219,7 @@ update msg model =
                     , activeComputationWorkflow = newComputationWorkflow
                     , isInitialState = True
                 }
-            , cmd
+            , Cmd.batch [ cmd, centerCurrentTapeCell () ]
             )
 
         ProcessComputationWorkflow workflow ->
@@ -246,7 +247,7 @@ update msg model =
                             , activeComputationWorkflow = newComputationWorkflow
                             , isInitialState = False
                         }
-                    , cmd
+                    , Cmd.batch [ cmd, centerCurrentTapeCell () ]
                     )
 
                 Nothing ->
@@ -270,7 +271,7 @@ update msg model =
                             , activeComputationWorkflow = newComputationWorkflow
                             , isInitialState = List.isEmpty restPrevTurings
                         }
-                    , cmd
+                    , Cmd.batch [ cmd, centerCurrentTapeCell () ]
                     )
 
                 _ ->
@@ -364,7 +365,7 @@ stateAndTapeHtml : Model -> Html Msg
 stateAndTapeHtml model =
     let
         ( tapeSymbols, currentSymbolIndex ) =
-            Tape.toSymbolList 8 model.turing.tape
+            Tape.toSymbolList model.turing.tape
 
         isFadeoutState =
             model.activeComputationWorkflow.step == Just OldSymbolFadeout
@@ -372,27 +373,32 @@ stateAndTapeHtml model =
         isFadeinState =
             model.activeComputationWorkflow.step == Just NewSymbolFadein
 
-        lastAppliedRule =
-            List.getAt model.lastAppliedRuleIndex model.turing.rules
+        pendingRule =
+            List.getAt model.pendingRuleIndex model.turing.rules
 
         renderedState =
             if isFadeinState then
-                Maybe.unwrap model.turing.currentState (\r -> r.newState) lastAppliedRule
+                Maybe.unwrap model.turing.currentState (\r -> r.newState) pendingRule
 
             else
                 model.turing.currentState
 
+        tapePadding =
+            8
+
         tapeCells =
             tapeSymbols
+                |> List.padLeft tapePadding model.turing.tape.emptySymbol
+                |> List.padRight tapePadding model.turing.tape.emptySymbol
                 |> List.indexedMap
                     (\index symbol ->
                         let
                             isCurrent =
-                                index == currentSymbolIndex
+                                (index - tapePadding) == currentSymbolIndex
 
                             renderedSymbol =
                                 if isCurrent && isFadeinState then
-                                    Maybe.unwrap symbol (\r -> r.newSymbol) lastAppliedRule
+                                    Maybe.unwrap "?" (\r -> r.newSymbol) pendingRule
 
                                 else
                                     symbol
@@ -414,9 +420,11 @@ stateAndTapeHtml model =
             , onClick ToggleEditStateTape
             ]
             [ text renderedState ]
-        , div
-            [ class "tape", class "centered" ]
-            tapeCells
+        , div [ class "tape-wrapper" ]
+            [ div
+                [ class "tape" ]
+                tapeCells
+            ]
         ]
 
 

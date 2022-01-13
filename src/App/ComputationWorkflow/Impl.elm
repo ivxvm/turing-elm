@@ -4,8 +4,11 @@ import App.ComputationWorkflow.Step exposing (..)
 import App.ComputationWorkflow.Type exposing (..)
 import App.Model as Model exposing (..)
 import App.Msg exposing (..)
+import App.Ports as Ports
+import Core.Direction as Direction
 import Core.Turing as Turing
 import Delay
+import List.Extra as List
 import Maybe.Extra as Maybe
 import Task
 import Time
@@ -48,7 +51,10 @@ update workflow model =
                             , pendingRuleIndex = currentlyApplicableRuleIndex
                             , activeComputationWorkflow = workflow
                           }
-                        , Delay.after 250 (ProcessComputationWorkflow { workflow | step = Just OldSymbolFadeout })
+                        , Cmd.batch
+                            [ Ports.centerCurrentTapeCell ()
+                            , Delay.after 250 (ProcessComputationWorkflow { workflow | step = Just OldSymbolFadeout })
+                            ]
                         )
 
                     Nothing ->
@@ -75,6 +81,15 @@ update workflow model =
 
                         else
                             Delay.after 250 (ProcessComputationWorkflow { workflow | step = Just ComputeNextState })
+
+                    isLeftMove =
+                        List.getAt model.pendingRuleIndex model.turing.rules
+                            |> Maybe.map .moveDirection
+                            |> Maybe.filter (\d -> d == Direction.Left)
+                            |> Maybe.isJust
+
+                    shouldOffsetTape =
+                        isLeftMove && model.turing.tape.left == []
                 in
                 ( Model.invalidateEditFields
                     { model
@@ -86,7 +101,14 @@ update workflow model =
                         , prevAppliedRuleIndexes = model.lastAppliedRuleIndex :: model.prevAppliedRuleIndexes
                         , isInitialState = False
                     }
-                , cmd
+                , Cmd.batch
+                    [ cmd
+                    , if shouldOffsetTape then
+                        Ports.scrollTape 50
+
+                      else
+                        Cmd.none
+                    ]
                 )
 
             _ ->

@@ -7767,6 +7767,12 @@ var $author$project$Core$Turing$setTape = F2(
 			{tape: tape});
 	});
 var $author$project$Core$Turing$asTapeIn = $elm_community$basics_extra$Basics$Extra$flip($author$project$Core$Turing$setTape);
+var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $author$project$App$Ports$centerCurrentTapeCell = _Platform_outgoingPort(
+	'centerCurrentTapeCell',
+	function ($) {
+		return $elm$json$Json$Encode$null;
+	});
 var $elm_community$result_extra$Result$Extra$error = function (result) {
 	if (result.$ === 'Ok') {
 		return $elm$core$Maybe$Nothing;
@@ -8551,9 +8557,32 @@ var $andrewMacmurray$elm_delay$Delay$after = F2(
 			$elm$core$Basics$always(msg),
 			$elm$core$Process$sleep(time));
 	});
+var $elm_community$maybe_extra$Maybe$Extra$filter = F2(
+	function (f, m) {
+		if (m.$ === 'Just') {
+			var a = m.a;
+			return f(a) ? m : $elm$core$Maybe$Nothing;
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm_community$list_extra$List$Extra$getAt = F2(
+	function (idx, xs) {
+		return (idx < 0) ? $elm$core$Maybe$Nothing : $elm$core$List$head(
+			A2($elm$core$List$drop, idx, xs));
+	});
 var $author$project$Core$Turing$isHalted = function (turing) {
 	return turing.isFinalState(turing.currentState);
 };
+var $elm_community$maybe_extra$Maybe$Extra$isJust = function (m) {
+	if (m.$ === 'Nothing') {
+		return false;
+	} else {
+		return true;
+	}
+};
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $author$project$App$Ports$scrollTape = _Platform_outgoingPort('scrollTape', $elm$json$Json$Encode$int);
 var $author$project$App$ComputationWorkflow$Impl$update = F2(
 	function (workflow, model) {
 		if (!_Utils_eq(workflow.id, model.activeComputationWorkflow.id)) {
@@ -8577,15 +8606,20 @@ var $author$project$App$ComputationWorkflow$Impl$update = F2(
 										pendingRuleIndex: currentlyApplicableRuleIndex,
 										pendingTuring: A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, model.turing)
 									}),
-								A2(
-									$andrewMacmurray$elm_delay$Delay$after,
-									250,
-									$author$project$App$Msg$ProcessComputationWorkflow(
-										_Utils_update(
-											workflow,
-											{
-												step: $elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Step$OldSymbolFadeout)
-											}))));
+								$elm$core$Platform$Cmd$batch(
+									_List_fromArray(
+										[
+											$author$project$App$Ports$centerCurrentTapeCell(_Utils_Tuple0),
+											A2(
+											$andrewMacmurray$elm_delay$Delay$after,
+											250,
+											$author$project$App$Msg$ProcessComputationWorkflow(
+												_Utils_update(
+													workflow,
+													{
+														step: $elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Step$OldSymbolFadeout)
+													})))
+										])));
 						} else {
 							return _Utils_Tuple2(
 								model,
@@ -8629,6 +8663,19 @@ var $author$project$App$ComputationWorkflow$Impl$update = F2(
 					default:
 						var _v7 = _v0.a;
 						var newTuring = A2($elm$core$Maybe$withDefault, model.turing, model.pendingTuring);
+						var isLeftMove = $elm_community$maybe_extra$Maybe$Extra$isJust(
+							A2(
+								$elm_community$maybe_extra$Maybe$Extra$filter,
+								function (d) {
+									return _Utils_eq(d, $author$project$Core$Direction$Left);
+								},
+								A2(
+									$elm$core$Maybe$map,
+									function ($) {
+										return $.moveDirection;
+									},
+									A2($elm_community$list_extra$List$Extra$getAt, model.pendingRuleIndex, model.turing.rules))));
+						var shouldOffsetTape = isLeftMove && _Utils_eq(model.turing.tape.left, _List_Nil);
 						var cmd = $author$project$Core$Turing$isHalted(newTuring) ? A2($andrewMacmurray$elm_delay$Delay$after, 0, $author$project$App$Msg$ToggleComputation) : A2(
 							$andrewMacmurray$elm_delay$Delay$after,
 							250,
@@ -8651,7 +8698,12 @@ var $author$project$App$ComputationWorkflow$Impl$update = F2(
 										prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
 										turing: newTuring
 									})),
-							cmd);
+							$elm$core$Platform$Cmd$batch(
+								_List_fromArray(
+									[
+										cmd,
+										shouldOffsetTape ? $author$project$App$Ports$scrollTape(50) : $elm$core$Platform$Cmd$none
+									])));
 				}
 			} else {
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -8800,7 +8852,12 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{activeComputationWorkflow: newComputationWorkflow, isInitialState: true, lastAppliedRuleIndex: -1, pendingRuleIndex: -1, pendingTuring: $elm$core$Maybe$Nothing, prevAppliedRuleIndexes: _List_Nil, prevTurings: _List_Nil, turing: $author$project$Main$busyBeaver})),
-					cmd);
+					$elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								cmd,
+								$author$project$App$Ports$centerCurrentTapeCell(_Utils_Tuple0)
+							])));
 			case 'ProcessComputationWorkflow':
 				var workflow = msg.a;
 				return A2($author$project$App$ComputationWorkflow$Impl$update, workflow, model);
@@ -8831,7 +8888,12 @@ var $author$project$Main$update = F2(
 									prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
 									turing: newTuring
 								})),
-						cmd);
+						$elm$core$Platform$Cmd$batch(
+							_List_fromArray(
+								[
+									cmd,
+									$author$project$App$Ports$centerCurrentTapeCell(_Utils_Tuple0)
+								])));
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
@@ -8861,7 +8923,12 @@ var $author$project$Main$update = F2(
 									prevTurings: restPrevTurings,
 									turing: prevTuring
 								})),
-						cmd);
+						$elm$core$Platform$Cmd$batch(
+							_List_fromArray(
+								[
+									cmd,
+									$author$project$App$Ports$centerCurrentTapeCell(_Utils_Tuple0)
+								])));
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
@@ -9050,13 +9117,6 @@ var $rtfeldman$elm_css$VirtualDom$Styled$attribute = F2(
 	});
 var $rtfeldman$elm_css$Html$Styled$Attributes$attribute = $rtfeldman$elm_css$VirtualDom$Styled$attribute;
 var $rtfeldman$elm_css$Html$Styled$input = $rtfeldman$elm_css$Html$Styled$node('input');
-var $elm_community$maybe_extra$Maybe$Extra$isJust = function (m) {
-	if (m.$ === 'Nothing') {
-		return false;
-	} else {
-		return true;
-	}
-};
 var $rtfeldman$elm_css$Html$Styled$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
@@ -9319,27 +9379,23 @@ var $author$project$Main$rulesListHtml = function (model) {
 			]));
 };
 var $author$project$App$Msg$ToggleEditStateTape = {$: 'ToggleEditStateTape'};
-var $elm_community$list_extra$List$Extra$getAt = F2(
-	function (idx, xs) {
-		return (idx < 0) ? $elm$core$Maybe$Nothing : $elm$core$List$head(
-			A2($elm$core$List$drop, idx, xs));
-	});
-var $author$project$Main$tapeCellHtml = F4(
-	function (symbol, isCurrent, isFadingOut, isFadingIn) {
-		return A2(
-			$rtfeldman$elm_css$Html$Styled$div,
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('tape-cell'),
-					$rtfeldman$elm_css$Html$Styled$Attributes$class('centered'),
-					A2($author$project$Utils$AttributeExtra$classIf, isCurrent, 'current'),
-					A2($author$project$Utils$AttributeExtra$classIf, isFadingOut, 'fadeout'),
-					A2($author$project$Utils$AttributeExtra$classIf, isFadingIn, 'fadein')
-				]),
-			_List_fromArray(
-				[
-					$rtfeldman$elm_css$Html$Styled$text(symbol)
-				]));
+var $author$project$Utils$ListExtra$padLeft = F3(
+	function (count, padElem, list) {
+		padLeft:
+		while (true) {
+			if (!count) {
+				return list;
+			} else {
+				var n = count;
+				var $temp$count = n - 1,
+					$temp$padElem = padElem,
+					$temp$list = A2($elm$core$List$cons, padElem, list);
+				count = $temp$count;
+				padElem = $temp$padElem;
+				list = $temp$list;
+				continue padLeft;
+			}
+		}
 	});
 var $elm$core$List$repeatHelp = F3(
 	function (result, n, value) {
@@ -9362,29 +9418,44 @@ var $elm$core$List$repeat = F2(
 	function (n, value) {
 		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
 	});
-var $author$project$Core$Tape$toSymbolList = F2(
-	function (minSideSize, tape) {
-		var rightPaddingSize = A2(
-			$elm$core$Basics$max,
-			0,
-			minSideSize - $elm$core$List$length(tape.right));
-		var leftLen = $elm$core$List$length(tape.left);
-		var leftPaddingSize = A2($elm$core$Basics$max, 0, minSideSize - leftLen);
-		var symbols = $elm$core$List$concat(
+var $author$project$Utils$ListExtra$padRight = F3(
+	function (count, padElem, list) {
+		return _Utils_ap(
+			list,
+			A2($elm$core$List$repeat, count, padElem));
+	});
+var $author$project$Main$tapeCellHtml = F4(
+	function (symbol, isCurrent, isFadingOut, isFadingIn) {
+		return A2(
+			$rtfeldman$elm_css$Html$Styled$div,
 			_List_fromArray(
 				[
-					A2($elm$core$List$repeat, leftPaddingSize, tape.emptySymbol),
-					tape.left,
-					_List_fromArray(
-					[tape.currentSymbol]),
-					tape.right,
-					A2($elm$core$List$repeat, rightPaddingSize, tape.emptySymbol)
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('tape-cell'),
+					$rtfeldman$elm_css$Html$Styled$Attributes$class('centered'),
+					A2($author$project$Utils$AttributeExtra$classIf, isCurrent, 'current'),
+					A2($author$project$Utils$AttributeExtra$classIf, isFadingOut, 'fadeout'),
+					A2($author$project$Utils$AttributeExtra$classIf, isFadingIn, 'fadein')
+				]),
+			_List_fromArray(
+				[
+					$rtfeldman$elm_css$Html$Styled$text(symbol)
 				]));
-		var currentSymbolIndex = leftPaddingSize + leftLen;
-		return _Utils_Tuple2(symbols, currentSymbolIndex);
 	});
+var $author$project$Core$Tape$toSymbolList = function (tape) {
+	var symbols = $elm$core$List$concat(
+		_List_fromArray(
+			[
+				tape.left,
+				_List_fromArray(
+				[tape.currentSymbol]),
+				tape.right
+			]));
+	var currentSymbolIndex = $elm$core$List$length(tape.left);
+	return _Utils_Tuple2(symbols, currentSymbolIndex);
+};
 var $author$project$Main$stateAndTapeHtml = function (model) {
-	var lastAppliedRule = A2($elm_community$list_extra$List$Extra$getAt, model.lastAppliedRuleIndex, model.turing.rules);
+	var tapePadding = 8;
+	var pendingRule = A2($elm_community$list_extra$List$Extra$getAt, model.pendingRuleIndex, model.turing.rules);
 	var isFadeoutState = _Utils_eq(
 		model.activeComputationWorkflow.step,
 		$elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Step$OldSymbolFadeout));
@@ -9397,25 +9468,29 @@ var $author$project$Main$stateAndTapeHtml = function (model) {
 		function (r) {
 			return r.newState;
 		},
-		lastAppliedRule) : model.turing.currentState;
-	var _v0 = A2($author$project$Core$Tape$toSymbolList, 8, model.turing.tape);
+		pendingRule) : model.turing.currentState;
+	var _v0 = $author$project$Core$Tape$toSymbolList(model.turing.tape);
 	var tapeSymbols = _v0.a;
 	var currentSymbolIndex = _v0.b;
 	var tapeCells = A2(
 		$elm$core$List$indexedMap,
 		F2(
 			function (index, symbol) {
-				var isCurrent = _Utils_eq(index, currentSymbolIndex);
+				var isCurrent = _Utils_eq(index - tapePadding, currentSymbolIndex);
 				var renderedSymbol = (isCurrent && isFadeinState) ? A3(
 					$elm_community$maybe_extra$Maybe$Extra$unwrap,
-					symbol,
+					'?',
 					function (r) {
 						return r.newSymbol;
 					},
-					lastAppliedRule) : symbol;
+					pendingRule) : symbol;
 				return A4($author$project$Main$tapeCellHtml, renderedSymbol, isCurrent, isCurrent && isFadeoutState, isCurrent && isFadeinState);
 			}),
-		tapeSymbols);
+		A3(
+			$author$project$Utils$ListExtra$padRight,
+			tapePadding,
+			model.turing.tape.emptySymbol,
+			A3($author$project$Utils$ListExtra$padLeft, tapePadding, model.turing.tape.emptySymbol, tapeSymbols)));
 	return A2(
 		$rtfeldman$elm_css$Html$Styled$div,
 		_List_fromArray(
@@ -9443,10 +9518,18 @@ var $author$project$Main$stateAndTapeHtml = function (model) {
 				$rtfeldman$elm_css$Html$Styled$div,
 				_List_fromArray(
 					[
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('tape'),
-						$rtfeldman$elm_css$Html$Styled$Attributes$class('centered')
+						$rtfeldman$elm_css$Html$Styled$Attributes$class('tape-wrapper')
 					]),
-				tapeCells)
+				_List_fromArray(
+					[
+						A2(
+						$rtfeldman$elm_css$Html$Styled$div,
+						_List_fromArray(
+							[
+								$rtfeldman$elm_css$Html$Styled$Attributes$class('tape')
+							]),
+						tapeCells)
+					]))
 			]));
 };
 var $author$project$Main$view = function (model) {

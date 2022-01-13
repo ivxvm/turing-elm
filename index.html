@@ -9,5 +9,23 @@
         var app = Elm.Main.init({
             node: document.getElementById("app")
         });
+        app.ports.centerCurrentTapeCell.subscribe(() => {
+            setTimeout(() => {
+                const tape = document.querySelector(".tape");
+                const currentTapeCell = tape.querySelector(".current");
+                tape.scrollTo({
+                    top: 0,
+                    left: currentTapeCell.offsetLeft - currentTapeCell.clientWidth * 3,
+                    behavior: "smooth"
+                });
+            }, 0);
+        });
+        app.ports.scrollTape.subscribe((offset) => {
+            const tape = document.querySelector(".tape");
+            tape.scrollTo({
+                top: 0,
+                left: tape.scrollLeft + offset
+            });
+        });
     </script>
 </body>

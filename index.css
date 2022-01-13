@@ -76,17 +76,15 @@ input:focus {
     color: transparent;
 }
 
-.tape {
-    mix-blend-mode: hard-light;
+.tape-wrapper {
     display: flex;
-    flex-direction: row;
-    overflow: hidden;
-    margin-left: 8px;
-    margin-right: 8px;
+    align-items: center;
+    mix-blend-mode: hard-light;
     position: relative;
+    overflow: hidden;
 }
 
-.tape::after {
+.tape-wrapper::after {
     position: absolute;
     content: "";
     left: 0px;
@@ -95,6 +93,15 @@ input:focus {
     width: 100%;
     background: linear-gradient(to right, gray 0%, transparent 30%, transparent 70%, gray);
     pointer-events: none;
+}
+
+.tape {
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    margin-left: 8px;
+    margin-right: 8px;
+    position: relative;
 }
 
 .tape-cell {
