@@ -1,8 +1,8 @@
 module App.Model exposing (..)
 
-import App.ComputationWorkflow.Type exposing (..)
+import App.ComputationWorkflow.Type as ComputationWorkflow exposing (..)
 import Array exposing (Array)
-import Core.Rule exposing (..)
+import Core.Rule as Rule exposing (..)
 import Core.Tape as Tape
 import Core.Turing exposing (..)
 
@@ -27,6 +27,33 @@ type alias Model =
     , isInitialState : Bool
     , isEditingStateAndTape : Bool
     }
+
+
+init : Turing String String -> ( Model, Cmd msg )
+init turing =
+    ( { ruleStrings =
+            turing.rules
+                |> List.map (Rule.toString identity identity)
+      , ruleValidationErrors = Array.repeat (List.length turing.rules) Nothing
+      , currentStateString = turing.currentState
+      , currentStateValidationError = Nothing
+      , currentEmptySymbolString = turing.tape.emptySymbol
+      , currentEmptySymbolValidationError = Nothing
+      , currentTapeString = Tape.toTapeString identity turing.tape
+      , currentTapeValidationError = Nothing
+      , turing = turing
+      , pendingTuring = Nothing
+      , prevTurings = []
+      , lastAppliedRuleIndex = -1
+      , pendingRuleIndex = -1
+      , prevAppliedRuleIndexes = []
+      , activeComputationWorkflow = ComputationWorkflow.init
+      , isRunning = False
+      , isInitialState = True
+      , isEditingStateAndTape = False
+      }
+    , Cmd.none
+    )
 
 
 validateStateString : String -> Maybe String

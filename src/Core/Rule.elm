@@ -13,16 +13,16 @@ type alias Rule a s =
 
 
 toString : (a -> String) -> (s -> String) -> Rule a s -> String
-toString ap sp rule =
+toString symbolToString stateToString rule =
     String.join " "
-        [ sp rule.currentState
-        , ap rule.currentSymbol
-        , ap rule.newSymbol
-        , sp rule.newState
+        [ stateToString rule.currentState
+        , symbolToString rule.currentSymbol
+        , symbolToString rule.newSymbol
+        , stateToString rule.newState
         , Direction.toString rule.moveDirection
         ]
 
 
 fromString : (String -> a) -> (String -> s) -> String -> Maybe (Rule a s)
-fromString ap sp string =
+fromString symbolFromString stateFromString string =
     Nothing

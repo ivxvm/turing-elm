@@ -14,11 +14,6 @@ import Task
 import Time
 
 
-init : ComputationWorkflow
-init =
-    { id = 0, step = Nothing }
-
-
 reset : ComputationWorkflow -> ComputationWorkflow
 reset workflow =
     { id = workflow.id + 1, step = Nothing }
