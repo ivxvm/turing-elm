@@ -66,32 +66,28 @@ writeSymbol newSymbol tape =
 
 
 toSymbolList : Int -> Tape a -> ( List a, Int )
-toSymbolList minSize tape =
+toSymbolList minSideSize tape =
     let
         leftLen =
             List.length tape.left
 
-        sizeToPad =
-            minSize - leftLen - 1 - List.length tape.right
+        leftPaddingSize =
+            max 0 (minSideSize - leftLen)
 
-        halfPadding =
-            sizeToPad // 2
-
-        paddingSublist =
-            List.repeat halfPadding tape.emptySymbol
+        rightPaddingSize =
+            max 0 (minSideSize - List.length tape.right)
 
         symbols =
             List.concat
-                [ paddingSublist
+                [ List.repeat leftPaddingSize tape.emptySymbol
                 , tape.left
                 , [ tape.currentSymbol ]
                 , tape.right
-                , paddingSublist
-                , List.repeat (modBy sizeToPad 2) tape.emptySymbol
+                , List.repeat rightPaddingSize tape.emptySymbol
                 ]
 
         currentSymbolIndex =
-            halfPadding + leftLen
+            leftPaddingSize + leftLen
     in
     ( symbols, currentSymbolIndex )
 

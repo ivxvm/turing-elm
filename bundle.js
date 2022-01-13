@@ -9363,26 +9363,24 @@ var $elm$core$List$repeat = F2(
 		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
 	});
 var $author$project$Core$Tape$toSymbolList = F2(
-	function (minSize, tape) {
+	function (minSideSize, tape) {
+		var rightPaddingSize = A2(
+			$elm$core$Basics$max,
+			0,
+			minSideSize - $elm$core$List$length(tape.right));
 		var leftLen = $elm$core$List$length(tape.left);
-		var sizeToPad = ((minSize - leftLen) - 1) - $elm$core$List$length(tape.right);
-		var halfPadding = (sizeToPad / 2) | 0;
-		var paddingSublist = A2($elm$core$List$repeat, halfPadding, tape.emptySymbol);
+		var leftPaddingSize = A2($elm$core$Basics$max, 0, minSideSize - leftLen);
 		var symbols = $elm$core$List$concat(
 			_List_fromArray(
 				[
-					paddingSublist,
+					A2($elm$core$List$repeat, leftPaddingSize, tape.emptySymbol),
 					tape.left,
 					_List_fromArray(
 					[tape.currentSymbol]),
 					tape.right,
-					paddingSublist,
-					A2(
-					$elm$core$List$repeat,
-					A2($elm$core$Basics$modBy, sizeToPad, 2),
-					tape.emptySymbol)
+					A2($elm$core$List$repeat, rightPaddingSize, tape.emptySymbol)
 				]));
-		var currentSymbolIndex = halfPadding + leftLen;
+		var currentSymbolIndex = leftPaddingSize + leftLen;
 		return _Utils_Tuple2(symbols, currentSymbolIndex);
 	});
 var $author$project$Main$stateAndTapeHtml = function (model) {
@@ -9400,7 +9398,7 @@ var $author$project$Main$stateAndTapeHtml = function (model) {
 			return r.newState;
 		},
 		lastAppliedRule) : model.turing.currentState;
-	var _v0 = A2($author$project$Core$Tape$toSymbolList, 24, model.turing.tape);
+	var _v0 = A2($author$project$Core$Tape$toSymbolList, 8, model.turing.tape);
 	var tapeSymbols = _v0.a;
 	var currentSymbolIndex = _v0.b;
 	var tapeCells = A2(

@@ -189,7 +189,6 @@ input:focus {
 
 .edit-state-and-tape-container input + span {
     position: relative;
-
 }
 
 .edit-state-and-tape-container input + span::before {

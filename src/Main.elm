@@ -364,7 +364,7 @@ stateAndTapeHtml : Model -> Html Msg
 stateAndTapeHtml model =
     let
         ( tapeSymbols, currentSymbolIndex ) =
-            Tape.toSymbolList 24 model.turing.tape
+            Tape.toSymbolList 8 model.turing.tape
 
         isFadeoutState =
             model.activeComputationWorkflow.step == Just OldSymbolFadeout
