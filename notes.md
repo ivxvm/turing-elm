@@ -9,3 +9,9 @@ Elm doesn't seem to have module reexports, neither an alternative to folder/inde
 Elm doesn't have nested record update syntax
 this works: { obj | field = newValue }
 this doesn't: { obj | field = { obj.field | other = ... } }
+
+There is a neat idiom for field setters that plays well with pipeline operator (|>):
+setSomething : FieldType -> RecordType -> RecordType
+setSomething ... = ...
+asSomethingIn : RecordType -> FieldType -> RecordType
+asSomethingIn = flip setSomething
