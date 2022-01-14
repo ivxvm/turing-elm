@@ -117,6 +117,7 @@ update msg model =
                 , currentTapeValidationError = Maybe.or validationError (Result.error newTape)
                 , turing =
                     newTape
+                        |> Result.map KeyedTape.lookahead
                         |> Result.withDefault model.turing.tape
                         |> asTapeIn model.turing
               }

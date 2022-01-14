@@ -8861,7 +8861,10 @@ var $author$project$App$Update$update = F2(
 							turing: A2(
 								$author$project$Core$Turing$asTapeIn,
 								model.turing,
-								A2($elm$core$Result$withDefault, model.turing.tape, newTape))
+								A2(
+									$elm$core$Result$withDefault,
+									model.turing.tape,
+									A2($elm$core$Result$map, $author$project$Core$KeyedTape$lookahead, newTape)))
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'ToggleEditStateTape':
