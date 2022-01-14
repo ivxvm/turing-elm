@@ -4,11 +4,9 @@ import App.ComputationWorkflow.Step exposing (..)
 import App.ComputationWorkflow.Type exposing (..)
 import App.Model as Model exposing (..)
 import App.Msg exposing (..)
-import Core.Direction exposing (..)
 import Core.KeyedTape as KeyedTape
 import Core.Turing as Turing
 import Delay
-import Maybe.Extra as Maybe
 import Task
 import Time
 

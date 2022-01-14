@@ -1,7 +1,6 @@
 module App.Msg exposing (..)
 
 import App.ComputationWorkflow.Type exposing (..)
-import App.Model exposing (..)
 
 
 type Msg

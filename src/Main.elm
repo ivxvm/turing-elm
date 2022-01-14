@@ -7,7 +7,7 @@ import App.Update as App
 import App.UpdateScroll exposing (withScrollUpdate)
 import App.View as App
 import Browser
-import Html.Styled exposing (..)
+import Html.Styled exposing (toUnstyled)
 
 
 main : Program () Model Msg

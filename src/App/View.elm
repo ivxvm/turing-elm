@@ -4,22 +4,15 @@ import App.ComputationWorkflow.Step exposing (..)
 import App.Model exposing (..)
 import App.Msg exposing (..)
 import Array
-import Array.Extra as Array
-import Core.Direction exposing (Direction(..))
 import Core.KeyedTape as KeyedTape exposing (..)
 import Core.Turing as Turing exposing (..)
-import Css exposing (..)
-import Css.Global exposing (withAttribute)
-import Delay exposing (..)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Html.Styled.Events exposing (onClick, onInput)
 import Html.Styled.Keyed as Keyed
-import List
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Utils.AttributeExtra exposing (..)
-import Utils.ListExtra as List
 
 
 rulesListEntryHtml : Model -> Int -> String -> Html Msg
