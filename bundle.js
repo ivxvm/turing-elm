@@ -5232,12 +5232,145 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
+var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $author$project$App$Ports$centerCurrentTapeCell = _Platform_outgoingPort(
+	'centerCurrentTapeCell',
+	function ($) {
+		return $elm$json$Json$Encode$null;
+	});
 var $author$project$App$ComputationWorkflow$Type$init = {id: 0, step: $elm$core$Maybe$Nothing};
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
+	});
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
+};
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $author$project$Core$Tape$toTapeString = F2(
+	function (symToString, tape) {
+		return A2(
+			$elm$core$String$join,
+			' ',
+			$elm$core$List$concat(
+				_List_fromArray(
+					[
+						$elm$core$List$reverse(
+						A2($elm$core$List$map, symToString, tape.left)),
+						_List_fromArray(
+						[
+							$elm$core$String$concat(
+							_List_fromArray(
+								[
+									'[',
+									symToString(tape.currentSymbol),
+									']'
+								]))
+						]),
+						A2($elm$core$List$map, symToString, tape.right)
+					])));
+	});
+var $author$project$Core$KeyedTape$toTapeString = $author$project$Core$Tape$toTapeString;
+var $author$project$App$Model$invalidateEditFields = function (model) {
+	return _Utils_update(
+		model,
+		{
+			currentEmptySymbolString: model.turing.tape.emptySymbol,
+			currentEmptySymbolValidationError: $elm$core$Maybe$Nothing,
+			currentStateString: model.turing.currentState,
+			currentStateValidationError: $elm$core$Maybe$Nothing,
+			currentTapeString: A2($author$project$Core$KeyedTape$toTapeString, $elm$core$Basics$identity, model.turing.tape),
+			currentTapeValidationError: $elm$core$Maybe$Nothing
+		});
+};
+var $author$project$Core$Direction$Left = {$: 'Left'};
+var $author$project$Core$Direction$Right = {$: 'Right'};
+var $author$project$Core$Tape$shiftLeft = function (tape) {
+	var _v0 = tape.left;
+	if (_v0.b) {
+		var x = _v0.a;
+		var xs = _v0.b;
+		return _Utils_update(
+			tape,
+			{
+				currentSymbol: x,
+				left: xs,
+				right: A2($elm$core$List$cons, tape.currentSymbol, tape.right)
+			});
+	} else {
+		return _Utils_update(
+			tape,
+			{
+				currentSymbol: tape.emptySymbol,
+				right: A2($elm$core$List$cons, tape.currentSymbol, tape.right)
+			});
+	}
+};
+var $author$project$Core$Tape$shiftRight = function (tape) {
+	var _v0 = tape.right;
+	if (_v0.b) {
+		var x = _v0.a;
+		var xs = _v0.b;
+		return _Utils_update(
+			tape,
+			{
+				currentSymbol: x,
+				left: A2($elm$core$List$cons, tape.currentSymbol, tape.left),
+				right: xs
+			});
+	} else {
+		return _Utils_update(
+			tape,
+			{
+				currentSymbol: tape.emptySymbol,
+				left: A2($elm$core$List$cons, tape.currentSymbol, tape.left)
+			});
+	}
+};
+var $author$project$Core$Tape$shift = F2(
+	function (direction, tape) {
+		if (direction.$ === 'Left') {
+			return $author$project$Core$Tape$shiftLeft(tape);
+		} else {
+			return $author$project$Core$Tape$shiftRight(tape);
+		}
+	});
+var $author$project$Core$KeyedTape$shift = F2(
+	function (dir, tape) {
+		var shiftedKeysTape = A2($author$project$Core$Tape$shift, dir, tape.keysTape);
+		var newTape = A2($author$project$Core$Tape$shift, dir, tape);
+		var needsNewKey = _Utils_eq(shiftedKeysTape.currentSymbol, shiftedKeysTape.emptySymbol);
+		var newKeysCounter = needsNewKey ? (tape.keysCounter + 1) : tape.keysCounter;
+		var newKeysTape = _Utils_update(
+			shiftedKeysTape,
+			{
+				currentSymbol: needsNewKey ? tape.keysCounter : shiftedKeysTape.currentSymbol
+			});
+		return _Utils_update(
+			newTape,
+			{keysCounter: newKeysCounter, keysTape: newKeysTape});
+	});
+var $author$project$Core$KeyedTape$lookahead = function (tape) {
+	return A2(
+		$author$project$Core$KeyedTape$shift,
+		$author$project$Core$Direction$Right,
+		A2(
+			$author$project$Core$KeyedTape$shift,
+			$author$project$Core$Direction$Left,
+			A2(
+				$author$project$Core$KeyedTape$shift,
+				$author$project$Core$Direction$Left,
+				A2($author$project$Core$KeyedTape$shift, $author$project$Core$Direction$Right, tape))));
+};
 var $elm$core$Basics$negate = function (n) {
 	return -n;
 };
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm$core$Array$repeat = F2(
 	function (n, e) {
 		return A2(
@@ -5268,71 +5401,40 @@ var $author$project$Core$Rule$toString = F3(
 					$author$project$Core$Direction$toString(rule.moveDirection)
 				]));
 	});
-var $elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
-		}
-	});
-var $elm$core$List$concat = function (lists) {
-	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
-};
-var $elm$core$String$concat = function (strings) {
-	return A2($elm$core$String$join, '', strings);
-};
-var $author$project$Core$Tape$toTapeString = F2(
-	function (symToString, tape) {
-		return A2(
-			$elm$core$String$join,
-			' ',
-			$elm$core$List$concat(
-				_List_fromArray(
-					[
-						A2($elm$core$List$map, symToString, tape.left),
-						_List_fromArray(
-						[
-							$elm$core$String$concat(
-							_List_fromArray(
-								[
-									'[',
-									symToString(tape.currentSymbol),
-									']'
-								]))
-						]),
-						A2($elm$core$List$map, symToString, tape.right)
-					])));
-	});
 var $author$project$App$Model$init = function (turing) {
 	return _Utils_Tuple2(
-		{
-			activeComputationWorkflow: $author$project$App$ComputationWorkflow$Type$init,
-			currentEmptySymbolString: turing.tape.emptySymbol,
-			currentEmptySymbolValidationError: $elm$core$Maybe$Nothing,
-			currentStateString: turing.currentState,
-			currentStateValidationError: $elm$core$Maybe$Nothing,
-			currentTapeString: A2($author$project$Core$Tape$toTapeString, $elm$core$Basics$identity, turing.tape),
-			currentTapeValidationError: $elm$core$Maybe$Nothing,
-			isEditingStateAndTape: false,
-			isInitialState: true,
-			isRunning: false,
-			lastAppliedRuleIndex: -1,
-			pendingRuleIndex: -1,
-			pendingTuring: $elm$core$Maybe$Nothing,
-			prevAppliedRuleIndexes: _List_Nil,
-			prevTurings: _List_Nil,
-			ruleStrings: A2(
-				$elm$core$List$map,
-				A2($author$project$Core$Rule$toString, $elm$core$Basics$identity, $elm$core$Basics$identity),
-				turing.rules),
-			ruleValidationErrors: A2(
-				$elm$core$Array$repeat,
-				$elm$core$List$length(turing.rules),
-				$elm$core$Maybe$Nothing),
-			turing: turing
-		},
-		$elm$core$Platform$Cmd$none);
+		$author$project$App$Model$invalidateEditFields(
+			{
+				activeComputationWorkflow: $author$project$App$ComputationWorkflow$Type$init,
+				currentEmptySymbolString: '',
+				currentEmptySymbolValidationError: $elm$core$Maybe$Nothing,
+				currentStateString: '',
+				currentStateValidationError: $elm$core$Maybe$Nothing,
+				currentTapeString: '',
+				currentTapeValidationError: $elm$core$Maybe$Nothing,
+				isEditingStateAndTape: false,
+				isInitialState: true,
+				isRunning: false,
+				lastAppliedRuleIndex: -1,
+				pendingRuleIndex: -1,
+				pendingTuring: $elm$core$Maybe$Nothing,
+				prevAppliedRuleIndexes: _List_Nil,
+				prevTurings: _List_Nil,
+				ruleStrings: A2(
+					$elm$core$List$map,
+					A2($author$project$Core$Rule$toString, $elm$core$Basics$identity, $elm$core$Basics$identity),
+					turing.rules),
+				ruleValidationErrors: A2(
+					$elm$core$Array$repeat,
+					$elm$core$List$length(turing.rules),
+					$elm$core$Maybe$Nothing),
+				turing: _Utils_update(
+					turing,
+					{
+						tape: $author$project$Core$KeyedTape$lookahead(turing.tape)
+					})
+			}),
+		$author$project$App$Ports$centerCurrentTapeCell(_Utils_Tuple0));
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
@@ -7653,12 +7755,38 @@ var $rtfeldman$elm_css$VirtualDom$Styled$toUnstyled = function (vdom) {
 	}
 };
 var $rtfeldman$elm_css$Html$Styled$toUnstyled = $rtfeldman$elm_css$VirtualDom$Styled$toUnstyled;
-var $author$project$Core$Direction$Left = {$: 'Left'};
-var $author$project$Core$Direction$Right = {$: 'Right'};
 var $author$project$Core$Rule$Rule = F5(
 	function (currentState, currentSymbol, newSymbol, newState, moveDirection) {
 		return {currentState: currentState, currentSymbol: currentSymbol, moveDirection: moveDirection, newState: newState, newSymbol: newSymbol};
 	});
+var $author$project$Core$KeyedTape$fromTape = function (tape) {
+	var leftLen = $elm$core$List$length(tape.left);
+	return {
+		currentSymbol: tape.currentSymbol,
+		emptySymbol: tape.emptySymbol,
+		keysCounter: (leftLen + $elm$core$List$length(tape.right)) + 1,
+		keysTape: {
+			currentSymbol: leftLen,
+			emptySymbol: -1,
+			left: A2(
+				$elm$core$List$indexedMap,
+				F2(
+					function (i, _v0) {
+						return i;
+					}),
+				tape.left),
+			right: A2(
+				$elm$core$List$indexedMap,
+				F2(
+					function (i, _v1) {
+						return (leftLen + i) + 1;
+					}),
+				tape.right)
+		},
+		left: tape.left,
+		right: tape.right
+	};
+};
 var $author$project$App$Turing$BusyBeaver$turing = {
 	currentState: 'A',
 	isFinalState: function (s) {
@@ -7673,64 +7801,16 @@ var $author$project$App$Turing$BusyBeaver$turing = {
 			A5($author$project$Core$Rule$Rule, 'C', '0', '1', 'B', $author$project$Core$Direction$Left),
 			A5($author$project$Core$Rule$Rule, 'C', '1', '1', 'X', $author$project$Core$Direction$Right)
 		]),
-	tape: {currentSymbol: '0', emptySymbol: '0', left: _List_Nil, right: _List_Nil}
+	tape: $author$project$Core$KeyedTape$fromTape(
+		{currentSymbol: '0', emptySymbol: '0', left: _List_Nil, right: _List_Nil})
 };
-var $author$project$Core$Tape$shiftLeft = function (tape) {
-	var _v0 = tape.left;
-	if (_v0.b) {
-		var x = _v0.a;
-		var xs = _v0.b;
-		return _Utils_update(
-			tape,
-			{
-				currentSymbol: x,
-				left: xs,
-				right: A2($elm$core$List$cons, tape.currentSymbol, tape.right)
-			});
-	} else {
-		return _Utils_update(
-			tape,
-			{
-				currentSymbol: tape.emptySymbol,
-				right: A2($elm$core$List$cons, tape.currentSymbol, tape.right)
-			});
-	}
-};
-var $author$project$Core$Tape$shiftRight = function (tape) {
-	var _v0 = tape.right;
-	if (_v0.b) {
-		var x = _v0.a;
-		var xs = _v0.b;
-		return _Utils_update(
-			tape,
-			{
-				currentSymbol: x,
-				left: A2($elm$core$List$cons, tape.currentSymbol, tape.left),
-				right: xs
-			});
-	} else {
-		return _Utils_update(
-			tape,
-			{
-				currentSymbol: tape.emptySymbol,
-				left: A2($elm$core$List$cons, tape.currentSymbol, tape.left)
-			});
-	}
-};
-var $author$project$Core$Tape$shift = F2(
-	function (direction, tape) {
-		if (direction.$ === 'Left') {
-			return $author$project$Core$Tape$shiftLeft(tape);
-		} else {
-			return $author$project$Core$Tape$shiftRight(tape);
-		}
-	});
 var $author$project$Core$Tape$writeSymbol = F2(
 	function (newSymbol, tape) {
 		return _Utils_update(
 			tape,
 			{currentSymbol: newSymbol});
 	});
+var $author$project$Core$KeyedTape$writeSymbol = $author$project$Core$Tape$writeSymbol;
 var $author$project$Core$Turing$applyRule = F2(
 	function (_v0, turing) {
 		var currentState = _v0.currentState;
@@ -7744,9 +7824,9 @@ var $author$project$Core$Turing$applyRule = F2(
 				{
 					currentState: newState,
 					tape: A2(
-						$author$project$Core$Tape$shift,
+						$author$project$Core$KeyedTape$shift,
 						moveDirection,
-						A2($author$project$Core$Tape$writeSymbol, newSymbol, turing.tape))
+						A2($author$project$Core$KeyedTape$writeSymbol, newSymbol, turing.tape))
 				}));
 	});
 var $elm_community$basics_extra$Basics$Extra$flip = F3(
@@ -7759,7 +7839,8 @@ var $author$project$Core$Tape$setEmptySymbol = F2(
 			tape,
 			{emptySymbol: symbol});
 	});
-var $author$project$Core$Tape$asEmptySymbolIn = $elm_community$basics_extra$Basics$Extra$flip($author$project$Core$Tape$setEmptySymbol);
+var $author$project$Core$KeyedTape$setEmptySymbol = $author$project$Core$Tape$setEmptySymbol;
+var $author$project$Core$KeyedTape$asEmptySymbolIn = $elm_community$basics_extra$Basics$Extra$flip($author$project$Core$KeyedTape$setEmptySymbol);
 var $author$project$Core$Turing$setTape = F2(
 	function (tape, turing) {
 		return _Utils_update(
@@ -7767,12 +7848,6 @@ var $author$project$Core$Turing$setTape = F2(
 			{tape: tape});
 	});
 var $author$project$Core$Turing$asTapeIn = $elm_community$basics_extra$Basics$Extra$flip($author$project$Core$Turing$setTape);
-var $elm$json$Json$Encode$null = _Json_encodeNull;
-var $author$project$App$Ports$centerCurrentTapeCell = _Platform_outgoingPort(
-	'centerCurrentTapeCell',
-	function ($) {
-		return $elm$json$Json$Encode$null;
-	});
 var $elm_community$result_extra$Result$Extra$error = function (result) {
 	if (result.$ === 'Ok') {
 		return $elm$core$Maybe$Nothing;
@@ -8009,18 +8084,13 @@ var $author$project$Core$Tape$fromString = F3(
 				},
 				A2($elm$core$Result$fromMaybe, 'Parse error', maybeSymbols)));
 	});
-var $author$project$App$Model$invalidateEditFields = function (model) {
-	return _Utils_update(
-		model,
-		{
-			currentEmptySymbolString: model.turing.tape.emptySymbol,
-			currentEmptySymbolValidationError: $elm$core$Maybe$Nothing,
-			currentStateString: model.turing.currentState,
-			currentStateValidationError: $elm$core$Maybe$Nothing,
-			currentTapeString: A2($author$project$Core$Tape$toTapeString, $elm$core$Basics$identity, model.turing.tape),
-			currentTapeValidationError: $elm$core$Maybe$Nothing
-		});
-};
+var $author$project$Core$KeyedTape$fromString = F3(
+	function (parseSymbol, emptySymbol, string) {
+		return A2(
+			$elm$core$Result$map,
+			$author$project$Core$KeyedTape$fromTape,
+			A3($author$project$Core$Tape$fromString, parseSymbol, emptySymbol, string));
+	});
 var $elm_community$maybe_extra$Maybe$Extra$isNothing = function (m) {
 	if (m.$ === 'Nothing') {
 		return true;
@@ -8028,6 +8098,8 @@ var $elm_community$maybe_extra$Maybe$Extra$isNothing = function (m) {
 		return false;
 	}
 };
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $elm_community$maybe_extra$Maybe$Extra$or = F2(
 	function (ma, mb) {
 		if (ma.$ === 'Nothing') {
@@ -8557,32 +8629,9 @@ var $andrewMacmurray$elm_delay$Delay$after = F2(
 			$elm$core$Basics$always(msg),
 			$elm$core$Process$sleep(time));
 	});
-var $elm_community$maybe_extra$Maybe$Extra$filter = F2(
-	function (f, m) {
-		if (m.$ === 'Just') {
-			var a = m.a;
-			return f(a) ? m : $elm$core$Maybe$Nothing;
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $elm_community$list_extra$List$Extra$getAt = F2(
-	function (idx, xs) {
-		return (idx < 0) ? $elm$core$Maybe$Nothing : $elm$core$List$head(
-			A2($elm$core$List$drop, idx, xs));
-	});
 var $author$project$Core$Turing$isHalted = function (turing) {
 	return turing.isFinalState(turing.currentState);
 };
-var $elm_community$maybe_extra$Maybe$Extra$isJust = function (m) {
-	if (m.$ === 'Nothing') {
-		return false;
-	} else {
-		return true;
-	}
-};
-var $elm$json$Json$Encode$int = _Json_wrap;
-var $author$project$App$Ports$scrollTape = _Platform_outgoingPort('scrollTape', $elm$json$Json$Encode$int);
 var $author$project$App$ComputationWorkflow$Impl$update = F2(
 	function (workflow, model) {
 		if (!_Utils_eq(workflow.id, model.activeComputationWorkflow.id)) {
@@ -8604,22 +8653,26 @@ var $author$project$App$ComputationWorkflow$Impl$update = F2(
 									{
 										activeComputationWorkflow: workflow,
 										pendingRuleIndex: currentlyApplicableRuleIndex,
-										pendingTuring: A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, model.turing)
-									}),
-								$elm$core$Platform$Cmd$batch(
-									_List_fromArray(
-										[
-											$author$project$App$Ports$centerCurrentTapeCell(_Utils_Tuple0),
-											A2(
-											$andrewMacmurray$elm_delay$Delay$after,
-											250,
-											$author$project$App$Msg$ProcessComputationWorkflow(
-												_Utils_update(
-													workflow,
+										pendingTuring: A2(
+											$elm$core$Maybe$map,
+											function (turing) {
+												return _Utils_update(
+													turing,
 													{
-														step: $elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Step$OldSymbolFadeout)
-													})))
-										])));
+														tape: $author$project$Core$KeyedTape$lookahead(turing.tape)
+													});
+											},
+											A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, model.turing))
+									}),
+								A2(
+									$andrewMacmurray$elm_delay$Delay$after,
+									250,
+									$author$project$App$Msg$ProcessComputationWorkflow(
+										_Utils_update(
+											workflow,
+											{
+												step: $elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Step$OldSymbolFadeout)
+											}))));
 						} else {
 							return _Utils_Tuple2(
 								model,
@@ -8663,19 +8716,6 @@ var $author$project$App$ComputationWorkflow$Impl$update = F2(
 					default:
 						var _v7 = _v0.a;
 						var newTuring = A2($elm$core$Maybe$withDefault, model.turing, model.pendingTuring);
-						var isLeftMove = $elm_community$maybe_extra$Maybe$Extra$isJust(
-							A2(
-								$elm_community$maybe_extra$Maybe$Extra$filter,
-								function (d) {
-									return _Utils_eq(d, $author$project$Core$Direction$Left);
-								},
-								A2(
-									$elm$core$Maybe$map,
-									function ($) {
-										return $.moveDirection;
-									},
-									A2($elm_community$list_extra$List$Extra$getAt, model.pendingRuleIndex, model.turing.rules))));
-						var shouldOffsetTape = isLeftMove && _Utils_eq(model.turing.tape.left, _List_Nil);
 						var cmd = $author$project$Core$Turing$isHalted(newTuring) ? A2($andrewMacmurray$elm_delay$Delay$after, 0, $author$project$App$Msg$ToggleComputation) : A2(
 							$andrewMacmurray$elm_delay$Delay$after,
 							250,
@@ -8698,12 +8738,7 @@ var $author$project$App$ComputationWorkflow$Impl$update = F2(
 										prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
 										turing: newTuring
 									})),
-							$elm$core$Platform$Cmd$batch(
-								_List_fromArray(
-									[
-										cmd,
-										shouldOffsetTape ? $author$project$App$Ports$scrollTape(50) : $elm$core$Platform$Cmd$none
-									])));
+							cmd);
 				}
 			} else {
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -8801,7 +8836,7 @@ var $author$project$App$Update$update = F2(
 									return A2(
 										$author$project$Core$Turing$asTapeIn,
 										model.turing,
-										A2($author$project$Core$Tape$asEmptySymbolIn, model.turing.tape, sanitizedValue));
+										A2($author$project$Core$KeyedTape$asEmptySymbolIn, model.turing.tape, sanitizedValue));
 								},
 								function (_v3) {
 									return model.turing;
@@ -8813,7 +8848,7 @@ var $author$project$App$Update$update = F2(
 				var newValue = msg.a;
 				var sanitizedValue = $elm$core$String$trim(newValue);
 				var validationError = $author$project$App$Model$validateTapeString(sanitizedValue);
-				var newTape = $elm_community$maybe_extra$Maybe$Extra$isNothing(validationError) ? A3($author$project$Core$Tape$fromString, $elm$core$Maybe$Just, model.turing.tape.emptySymbol, sanitizedValue) : $elm$core$Result$Err('Validation error');
+				var newTape = $elm_community$maybe_extra$Maybe$Extra$isNothing(validationError) ? A3($author$project$Core$KeyedTape$fromString, $elm$core$Maybe$Just, model.turing.tape.emptySymbol, sanitizedValue) : $elm$core$Result$Err('Validation error');
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -8844,20 +8879,16 @@ var $author$project$App$Update$update = F2(
 						{activeComputationWorkflow: newComputationWorkflow, isRunning: !model.isRunning, pendingTuring: $elm$core$Maybe$Nothing}),
 					cmd);
 			case 'ResetComputation':
+				var initialModel = $author$project$App$Model$init($author$project$App$Turing$BusyBeaver$turing).a;
 				var _v4 = $author$project$App$Update$restartComputationIfRunning(model);
 				var newComputationWorkflow = _v4.a;
 				var cmd = _v4.b;
 				return _Utils_Tuple2(
 					$author$project$App$Model$invalidateEditFields(
 						_Utils_update(
-							model,
-							{activeComputationWorkflow: newComputationWorkflow, isInitialState: true, lastAppliedRuleIndex: -1, pendingRuleIndex: -1, pendingTuring: $elm$core$Maybe$Nothing, prevAppliedRuleIndexes: _List_Nil, prevTurings: _List_Nil, turing: $author$project$App$Turing$BusyBeaver$turing})),
-					$elm$core$Platform$Cmd$batch(
-						_List_fromArray(
-							[
-								cmd,
-								$author$project$App$Ports$centerCurrentTapeCell(_Utils_Tuple0)
-							])));
+							initialModel,
+							{activeComputationWorkflow: newComputationWorkflow, isEditingStateAndTape: model.isEditingStateAndTape, isRunning: model.isRunning})),
+					cmd);
 			case 'ProcessComputationWorkflow':
 				var workflow = msg.a;
 				return A2($author$project$App$ComputationWorkflow$Impl$update, workflow, model);
@@ -8886,14 +8917,13 @@ var $author$project$App$Update$update = F2(
 									pendingTuring: $elm$core$Maybe$Nothing,
 									prevAppliedRuleIndexes: A2($elm$core$List$cons, model.lastAppliedRuleIndex, model.prevAppliedRuleIndexes),
 									prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
-									turing: newTuring
+									turing: _Utils_update(
+										newTuring,
+										{
+											tape: $author$project$Core$KeyedTape$lookahead(newTuring.tape)
+										})
 								})),
-						$elm$core$Platform$Cmd$batch(
-							_List_fromArray(
-								[
-									cmd,
-									$author$project$App$Ports$centerCurrentTapeCell(_Utils_Tuple0)
-								])));
+						cmd);
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
@@ -8923,12 +8953,7 @@ var $author$project$App$Update$update = F2(
 									prevTurings: restPrevTurings,
 									turing: prevTuring
 								})),
-						$elm$core$Platform$Cmd$batch(
-							_List_fromArray(
-								[
-									cmd,
-									$author$project$App$Ports$centerCurrentTapeCell(_Utils_Tuple0)
-								])));
+						cmd);
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
@@ -9117,6 +9142,13 @@ var $rtfeldman$elm_css$VirtualDom$Styled$attribute = F2(
 	});
 var $rtfeldman$elm_css$Html$Styled$Attributes$attribute = $rtfeldman$elm_css$VirtualDom$Styled$attribute;
 var $rtfeldman$elm_css$Html$Styled$input = $rtfeldman$elm_css$Html$Styled$node('input');
+var $elm_community$maybe_extra$Maybe$Extra$isJust = function (m) {
+	if (m.$ === 'Nothing') {
+		return false;
+	} else {
+		return true;
+	}
+};
 var $rtfeldman$elm_css$Html$Styled$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
@@ -9379,53 +9411,45 @@ var $author$project$App$View$rulesListHtml = function (model) {
 			]));
 };
 var $author$project$App$Msg$ToggleEditStateTape = {$: 'ToggleEditStateTape'};
-var $author$project$Utils$ListExtra$padLeft = F3(
-	function (count, padElem, list) {
-		padLeft:
-		while (true) {
-			if (!count) {
-				return list;
-			} else {
-				var n = count;
-				var $temp$count = n - 1,
-					$temp$padElem = padElem,
-					$temp$list = A2($elm$core$List$cons, padElem, list);
-				count = $temp$count;
-				padElem = $temp$padElem;
-				list = $temp$list;
-				continue padLeft;
-			}
-		}
+var $author$project$Core$Tape$currentSymbolIndex = function (tape) {
+	return $elm$core$List$length(tape.left);
+};
+var $author$project$Core$KeyedTape$currentSymbolIndex = $author$project$Core$Tape$currentSymbolIndex;
+var $elm_community$list_extra$List$Extra$getAt = F2(
+	function (idx, xs) {
+		return (idx < 0) ? $elm$core$Maybe$Nothing : $elm$core$List$head(
+			A2($elm$core$List$drop, idx, xs));
 	});
-var $elm$core$List$repeatHelp = F3(
-	function (result, n, value) {
-		repeatHelp:
-		while (true) {
-			if (n <= 0) {
-				return result;
-			} else {
-				var $temp$result = A2($elm$core$List$cons, value, result),
-					$temp$n = n - 1,
-					$temp$value = value;
-				result = $temp$result;
-				n = $temp$n;
-				value = $temp$value;
-				continue repeatHelp;
-			}
-		}
+var $elm_community$list_extra$List$Extra$initialize = F2(
+	function (n, f) {
+		var step = F2(
+			function (i, acc) {
+				step:
+				while (true) {
+					if (i < 0) {
+						return acc;
+					} else {
+						var $temp$i = i - 1,
+							$temp$acc = A2(
+							$elm$core$List$cons,
+							f(i),
+							acc);
+						i = $temp$i;
+						acc = $temp$acc;
+						continue step;
+					}
+				}
+			});
+		return A2(step, n - 1, _List_Nil);
 	});
-var $elm$core$List$repeat = F2(
-	function (n, value) {
-		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
+var $rtfeldman$elm_css$VirtualDom$Styled$KeyedNode = F3(
+	function (a, b, c) {
+		return {$: 'KeyedNode', a: a, b: b, c: c};
 	});
-var $author$project$Utils$ListExtra$padRight = F3(
-	function (count, padElem, list) {
-		return _Utils_ap(
-			list,
-			A2($elm$core$List$repeat, count, padElem));
-	});
-var $author$project$App$View$tapeCellHtml = F4(
-	function (symbol, isCurrent, isFadingOut, isFadingIn) {
+var $rtfeldman$elm_css$VirtualDom$Styled$keyedNode = $rtfeldman$elm_css$VirtualDom$Styled$KeyedNode;
+var $rtfeldman$elm_css$Html$Styled$Keyed$node = $rtfeldman$elm_css$VirtualDom$Styled$keyedNode;
+var $author$project$App$View$tapeCellHtml = F5(
+	function (key, symbol, isCurrent, isFadingOut, isFadingIn) {
 		return A2(
 			$rtfeldman$elm_css$Html$Styled$div,
 			_List_fromArray(
@@ -9434,28 +9458,72 @@ var $author$project$App$View$tapeCellHtml = F4(
 					$rtfeldman$elm_css$Html$Styled$Attributes$class('centered'),
 					A2($author$project$Utils$AttributeExtra$classIf, isCurrent, 'current'),
 					A2($author$project$Utils$AttributeExtra$classIf, isFadingOut, 'fadeout'),
-					A2($author$project$Utils$AttributeExtra$classIf, isFadingIn, 'fadein')
+					A2($author$project$Utils$AttributeExtra$classIf, isFadingIn, 'fadein'),
+					A2($rtfeldman$elm_css$Html$Styled$Attributes$attribute, 'key', key)
 				]),
 			_List_fromArray(
 				[
 					$rtfeldman$elm_css$Html$Styled$text(symbol)
 				]));
 	});
-var $author$project$Core$Tape$toSymbolList = function (tape) {
-	var symbols = $elm$core$List$concat(
+var $author$project$Core$KeyedTape$toKeyList = function (tape) {
+	return $elm$core$List$concat(
 		_List_fromArray(
 			[
-				tape.left,
+				$elm$core$List$reverse(tape.keysTape.left),
+				_List_fromArray(
+				[tape.keysTape.currentSymbol]),
+				tape.keysTape.right
+			]));
+};
+var $author$project$Core$Tape$toSymbolList = function (tape) {
+	return $elm$core$List$concat(
+		_List_fromArray(
+			[
+				$elm$core$List$reverse(tape.left),
 				_List_fromArray(
 				[tape.currentSymbol]),
 				tape.right
 			]));
-	var currentSymbolIndex = $elm$core$List$length(tape.left);
-	return _Utils_Tuple2(symbols, currentSymbolIndex);
 };
+var $author$project$Core$KeyedTape$toSymbolList = $author$project$Core$Tape$toSymbolList;
+var $elm$core$Tuple$pair = F2(
+	function (a, b) {
+		return _Utils_Tuple2(a, b);
+	});
+var $elm_community$list_extra$List$Extra$zip = $elm$core$List$map2($elm$core$Tuple$pair);
 var $author$project$App$View$stateAndTapeHtml = function (model) {
+	var tapeSymbols = $author$project$Core$KeyedTape$toSymbolList(model.turing.tape);
 	var tapePadding = 8;
+	var tapeKeys = A2(
+		$elm$core$List$map,
+		$elm$core$String$fromInt,
+		$author$project$Core$KeyedTape$toKeyList(model.turing.tape));
+	var renderPaddingCell = F2(
+		function (prefix, i) {
+			return _Utils_Tuple2(
+				_Utils_ap(
+					prefix,
+					$elm$core$String$fromInt(i)),
+				A5(
+					$author$project$App$View$tapeCellHtml,
+					_Utils_ap(
+						prefix,
+						$elm$core$String$fromInt(i)),
+					model.turing.tape.emptySymbol,
+					false,
+					false,
+					false));
+		});
+	var rightPaddingList = A2(
+		$elm_community$list_extra$List$Extra$initialize,
+		tapePadding,
+		renderPaddingCell('rp_'));
 	var pendingRule = A2($elm_community$list_extra$List$Extra$getAt, model.pendingRuleIndex, model.turing.rules);
+	var leftPaddingList = A2(
+		$elm_community$list_extra$List$Extra$initialize,
+		tapePadding,
+		renderPaddingCell('lp_'));
 	var isFadeoutState = _Utils_eq(
 		model.activeComputationWorkflow.step,
 		$elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Step$OldSymbolFadeout));
@@ -9469,14 +9537,12 @@ var $author$project$App$View$stateAndTapeHtml = function (model) {
 			return r.newState;
 		},
 		pendingRule) : model.turing.currentState;
-	var _v0 = $author$project$Core$Tape$toSymbolList(model.turing.tape);
-	var tapeSymbols = _v0.a;
-	var currentSymbolIndex = _v0.b;
+	var currentSymbolIndex = $author$project$Core$KeyedTape$currentSymbolIndex(model.turing.tape);
 	var tapeCells = A2(
 		$elm$core$List$indexedMap,
 		F2(
 			function (index, symbol) {
-				var isCurrent = _Utils_eq(index - tapePadding, currentSymbolIndex);
+				var isCurrent = _Utils_eq(index, currentSymbolIndex);
 				var renderedSymbol = (isCurrent && isFadeinState) ? A3(
 					$elm_community$maybe_extra$Maybe$Extra$unwrap,
 					'?',
@@ -9484,13 +9550,18 @@ var $author$project$App$View$stateAndTapeHtml = function (model) {
 						return r.newSymbol;
 					},
 					pendingRule) : symbol;
-				return A4($author$project$App$View$tapeCellHtml, renderedSymbol, isCurrent, isCurrent && isFadeoutState, isCurrent && isFadeinState);
+				return A5(
+					$author$project$App$View$tapeCellHtml,
+					A2(
+						$elm$core$Maybe$withDefault,
+						'?',
+						A2($elm_community$list_extra$List$Extra$getAt, index, tapeKeys)),
+					renderedSymbol,
+					isCurrent,
+					isCurrent && isFadeoutState,
+					isCurrent && isFadeinState);
 			}),
-		A3(
-			$author$project$Utils$ListExtra$padRight,
-			tapePadding,
-			model.turing.tape.emptySymbol,
-			A3($author$project$Utils$ListExtra$padLeft, tapePadding, model.turing.tape.emptySymbol, tapeSymbols)));
+		tapeSymbols);
 	return A2(
 		$rtfeldman$elm_css$Html$Styled$div,
 		_List_fromArray(
@@ -9522,13 +9593,20 @@ var $author$project$App$View$stateAndTapeHtml = function (model) {
 					]),
 				_List_fromArray(
 					[
-						A2(
-						$rtfeldman$elm_css$Html$Styled$div,
+						A3(
+						$rtfeldman$elm_css$Html$Styled$Keyed$node,
+						'div',
 						_List_fromArray(
 							[
 								$rtfeldman$elm_css$Html$Styled$Attributes$class('tape')
 							]),
-						tapeCells)
+						$elm$core$List$concat(
+							_List_fromArray(
+								[
+									leftPaddingList,
+									A2($elm_community$list_extra$List$Extra$zip, tapeKeys, tapeCells),
+									rightPaddingList
+								])))
 					]))
 			]));
 };
@@ -9547,6 +9625,65 @@ var $author$project$App$View$view = function (model) {
 				$author$project$App$View$rulesListHtml(model)
 			]));
 };
+var $elm_community$maybe_extra$Maybe$Extra$filter = F2(
+	function (f, m) {
+		if (m.$ === 'Just') {
+			var a = m.a;
+			return f(a) ? m : $elm$core$Maybe$Nothing;
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$App$UpdateScroll$isAffectingScroll = function (msg) {
+	switch (msg.$) {
+		case 'ResetComputation':
+			return true;
+		case 'StepFw':
+			return true;
+		case 'StepBw':
+			return true;
+		case 'ProcessComputationWorkflow':
+			var workflow = msg.a;
+			return _Utils_eq(
+				workflow.step,
+				$elm$core$Maybe$Just($author$project$App$ComputationWorkflow$Step$UpdateMachineState));
+		default:
+			return false;
+	}
+};
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $author$project$App$Ports$scrollTape = _Platform_outgoingPort('scrollTape', $elm$json$Json$Encode$int);
+var $author$project$App$UpdateScroll$withScrollUpdate = F3(
+	function (updateFn, msg, model) {
+		var isStepBw = _Utils_eq(msg, $author$project$App$Msg$StepBw);
+		var tapeOffsetCells = isStepBw ? (-1) : 1;
+		var _v0 = A2(updateFn, msg, model);
+		var newModel = _v0.a;
+		var cmd = _v0.b;
+		var isLeftMove = $elm_community$maybe_extra$Maybe$Extra$isJust(
+			A2(
+				$elm_community$maybe_extra$Maybe$Extra$filter,
+				function (d) {
+					return _Utils_eq(d, $author$project$Core$Direction$Left);
+				},
+				A2(
+					$elm$core$Maybe$map,
+					function ($) {
+						return $.moveDirection;
+					},
+					A2($elm_community$list_extra$List$Extra$getAt, newModel.lastAppliedRuleIndex, newModel.turing.rules))));
+		var shouldOffsetTape = isLeftMove && ($elm$core$List$length(model.turing.tape.left) === 1);
+		var offsetScrollCmd = shouldOffsetTape ? $author$project$App$Ports$scrollTape(tapeOffsetCells) : $elm$core$Platform$Cmd$none;
+		return $author$project$App$UpdateScroll$isAffectingScroll(msg) ? _Utils_Tuple2(
+			newModel,
+			$elm$core$Platform$Cmd$batch(
+				_List_fromArray(
+					[
+						cmd,
+						offsetScrollCmd,
+						$author$project$App$Ports$centerCurrentTapeCell(_Utils_Tuple0)
+					]))) : _Utils_Tuple2(newModel, cmd);
+	});
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{
 		init: function (_v0) {
@@ -9555,7 +9692,7 @@ var $author$project$Main$main = $elm$browser$Browser$element(
 		subscriptions: function (_v1) {
 			return $elm$core$Platform$Sub$none;
 		},
-		update: $author$project$App$Update$update,
+		update: $author$project$App$UpdateScroll$withScrollUpdate($author$project$App$Update$update),
 		view: A2($elm$core$Basics$composeR, $author$project$App$View$view, $rtfeldman$elm_css$Html$Styled$toUnstyled)
 	});
 _Platform_export({'Main':{'init':$author$project$Main$main(

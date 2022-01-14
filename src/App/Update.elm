@@ -10,7 +10,7 @@ import App.Turing.BusyBeaver as BusyBeaver
 import Array
 import Array.Extra as Array
 import Core.Direction exposing (Direction(..))
-import Core.Tape as Tape exposing (..)
+import Core.KeyedTape as KeyedTape exposing (..)
 import Core.Turing as Turing exposing (..)
 import Css exposing (..)
 import Delay exposing (..)
@@ -107,7 +107,7 @@ update msg model =
 
                 newTape =
                     if Maybe.isNothing validationError then
-                        Tape.fromString Just model.turing.tape.emptySymbol sanitizedValue
+                        KeyedTape.fromString Just model.turing.tape.emptySymbol sanitizedValue
 
                     else
                         Err "Validation error"
@@ -156,19 +156,17 @@ update msg model =
             let
                 ( newComputationWorkflow, cmd ) =
                     restartComputationIfRunning model
+
+                initialModel =
+                    Tuple.first (Model.init BusyBeaver.turing)
             in
             ( Model.invalidateEditFields
-                { model
-                    | turing = BusyBeaver.turing
-                    , pendingTuring = Nothing
-                    , prevTurings = []
-                    , lastAppliedRuleIndex = -1
-                    , pendingRuleIndex = -1
-                    , prevAppliedRuleIndexes = []
-                    , activeComputationWorkflow = newComputationWorkflow
-                    , isInitialState = True
+                { initialModel
+                    | activeComputationWorkflow = newComputationWorkflow
+                    , isEditingStateAndTape = model.isEditingStateAndTape
+                    , isRunning = model.isRunning
                 }
-            , Cmd.batch [ cmd, centerCurrentTapeCell () ]
+            , cmd
             )
 
         ProcessComputationWorkflow workflow ->
@@ -187,7 +185,7 @@ update msg model =
                     in
                     ( Model.invalidateEditFields
                         { model
-                            | turing = newTuring
+                            | turing = { newTuring | tape = KeyedTape.lookahead newTuring.tape }
                             , pendingTuring = Nothing
                             , prevTurings = model.turing :: model.prevTurings
                             , lastAppliedRuleIndex = currentlyApplicableRuleIndex
@@ -196,7 +194,7 @@ update msg model =
                             , activeComputationWorkflow = newComputationWorkflow
                             , isInitialState = False
                         }
-                    , Cmd.batch [ cmd, centerCurrentTapeCell () ]
+                    , cmd
                     )
 
                 Nothing ->
@@ -220,7 +218,7 @@ update msg model =
                             , activeComputationWorkflow = newComputationWorkflow
                             , isInitialState = List.isEmpty restPrevTurings
                         }
-                    , Cmd.batch [ cmd, centerCurrentTapeCell () ]
+                    , cmd
                     )
 
                 _ ->

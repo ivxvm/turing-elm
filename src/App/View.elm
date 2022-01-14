@@ -6,13 +6,15 @@ import App.Msg exposing (..)
 import Array
 import Array.Extra as Array
 import Core.Direction exposing (Direction(..))
-import Core.Tape as Tape exposing (..)
+import Core.KeyedTape as KeyedTape exposing (..)
 import Core.Turing as Turing exposing (..)
 import Css exposing (..)
+import Css.Global exposing (withAttribute)
 import Delay exposing (..)
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Html.Styled.Events exposing (onClick, onInput)
+import Html.Styled.Keyed as Keyed
 import List
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -71,14 +73,15 @@ rulesListHtml model =
         ]
 
 
-tapeCellHtml : String -> Bool -> Bool -> Bool -> Html Msg
-tapeCellHtml symbol isCurrent isFadingOut isFadingIn =
+tapeCellHtml : String -> String -> Bool -> Bool -> Bool -> Html Msg
+tapeCellHtml key symbol isCurrent isFadingOut isFadingIn =
     div
         [ class "tape-cell"
         , class "centered"
         , classIf isCurrent "current"
         , classIf isFadingOut "fadeout"
         , classIf isFadingIn "fadein"
+        , attribute "key" key
         ]
         [ text symbol ]
 
@@ -86,8 +89,15 @@ tapeCellHtml symbol isCurrent isFadingOut isFadingIn =
 stateAndTapeHtml : Model -> Html Msg
 stateAndTapeHtml model =
     let
-        ( tapeSymbols, currentSymbolIndex ) =
-            Tape.toSymbolList model.turing.tape
+        tapeSymbols =
+            KeyedTape.toSymbolList model.turing.tape
+
+        tapeKeys =
+            KeyedTape.toKeyList model.turing.tape
+                |> List.map String.fromInt
+
+        currentSymbolIndex =
+            KeyedTape.currentSymbolIndex model.turing.tape
 
         isFadeoutState =
             model.activeComputationWorkflow.step == Just OldSymbolFadeout
@@ -108,15 +118,24 @@ stateAndTapeHtml model =
         tapePadding =
             8
 
+        renderPaddingCell prefix i =
+            ( prefix ++ String.fromInt i
+            , tapeCellHtml (prefix ++ String.fromInt i) model.turing.tape.emptySymbol False False False
+            )
+
+        leftPaddingList =
+            List.initialize tapePadding (renderPaddingCell "lp_")
+
+        rightPaddingList =
+            List.initialize tapePadding (renderPaddingCell "rp_")
+
         tapeCells =
             tapeSymbols
-                |> List.padLeft tapePadding model.turing.tape.emptySymbol
-                |> List.padRight tapePadding model.turing.tape.emptySymbol
                 |> List.indexedMap
                     (\index symbol ->
                         let
                             isCurrent =
-                                (index - tapePadding) == currentSymbolIndex
+                                index == currentSymbolIndex
 
                             renderedSymbol =
                                 if isCurrent && isFadeinState then
@@ -125,7 +144,8 @@ stateAndTapeHtml model =
                                 else
                                     symbol
                         in
-                        tapeCellHtml renderedSymbol
+                        tapeCellHtml (Maybe.withDefault "?" (List.getAt index tapeKeys))
+                            renderedSymbol
                             isCurrent
                             (isCurrent && isFadeoutState)
                             (isCurrent && isFadeinState)
@@ -142,10 +162,16 @@ stateAndTapeHtml model =
             , onClick ToggleEditStateTape
             ]
             [ text renderedState ]
-        , div [ class "tape-wrapper" ]
-            [ div
+        , div
+            [ class "tape-wrapper" ]
+            [ Keyed.node "div"
                 [ class "tape" ]
-                tapeCells
+                (List.concat
+                    [ leftPaddingList
+                    , List.zip tapeKeys tapeCells
+                    , rightPaddingList
+                    ]
+                )
             ]
         ]
 

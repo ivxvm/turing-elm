@@ -1,13 +1,20 @@
 module App.Turing.BusyBeaver exposing (..)
 
 import Core.Direction exposing (Direction(..))
+import Core.KeyedTape as KeyedTape
 import Core.Rule exposing (Rule)
 import Core.Turing exposing (Turing)
 
 
 turing : Turing String String
 turing =
-    { tape = { left = [], right = [], currentSymbol = "0", emptySymbol = "0" }
+    { tape =
+        KeyedTape.fromTape
+            { left = []
+            , right = []
+            , currentSymbol = "0"
+            , emptySymbol = "0"
+            }
     , currentState = "A"
     , isFinalState = \s -> s == "X"
     , rules =

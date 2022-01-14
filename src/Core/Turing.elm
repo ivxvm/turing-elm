@@ -1,24 +1,24 @@
 module Core.Turing exposing (..)
 
 import Basics.Extra exposing (flip)
+import Core.KeyedTape as KeyedTape exposing (KeyedTape)
 import Core.Rule exposing (Rule)
-import Core.Tape as Tape exposing (Tape)
 
 
 type alias Turing a s =
-    { tape : Tape a
+    { tape : KeyedTape {} a
     , currentState : s
     , isFinalState : s -> Bool
     , rules : List (Rule a s)
     }
 
 
-setTape : Tape a -> Turing a s -> Turing a s
+setTape : KeyedTape {} a -> Turing a s -> Turing a s
 setTape tape turing =
     { turing | tape = tape }
 
 
-asTapeIn : Turing a s -> Tape a -> Turing a s
+asTapeIn : Turing a s -> KeyedTape {} a -> Turing a s
 asTapeIn =
     flip setTape
 
@@ -56,7 +56,7 @@ applyRule { currentState, currentSymbol, newSymbol, newState, moveDirection } tu
             { turing
                 | tape =
                     turing.tape
-                        |> Tape.writeSymbol newSymbol
-                        |> Tape.shift moveDirection
+                        |> KeyedTape.writeSymbol newSymbol
+                        |> KeyedTape.shift moveDirection
                 , currentState = newState
             }

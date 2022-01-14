@@ -6,25 +6,26 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 
 
-type alias Tape a =
-    { left : List a
-    , right : List a
-    , currentSymbol : a
-    , emptySymbol : a
+type alias Tape ext sym =
+    { ext
+        | left : List sym
+        , right : List sym
+        , currentSymbol : sym
+        , emptySymbol : sym
     }
 
 
-setEmptySymbol : a -> Tape a -> Tape a
+setEmptySymbol : a -> Tape ext a -> Tape ext a
 setEmptySymbol symbol tape =
     { tape | emptySymbol = symbol }
 
 
-asEmptySymbolIn : Tape a -> a -> Tape a
+asEmptySymbolIn : Tape ext a -> a -> Tape ext a
 asEmptySymbolIn =
     flip setEmptySymbol
 
 
-shiftLeft : Tape a -> Tape a
+shiftLeft : Tape ext a -> Tape ext a
 shiftLeft tape =
     case tape.left of
         x :: xs ->
@@ -37,7 +38,7 @@ shiftLeft tape =
             }
 
 
-shiftRight : Tape a -> Tape a
+shiftRight : Tape ext a -> Tape ext a
 shiftRight tape =
     case tape.right of
         x :: xs ->
@@ -50,7 +51,7 @@ shiftRight tape =
             }
 
 
-shift : Direction -> Tape a -> Tape a
+shift : Direction -> Tape ext a -> Tape ext a
 shift direction tape =
     case direction of
         Left ->
@@ -60,28 +61,26 @@ shift direction tape =
             shiftRight tape
 
 
-writeSymbol : a -> Tape a -> Tape a
+writeSymbol : a -> Tape ext a -> Tape ext a
 writeSymbol newSymbol tape =
     { tape | currentSymbol = newSymbol }
 
 
-toSymbolList : Tape a -> ( List a, Int )
+currentSymbolIndex : Tape ext sym -> Int
+currentSymbolIndex tape =
+    List.length tape.left
+
+
+toSymbolList : Tape ext a -> List a
 toSymbolList tape =
-    let
-        symbols =
-            List.concat
-                [ tape.left
-                , [ tape.currentSymbol ]
-                , tape.right
-                ]
-
-        currentSymbolIndex =
-            List.length tape.left
-    in
-    ( symbols, currentSymbolIndex )
+    List.concat
+        [ List.reverse tape.left
+        , [ tape.currentSymbol ]
+        , tape.right
+        ]
 
 
-fromString : (String -> Maybe a) -> a -> String -> Result String (Tape a)
+fromString : (String -> Maybe a) -> a -> String -> Result String (Tape {} a)
 fromString parseSymbol emptySymbol string =
     let
         parseOptionalBrackets : String -> ( Bool, String )
@@ -140,11 +139,11 @@ fromString parseSymbol emptySymbol string =
             )
 
 
-toTapeString : (a -> String) -> Tape a -> String
+toTapeString : (a -> String) -> Tape ext a -> String
 toTapeString symToString tape =
     String.join " "
         (List.concat
-            [ List.map symToString tape.left
+            [ List.reverse (List.map symToString tape.left)
             , [ String.concat [ "[", symToString tape.currentSymbol, "]" ] ]
             , List.map symToString tape.right
             ]

@@ -15,17 +15,15 @@
                 const currentTapeCell = tape.querySelector(".current");
                 tape.scrollTo({
                     top: 0,
-                    left: currentTapeCell.offsetLeft - currentTapeCell.clientWidth * 3,
+                    left: currentTapeCell.offsetLeft - currentTapeCell.offsetWidth * 3,
                     behavior: "smooth"
                 });
-            }, 0);
+            }, 250);
         });
-        app.ports.scrollTape.subscribe((offset) => {
+        app.ports.scrollTape.subscribe((offsetCells) => {
             const tape = document.querySelector(".tape");
-            tape.scrollTo({
-                top: 0,
-                left: tape.scrollLeft + offset
-            });
+            const currentTapeCell = tape.querySelector(".current");
+            tape.scrollLeft = tape.scrollLeft + offsetCells * currentTapeCell.offsetWidth;
         });
     </script>
 </body>
