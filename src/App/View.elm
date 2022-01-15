@@ -36,7 +36,7 @@ rulesListEntryHtml model ruleIndex ruleString =
         , class validationClass
         ]
         [ input
-            [ placeholder "Rule description"
+            [ placeholder "OldState OldSymbol NewSymbol NewState MoveDirection"
             , value ruleString
             , class "rule-input"
             , classIf (ruleIndex == highlightedRuleIndex) "highlighted-rule"
