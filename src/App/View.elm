@@ -179,10 +179,10 @@ stateAndTapeHtml model =
         ]
 
 
-editStateAndTapeHtml : Model -> Html Msg
-editStateAndTapeHtml model =
+configurationHtml : Model -> Html Msg
+configurationHtml model =
     div
-        [ class "edit-state-and-tape-container"
+        [ class "configuration-container"
         , classIf (not model.isEditingStateAndTape) "disabled"
         ]
         [ input
@@ -267,7 +267,7 @@ view model =
     div
         [ class "app-container" ]
         [ stateAndTapeHtml model
-        , editStateAndTapeHtml model
+        , configurationHtml model
         , controlsHtml model
         , rulesListHtml model
         ]

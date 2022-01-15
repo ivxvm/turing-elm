@@ -176,7 +176,7 @@ input:focus {
     background-color: #45A29E;
 }
 
-.edit-state-and-tape-container {
+.configuration-container {
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -185,11 +185,11 @@ input:focus {
     padding-right: 32px;
 }
 
-.edit-state-and-tape-container.disabled {
+.configuration-container.disabled {
     display: none;
 }
 
-.edit-state-and-tape-container input {
+.configuration-container input {
     width: 133px;
     border: 0;
     font-weight: bold;
@@ -200,15 +200,15 @@ input:focus {
     box-sizing: border-box;
 }
 
-.edit-state-and-tape-container input.invalid {
+.configuration-container input.invalid {
     outline: 1px solid red !important;
 }
 
-.edit-state-and-tape-container input + span {
+.configuration-container input + span {
     position: relative;
 }
 
-.edit-state-and-tape-container input + span::before {
+.configuration-container input + span::before {
     position: absolute;
     bottom: -16px;
     right: -1px;
@@ -223,7 +223,7 @@ input:focus {
     opacity: 0;
 }
 
-.edit-state-and-tape-container input:hover + span::before {
+.configuration-container input:hover + span::before {
     opacity: 1;
 }
 
