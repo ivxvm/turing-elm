@@ -102,11 +102,18 @@ stateAndTapeHtml model =
             List.getAt model.pendingRuleIndex model.turing.rules
 
         renderedState =
-            if isFadeinState then
-                Maybe.unwrap model.turing.currentState (\r -> r.newState) pendingRule
+            String.slice 0 3 <|
+                if isFadeinState then
+                    Maybe.unwrap model.turing.currentState (\r -> r.newState) pendingRule
 
-            else
-                model.turing.currentState
+                else
+                    model.turing.currentState
+
+        isSingleCharState =
+            String.length renderedState == 1
+
+        isTwoCharsState =
+            String.length renderedState == 2
 
         tapePadding =
             8
@@ -151,6 +158,9 @@ stateAndTapeHtml model =
             , class "centered"
             , classIf isFadeoutState "fadeout"
             , classIf isFadeinState "fadein"
+            , classIf isSingleCharState "onechar"
+            , classIf isTwoCharsState "twochars"
+            , classIf (not isSingleCharState && not isTwoCharsState) "morechars"
             , classIf model.isEditingStateAndTape "editing-toggled"
             , onClick ToggleEditStateTape
             ]

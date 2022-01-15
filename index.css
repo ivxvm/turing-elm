@@ -50,11 +50,21 @@ input:focus {
     min-width: 64px;
     min-height: 64px;
     max-height: 64px;
-    font-size: 48px;
     font-weight: bold;
     color: #C5C6C7;
     border: 4px double #C5C6C7;
+}
 
+.state.onechar {
+    font-size: 44px;
+}
+
+.state.twochars {
+    font-size: 32px;
+}
+
+.state.morechars {
+    font-size: 24px;
 }
 
 .state.editing-toggled,
