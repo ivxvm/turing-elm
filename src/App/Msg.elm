@@ -10,9 +10,17 @@ type Msg
     | UpdateState String
     | UpdateEmptySymbol String
     | UpdateTape String
-    | ToggleEditStateTape
+    | UpdateMachineName String
+    | ToggleEditConfiguration
     | ToggleComputation
     | ResetComputation
     | ProcessComputationWorkflow ComputationWorkflow
     | StepFw
     | StepBw
+
+
+
+-- | SaveMachine
+-- | LoadMachine String
+-- | GetSavedMachines
+-- | GetSavedMachinesSuccess (List String)

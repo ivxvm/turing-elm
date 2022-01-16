@@ -2,14 +2,16 @@ module Core.Turing exposing (..)
 
 import Basics.Extra exposing (flip)
 import Core.KeyedTape as KeyedTape exposing (KeyedTape)
-import Core.Rule exposing (Rule)
+import Core.Rule as Rule exposing (Rule)
+import Json.Decode as D
+import Json.Encode as E
 
 
-type alias Turing a s =
-    { tape : KeyedTape {} a
-    , currentState : s
-    , isFinalState : s -> Bool
-    , rules : List (Rule a s)
+type alias Turing sym st =
+    { tape : KeyedTape {} sym
+    , currentState : st
+    , finalState : st
+    , rules : List (Rule sym st)
     }
 
 
@@ -25,7 +27,7 @@ asTapeIn =
 
 isHalted : Turing a s -> Bool
 isHalted turing =
-    turing.isFinalState turing.currentState
+    turing.currentState == turing.finalState
 
 
 findApplicableRule : Turing a s -> Maybe ( Int, Rule a s )
@@ -60,3 +62,22 @@ applyRule { currentState, currentSymbol, newSymbol, newState, moveDirection } tu
                         |> KeyedTape.shift moveDirection
                 , currentState = newState
             }
+
+
+encode : (sym -> E.Value) -> (st -> E.Value) -> Turing sym st -> E.Value
+encode encodeSymbol encodeState turing =
+    E.object
+        [ ( "tape", KeyedTape.encode encodeSymbol turing.tape )
+        , ( "currentState", encodeState turing.currentState )
+        , ( "finalState", encodeState turing.finalState )
+        , ( "rules", E.list (Rule.encode encodeSymbol encodeState) turing.rules )
+        ]
+
+
+decoder : D.Decoder sym -> D.Decoder st -> D.Decoder (Turing sym st)
+decoder symbolDecoder stateDecoder =
+    D.map4 Turing
+        (D.field "tape" (KeyedTape.decoder symbolDecoder))
+        (D.field "currentState" stateDecoder)
+        (D.field "finalState" stateDecoder)
+        (D.field "rules" (D.list (Rule.decoder symbolDecoder stateDecoder)))

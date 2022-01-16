@@ -2,6 +2,8 @@ module Core.Tape exposing (..)
 
 import Basics.Extra exposing (flip)
 import Core.Direction exposing (Direction(..))
+import Json.Decode as D
+import Json.Encode as E
 import List.Extra as List
 import Maybe.Extra as Maybe
 
@@ -148,3 +150,29 @@ toTapeString symToString tape =
             , List.map symToString tape.right
             ]
         )
+
+
+encode : (sym -> E.Value) -> Tape {} sym -> E.Value
+encode encodeSymbol tape =
+    E.object
+        [ ( "left", E.list encodeSymbol tape.left )
+        , ( "right", E.list encodeSymbol tape.right )
+        , ( "currentSymbol", encodeSymbol tape.currentSymbol )
+        , ( "emptySymbol", encodeSymbol tape.emptySymbol )
+        ]
+
+
+decoder : D.Decoder sym -> D.Decoder (Tape {} sym)
+decoder symbolDecoder =
+    D.map4
+        (\l r c e ->
+            { left = l
+            , right = r
+            , currentSymbol = c
+            , emptySymbol = e
+            }
+        )
+        (D.field "left" (D.list symbolDecoder))
+        (D.field "right" (D.list symbolDecoder))
+        (D.field "currentSymbol" symbolDecoder)
+        (D.field "emptySymbol" symbolDecoder)

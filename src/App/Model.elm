@@ -9,7 +9,9 @@ import Core.Turing exposing (..)
 
 
 type alias Model =
-    { ruleStrings : List String
+    { machineName : String
+    , machineNameValidationError : Maybe String
+    , ruleStrings : List String
     , ruleValidationErrors : Array (Maybe String)
     , currentStateString : String
     , currentStateValidationError : Maybe String
@@ -30,10 +32,12 @@ type alias Model =
     }
 
 
-init : Turing String String -> ( Model, Cmd msg )
-init turing =
+init : String -> Turing String String -> ( Model, Cmd msg )
+init name turing =
     ( invalidateEditFields
-        { ruleStrings =
+        { machineName = name
+        , machineNameValidationError = Nothing
+        , ruleStrings =
             turing.rules
                 |> List.map (Rule.toString identity identity)
         , ruleValidationErrors = Array.repeat (List.length turing.rules) Nothing
@@ -71,6 +75,15 @@ validateEmptySymbolString : String -> Maybe String
 validateEmptySymbolString emptySymbol =
     if String.isEmpty emptySymbol then
         Just "Empty symbol unspecified"
+
+    else
+        Nothing
+
+
+validateMachineName : String -> Maybe String
+validateMachineName machineName =
+    if String.isEmpty machineName then
+        Just "Machine name shouldn't be empty"
 
     else
         Nothing

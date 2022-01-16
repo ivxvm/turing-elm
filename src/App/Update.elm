@@ -114,7 +114,22 @@ update msg model =
             , Cmd.none
             )
 
-        ToggleEditStateTape ->
+        UpdateMachineName newValue ->
+            let
+                sanitizedValue =
+                    String.trim newValue
+
+                validationError =
+                    Model.validateMachineName sanitizedValue
+            in
+            ( { model
+                | machineName = newValue
+                , machineNameValidationError = validationError
+              }
+            , Cmd.none
+            )
+
+        ToggleEditConfiguration ->
             ( { model | isEditingStateAndTape = not model.isEditingStateAndTape }
             , Cmd.none
             )
@@ -149,7 +164,7 @@ update msg model =
                     restartComputationIfRunning model
 
                 initialModel =
-                    Tuple.first (Model.init BusyBeaver.turing)
+                    Tuple.first (Model.init "Busy Beaver" BusyBeaver.turing)
             in
             ( Model.invalidateEditFields
                 { initialModel

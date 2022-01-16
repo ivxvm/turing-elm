@@ -178,19 +178,27 @@ input:focus {
 
 .configuration-container {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    flex-direction: column;
     margin-bottom: 20px;
     padding-left: 32px;
     padding-right: 32px;
 }
 
-.configuration-container.disabled {
+.configuration-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.configuration-row:not(:first-child) {
+    margin-top: 5px;
+}
+
+.configuration-row.disabled {
     display: none;
 }
 
-.configuration-container input {
-    width: 133px;
+.configuration-row input {
     border: 0;
     font-weight: bold;
     background-color: #0B0C10;
@@ -200,15 +208,15 @@ input:focus {
     box-sizing: border-box;
 }
 
-.configuration-container input.invalid {
+.configuration-row input.invalid {
     outline: 1px solid red !important;
 }
 
-.configuration-container input + span {
+.configuration-row input + span {
     position: relative;
 }
 
-.configuration-container input + span::before {
+.configuration-row input + span::before {
     position: absolute;
     bottom: -16px;
     right: -1px;
@@ -223,24 +231,59 @@ input:focus {
     opacity: 0;
 }
 
-.configuration-container input:hover + span::before {
+.configuration-row input:hover + span::before {
     opacity: 1;
 }
 
 .current-state-input {
+    width: 133px;
     padding-left: 16px;
     border-top-left-radius: 16px;
     border-bottom-left-radius: 16px;
 }
 
 .current-empty-symbol-input {
-    margin-left: 4px;
-    margin-right: 4px;
+    width: 133px;
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 .current-tape-input {
+    width: 133px;
     border-top-right-radius: 16px;
     border-bottom-right-radius: 16px;
+}
+
+.machine-name-input {
+    width: calc(266px + 5px);
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
+    margin-right: 5px;
+}
+
+.save-machine-button {
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #45A29E;
+    border-left: 2px solid #45A29E;
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
+    color: #45A29E;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 16px;
+    width: 133px;
+    text-align: center;
+    box-sizing: border-box;
+    padding-bottom: 2px;
+    user-select: none;
+}
+
+.save-machine-button:hover {
+    color: #66FCF1;
+    cursor: pointer;
+    background-color: #45A29E;
 }
 
 .rules-container {

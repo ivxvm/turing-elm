@@ -3,6 +3,8 @@ module Core.KeyedTape exposing (..)
 import Basics.Extra exposing (flip)
 import Core.Direction as Direction exposing (Direction)
 import Core.Tape as Tape exposing (Tape)
+import Json.Decode as D
+import Json.Encode as E
 
 
 type alias KeyedTape ext sym =
@@ -123,3 +125,19 @@ fromString parseSymbol emptySymbol string =
 toTapeString : (sym -> String) -> KeyedTape ext sym -> String
 toTapeString =
     Tape.toTapeString
+
+
+encode : (sym -> E.Value) -> KeyedTape {} sym -> E.Value
+encode encodeSymbol tape =
+    Tape.encode encodeSymbol
+        { left = tape.left
+        , right = tape.right
+        , currentSymbol = tape.currentSymbol
+        , emptySymbol = tape.emptySymbol
+        }
+
+
+decoder : D.Decoder sym -> D.Decoder (KeyedTape {} sym)
+decoder symbolDecoder =
+    Tape.decoder symbolDecoder
+        |> D.map fromTape

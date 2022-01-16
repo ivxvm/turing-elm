@@ -162,7 +162,7 @@ stateAndTapeHtml model =
             , classIf isTwoCharsState "twochars"
             , classIf (not isSingleCharState && not isTwoCharsState) "morechars"
             , classIf model.isEditingStateAndTape "editing-toggled"
-            , onClick ToggleEditStateTape
+            , onClick ToggleEditConfiguration
             ]
             [ text renderedState ]
         , div
@@ -182,42 +182,61 @@ stateAndTapeHtml model =
 configurationHtml : Model -> Html Msg
 configurationHtml model =
     div
-        [ class "configuration-container"
-        , classIf (not model.isEditingStateAndTape) "disabled"
-        ]
-        [ input
-            [ placeholder "State"
-            , value model.currentStateString
-            , class "current-state-input"
-            , classIf (Maybe.isJust model.currentStateValidationError) "invalid"
-            , onInput UpdateState
+        [ class "configuration-container" ]
+        [ div
+            [ class "configuration-row"
+            , classIf (not model.isEditingStateAndTape) "disabled"
             ]
-            []
-        , span
-            [ attribute "error" (Maybe.withDefault "" model.currentStateValidationError) ]
-            []
-        , input
-            [ placeholder "∅"
-            , value model.currentEmptySymbolString
-            , class "current-empty-symbol-input"
-            , classIf (Maybe.isJust model.currentEmptySymbolValidationError) "invalid"
-            , onInput UpdateEmptySymbol
+            [ input
+                [ placeholder "Machine name"
+                , value model.machineName
+                , class "machine-name-input"
+                , classIf (Maybe.isJust model.machineNameValidationError) "invalid"
+                , onInput UpdateMachineName
+                ]
+                []
+            , div
+                [ class "save-machine-button" ]
+                [ text "save" ]
             ]
-            []
-        , span
-            [ attribute "error" (Maybe.withDefault "" model.currentEmptySymbolValidationError) ]
-            []
-        , input
-            [ placeholder "Tape"
-            , value model.currentTapeString
-            , class "current-tape-input"
-            , classIf (Maybe.isJust model.currentTapeValidationError) "invalid"
-            , onInput UpdateTape
+        , div
+            [ class "configuration-row"
+            , classIf (not model.isEditingStateAndTape) "disabled"
             ]
-            []
-        , span
-            [ attribute "error" (Maybe.withDefault "" model.currentTapeValidationError) ]
-            []
+            [ input
+                [ placeholder "State"
+                , value model.currentStateString
+                , class "current-state-input"
+                , classIf (Maybe.isJust model.currentStateValidationError) "invalid"
+                , onInput UpdateState
+                ]
+                []
+            , span
+                [ attribute "error" (Maybe.withDefault "" model.currentStateValidationError) ]
+                []
+            , input
+                [ placeholder "∅"
+                , value model.currentEmptySymbolString
+                , class "current-empty-symbol-input"
+                , classIf (Maybe.isJust model.currentEmptySymbolValidationError) "invalid"
+                , onInput UpdateEmptySymbol
+                ]
+                []
+            , span
+                [ attribute "error" (Maybe.withDefault "" model.currentEmptySymbolValidationError) ]
+                []
+            , input
+                [ placeholder "Tape"
+                , value model.currentTapeString
+                , class "current-tape-input"
+                , classIf (Maybe.isJust model.currentTapeValidationError) "invalid"
+                , onInput UpdateTape
+                ]
+                []
+            , span
+                [ attribute "error" (Maybe.withDefault "" model.currentTapeValidationError) ]
+                []
+            ]
         ]
 
 

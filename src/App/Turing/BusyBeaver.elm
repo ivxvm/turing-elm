@@ -16,7 +16,7 @@ turing =
             , emptySymbol = "0"
             }
     , currentState = "A"
-    , isFinalState = \s -> s == "X"
+    , finalState = "X"
     , rules =
         [ Rule "A" "1" "1" "C" Left
         , Rule "A" "0" "1" "B" Right

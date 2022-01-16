@@ -13,7 +13,7 @@ import Html.Styled exposing (toUnstyled)
 main : Program () Model Msg
 main =
     Browser.element
-        { init = \() -> App.init BusyBeaver.turing
+        { init = \() -> App.init "Busy Beaver" BusyBeaver.turing
         , update = withScrollUpdate App.update
         , view = App.view >> toUnstyled
         , subscriptions = \_ -> Sub.none
