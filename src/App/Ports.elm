@@ -15,4 +15,7 @@ port saveMachine : ( String, E.Value ) -> Cmd msg
 port getSavedMachines : () -> Cmd msg
 
 
-port getSavedMachinesSuccess : (List ( String, String ) -> msg) -> Sub msg
+port onGetSavedMachinesSuccess : (List ( String, String ) -> msg) -> Sub msg
+
+
+port onDeleteMachineSuccess : (String -> msg) -> Sub msg

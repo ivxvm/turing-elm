@@ -1,41 +1,12 @@
 <!doctype html>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+
 <link rel="stylesheet" href="index.css" />
 
 <body>
     <header>turing.elm</header>
     <div id="app"></div>
     <script src="bundle.js"></script>
-    <script>
-        var app = Elm.Main.init({
-            node: document.getElementById("app")
-        });
-        app.ports.centerCurrentTapeCell.subscribe(() => {
-            setTimeout(() => {
-                const tape = document.querySelector(".tape");
-                const currentTapeCell = tape.querySelector(".current");
-                tape.scrollTo({
-                    top: 0,
-                    left: currentTapeCell.offsetLeft - currentTapeCell.offsetWidth * 3,
-                    behavior: "smooth"
-                });
-            }, 250);
-        });
-        app.ports.scrollTape.subscribe((offsetCells) => {
-            const tape = document.querySelector(".tape");
-            const currentTapeCell = tape.querySelector(".current");
-            tape.scrollLeft = tape.scrollLeft + offsetCells * currentTapeCell.offsetWidth;
-        });
-        app.ports.saveMachine.subscribe(([name, data]) => {
-            let isAllowedToWriteData = true;
-            if (localStorage.getItem(name)) {
-                isAllowedToWriteData = confirm("There is already a saved machine with same name, do you want to overwrite data?");
-            }
-            if (isAllowedToWriteData) {
-                localStorage.setItem(name, JSON.stringify(data));
-            }
-        })
-        app.ports.getSavedMachines.subscribe(() => {
-            app.ports.getSavedMachinesSuccess.send(Array.from(Object.entries(localStorage)));
-        });
-    </script>
+    <script src="index.js"></script>
 </body>

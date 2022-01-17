@@ -17,5 +17,10 @@ main =
         { init = \() -> App.init "Busy Beaver" BusyBeaver.turing
         , update = withScrollUpdate App.update
         , view = App.view >> toUnstyled
-        , subscriptions = \_ -> Ports.getSavedMachinesSuccess GetSavedMachinesSuccess
+        , subscriptions =
+            \_ ->
+                Sub.batch
+                    [ Ports.onGetSavedMachinesSuccess GetSavedMachinesSuccess
+                    , Ports.onDeleteMachineSuccess DeleteMachine
+                    ]
         }

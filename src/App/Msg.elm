@@ -18,5 +18,7 @@ type Msg
     | StepFw
     | StepBw
     | SaveMachine
+    | LoadMachine String
+    | DeleteMachine String
     | GetSavedMachines
     | GetSavedMachinesSuccess (List ( String, String ))

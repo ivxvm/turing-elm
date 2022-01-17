@@ -5,11 +5,11 @@ import App.ComputationWorkflow.Type exposing (..)
 import App.Model as Model exposing (..)
 import App.Msg exposing (..)
 import App.Ports as Ports
-import App.Turing.BusyBeaver as BusyBeaver
 import Array
 import Array.Extra as Array
 import Core.KeyedTape as KeyedTape exposing (..)
 import Core.Turing as Turing exposing (..)
+import Delay
 import Dict as Dict exposing (..)
 import Json.Decode as D
 import Json.Encode as E
@@ -164,11 +164,15 @@ update msg model =
 
         ResetComputation ->
             let
-                ( newComputationWorkflow, cmd ) =
+                ( newComputationWorkflow, restartCmd ) =
                     restartComputationIfRunning model
 
-                initialModel =
-                    Tuple.first (Model.init "Busy Beaver" BusyBeaver.turing)
+                newTuring =
+                    List.last model.prevTurings
+                        |> Maybe.withDefault model.turing
+
+                ( initialModel, initCmd ) =
+                    Model.init model.machineName newTuring
             in
             ( Model.invalidateEditFields
                 { initialModel
@@ -176,7 +180,7 @@ update msg model =
                     , isEditingStateAndTape = model.isEditingStateAndTape
                     , isRunning = model.isRunning
                 }
-            , cmd
+            , Cmd.batch [ restartCmd, initCmd ]
             )
 
         ProcessComputationWorkflow workflow ->
@@ -236,7 +240,33 @@ update msg model =
 
         SaveMachine ->
             ( model
-            , Ports.saveMachine ( model.machineName, Turing.encode E.string E.string model.turing )
+            , Cmd.batch
+                [ Ports.saveMachine ( model.machineName, Turing.encode E.string E.string model.turing )
+                , Delay.after 250 GetSavedMachines
+                ]
+            )
+
+        LoadMachine name ->
+            let
+                newTuring =
+                    Dict.get name model.savedMachines
+                        |> Maybe.withDefault model.turing
+
+                ( newModel, initCmd ) =
+                    Model.init name newTuring
+            in
+            ( Model.invalidateEditFields
+                { newModel
+                    | activeComputationWorkflow = ComputationWorkflow.reset model.activeComputationWorkflow
+                    , isEditingStateAndTape = model.isEditingStateAndTape
+                    , isRunning = False
+                }
+            , initCmd
+            )
+
+        DeleteMachine name ->
+            ( { model | savedMachines = Dict.remove name model.savedMachines }
+            , Cmd.none
             )
 
         GetSavedMachines ->

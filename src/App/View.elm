@@ -6,10 +6,12 @@ import App.Msg exposing (..)
 import Array
 import Core.KeyedTape as KeyedTape exposing (..)
 import Core.Turing as Turing exposing (..)
+import Dict
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (..)
 import Html.Styled.Events exposing (onClick, onInput)
 import Html.Styled.Keyed as Keyed
+import List as List
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Utils.AttributeExtra exposing (..)
@@ -283,12 +285,29 @@ controlsHtml model =
         ]
 
 
+savedMachinesHtmls : Model -> List (Html Msg)
+savedMachinesHtmls model =
+    model.savedMachines
+        |> Dict.keys
+        |> List.map
+            (\name ->
+                a
+                    [ class "saved-machine-link"
+                    , attribute "style" "display:none"
+                    , onClick (LoadMachine name)
+                    ]
+                    [ text name ]
+            )
+
+
 view : Model -> Html Msg
 view model =
     div
         [ class "app-container" ]
-        [ stateAndTapeHtml model
-        , configurationHtml model
-        , controlsHtml model
-        , rulesListHtml model
-        ]
+        (savedMachinesHtmls model
+            ++ [ stateAndTapeHtml model
+               , configurationHtml model
+               , controlsHtml model
+               , rulesListHtml model
+               ]
+        )
