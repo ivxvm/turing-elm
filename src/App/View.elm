@@ -196,7 +196,9 @@ configurationHtml model =
                 ]
                 []
             , div
-                [ class "save-machine-button" ]
+                [ class "save-machine-button"
+                , onClick SaveMachine
+                ]
                 [ text "save" ]
             ]
         , div

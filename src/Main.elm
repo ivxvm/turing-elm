@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import App.Model as App exposing (..)
 import App.Msg exposing (..)
+import App.Ports as Ports
 import App.Turing.BusyBeaver as BusyBeaver
 import App.Update as App
 import App.UpdateScroll exposing (withScrollUpdate)
@@ -16,5 +17,5 @@ main =
         { init = \() -> App.init "Busy Beaver" BusyBeaver.turing
         , update = withScrollUpdate App.update
         , view = App.view >> toUnstyled
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = \_ -> Ports.getSavedMachinesSuccess GetSavedMachinesSuccess
         }

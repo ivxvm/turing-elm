@@ -25,5 +25,17 @@
             const currentTapeCell = tape.querySelector(".current");
             tape.scrollLeft = tape.scrollLeft + offsetCells * currentTapeCell.offsetWidth;
         });
+        app.ports.saveMachine.subscribe(([name, data]) => {
+            let isAllowedToWriteData = true;
+            if (localStorage.getItem(name)) {
+                isAllowedToWriteData = confirm("There is already a saved machine with same name, do you want to overwrite data?");
+            }
+            if (isAllowedToWriteData) {
+                localStorage.setItem(name, JSON.stringify(data));
+            }
+        })
+        app.ports.getSavedMachines.subscribe(() => {
+            app.ports.getSavedMachinesSuccess.send(Array.from(Object.entries(localStorage)));
+        });
     </script>
 </body>

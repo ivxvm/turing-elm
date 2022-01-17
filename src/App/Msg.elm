@@ -17,10 +17,6 @@ type Msg
     | ProcessComputationWorkflow ComputationWorkflow
     | StepFw
     | StepBw
-
-
-
--- | SaveMachine
--- | LoadMachine String
--- | GetSavedMachines
--- | GetSavedMachinesSuccess (List String)
+    | SaveMachine
+    | GetSavedMachines
+    | GetSavedMachinesSuccess (List ( String, String ))

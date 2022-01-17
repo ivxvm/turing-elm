@@ -4,11 +4,15 @@ import App.ComputationWorkflow.Impl as ComputationWorkflow exposing (..)
 import App.ComputationWorkflow.Type exposing (..)
 import App.Model as Model exposing (..)
 import App.Msg exposing (..)
+import App.Ports as Ports
 import App.Turing.BusyBeaver as BusyBeaver
 import Array
 import Array.Extra as Array
 import Core.KeyedTape as KeyedTape exposing (..)
 import Core.Turing as Turing exposing (..)
+import Dict as Dict exposing (..)
+import Json.Decode as D
+import Json.Encode as E
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Result.Extra as Result
@@ -229,6 +233,28 @@ update msg model =
 
                 _ ->
                     ( model, Cmd.none )
+
+        SaveMachine ->
+            ( model
+            , Ports.saveMachine ( model.machineName, Turing.encode E.string E.string model.turing )
+            )
+
+        GetSavedMachines ->
+            ( model
+            , Ports.getSavedMachines ()
+            )
+
+        GetSavedMachinesSuccess payload ->
+            ( { model
+                | savedMachines =
+                    payload
+                        |> List.map (Result.combineMapSecond (D.decodeString (Turing.decoder D.string D.string)))
+                        |> Result.partition
+                        |> Tuple.first
+                        |> Dict.fromList
+              }
+            , Cmd.none
+            )
 
 
 restartComputationIfRunning : Model -> ( ComputationWorkflow, Cmd Msg )

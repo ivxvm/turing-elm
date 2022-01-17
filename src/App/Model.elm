@@ -6,11 +6,13 @@ import Array exposing (Array)
 import Core.KeyedTape as KeyedTape exposing (..)
 import Core.Rule as Rule exposing (..)
 import Core.Turing exposing (..)
+import Dict as Dict exposing (..)
 
 
 type alias Model =
     { machineName : String
     , machineNameValidationError : Maybe String
+    , savedMachines : Dict String (Turing String String)
     , ruleStrings : List String
     , ruleValidationErrors : Array (Maybe String)
     , currentStateString : String
@@ -37,6 +39,7 @@ init name turing =
     ( invalidateEditFields
         { machineName = name
         , machineNameValidationError = Nothing
+        , savedMachines = Dict.empty
         , ruleStrings =
             turing.rules
                 |> List.map (Rule.toString identity identity)
@@ -58,7 +61,10 @@ init name turing =
         , isInitialState = True
         , isEditingStateAndTape = False
         }
-    , Ports.centerCurrentTapeCell ()
+    , Cmd.batch
+        [ Ports.centerCurrentTapeCell ()
+        , Ports.getSavedMachines ()
+        ]
     )
 
 
