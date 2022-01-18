@@ -21,7 +21,8 @@ header {
 }
 
 input:focus {
-    outline: 1px solid #66FCF1 !important;
+    outline: 0;
+    box-shadow: 0 0 0 1px #66FCF1 !important;
 }
 
 .centered {
@@ -211,7 +212,7 @@ input:focus {
 }
 
 .configuration-row input.invalid {
-    outline: 1px solid red !important;
+    box-shadow: 0 0 0 1px red !important;
 }
 
 .configuration-row input + span {
@@ -310,8 +311,12 @@ input:focus {
     color: #C5C6C7;
 }
 
+.rule-input.invalid {
+    box-shadow: 0 0 0 1px red !important;
+}
+
 .rule-input.highlighted-rule {
-    outline: 1px solid #45A29E;
+    box-shadow: 0 0 0 1px #45A29E;
 }
 
 .add-rule,
