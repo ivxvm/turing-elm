@@ -10,7 +10,6 @@ import App.View as App
 import Browser
 import Core.Turing as Turing
 import Html.Styled exposing (toUnstyled)
-import Json.Encode as E
 
 
 main : Program () Model Msg
@@ -26,7 +25,7 @@ main =
                 , Cmd.batch
                     [ initCmd
                     , Ports.provideBuiltinMachines
-                        [ ( "Busy Beaver", Turing.encode E.string E.string BusyBeaver.turing )
+                        [ ( "Busy Beaver", Turing.encodeSimple BusyBeaver.turing )
                         ]
                     ]
                 )

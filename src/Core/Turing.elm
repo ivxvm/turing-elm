@@ -74,6 +74,11 @@ encode encodeSymbol encodeState turing =
         ]
 
 
+encodeSimple : Turing String String -> E.Value
+encodeSimple =
+    encode E.string E.string
+
+
 decoder : D.Decoder sym -> D.Decoder st -> D.Decoder (Turing sym st)
 decoder symbolDecoder stateDecoder =
     D.map4 Turing
@@ -81,3 +86,8 @@ decoder symbolDecoder stateDecoder =
         (D.field "currentState" stateDecoder)
         (D.field "finalState" stateDecoder)
         (D.field "rules" (D.list (Rule.decoder symbolDecoder stateDecoder)))
+
+
+decoderSimple : D.Decoder (Turing String String)
+decoderSimple =
+    decoder D.string D.string

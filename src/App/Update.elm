@@ -12,7 +12,6 @@ import Core.Turing as Turing exposing (..)
 import Delay
 import Dict as Dict exposing (..)
 import Json.Decode as D
-import Json.Encode as E
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Result.Extra as Result
@@ -242,7 +241,7 @@ update msg model =
         SaveMachine ->
             ( model
             , Cmd.batch
-                [ Ports.saveMachine ( model.machineName, Turing.encode E.string E.string model.turing )
+                [ Ports.saveMachine ( model.machineName, Turing.encodeSimple model.turing )
                 , Delay.after 250 GetSavedMachines
                 ]
             )
@@ -280,7 +279,7 @@ update msg model =
             ( { model
                 | savedMachines =
                     payload
-                        |> List.map (Result.combineMapSecond (D.decodeString (Turing.decoder D.string D.string)))
+                        |> List.map (Result.combineMapSecond (D.decodeString Turing.decoderSimple))
                         |> Result.partition
                         |> Tuple.first
                         |> Dict.fromList

@@ -2,10 +2,10 @@ module TuringTests exposing (..)
 
 import Core.Direction as Direction exposing (..)
 import Core.KeyedTape as KeyedTape exposing (..)
-import Core.Rule as Rule exposing (..)
+import Core.Rule exposing (..)
 import Core.Turing as Turing exposing (..)
 import Expect
-import Json.Decode as D exposing (decodeString)
+import Json.Decode exposing (decodeString)
 import Json.Encode as E
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -106,7 +106,7 @@ jsonTest =
                 Expect.equal
                     (Result.Ok exampleTuring)
                     (decodeString
-                        (Turing.decoder D.string D.string)
-                        (E.encode 0 (Turing.encode E.string E.string exampleTuring))
+                        Turing.decoderSimple
+                        (E.encode 0 (Turing.encodeSimple exampleTuring))
                     )
         ]
