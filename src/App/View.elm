@@ -35,12 +35,13 @@ rulesListEntryHtml model ruleIndex ruleString =
     in
     div
         [ class "rules-list-row"
-        , class validationClass
         ]
         [ input
             [ placeholder "OldState OldSymbol NewSymbol NewState MoveDirection"
+            , title (Maybe.withDefault "" validationError)
             , value ruleString
             , class "rule-input"
+            , class validationClass
             , classIf (ruleIndex == highlightedRuleIndex) "highlighted-rule"
             , onInput (UpdateRule ruleIndex)
             ]

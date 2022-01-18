@@ -111,9 +111,12 @@ validateRuleString ruleString =
             parts =
                 String.split " " ruleString
                     |> List.filter (not << String.isEmpty)
+
+            len =
+                List.length parts
         in
-        if List.length parts /= 5 then
-            Just "Missing parts in rule: should contain 5 parts"
+        if len /= 5 then
+            Just ("Rule should contain 5 parts, currently " ++ String.fromInt len)
 
         else
             Nothing
