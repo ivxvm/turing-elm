@@ -25,6 +25,16 @@ asTapeIn =
     flip setTape
 
 
+setRules : List (Rule sym st) -> Turing sym st -> Turing sym st
+setRules rules turing =
+    { turing | rules = rules }
+
+
+asRulesIn : Turing sym st -> List (Rule sym st) -> Turing sym st
+asRulesIn =
+    flip setRules
+
+
 isHalted : Turing a s -> Bool
 isHalted turing =
     turing.currentState == turing.finalState

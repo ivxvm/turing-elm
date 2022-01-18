@@ -37,15 +37,15 @@ update msg model =
             ( { model
                 | ruleStrings = List.removeAt index model.ruleStrings
                 , ruleValidationErrors = Array.removeAt index model.ruleValidationErrors
+                , turing =
+                    List.removeAt index model.turing.rules
+                        |> asRulesIn model.turing
               }
             , Cmd.none
             )
 
         UpdateRule index newValue ->
             let
-                turing =
-                    model.turing
-
                 sanitizedValue =
                     String.trim newValue
 
@@ -58,7 +58,9 @@ update msg model =
             ( { model
                 | ruleStrings = List.setAt index newValue model.ruleStrings
                 , ruleValidationErrors = Array.set index validationError model.ruleValidationErrors
-                , turing = { turing | rules = Maybe.unwrap model.turing.rules (\r -> List.setAt index r model.turing.rules) newRule }
+                , turing =
+                    Maybe.unwrap model.turing.rules (\r -> List.setAt index r model.turing.rules) newRule
+                        |> asRulesIn model.turing
               }
             , Cmd.none
             )
