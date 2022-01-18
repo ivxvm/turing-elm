@@ -101,6 +101,24 @@ validateTapeString tapeString =
         Nothing
 
 
+validateRuleString : String -> Maybe String
+validateRuleString ruleString =
+    if String.isEmpty ruleString then
+        Just "Rule unspecified"
+
+    else
+        let
+            parts =
+                String.split " " ruleString
+                    |> List.filter (not << String.isEmpty)
+        in
+        if List.length parts /= 5 then
+            Just "Missing parts in rule: should contain 5 parts"
+
+        else
+            Nothing
+
+
 invalidateEditFields : Model -> Model
 invalidateEditFields model =
     { model

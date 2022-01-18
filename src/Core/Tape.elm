@@ -130,7 +130,7 @@ fromString parseSymbol emptySymbol string =
                 case List.splitAt focusedSymbolIndex symbols of
                     ( left, ( _, current ) :: right ) ->
                         Ok
-                            { left = List.map Tuple.second left
+                            { left = List.reverse (List.map Tuple.second left)
                             , right = List.map Tuple.second right
                             , currentSymbol = current
                             , emptySymbol = emptySymbol

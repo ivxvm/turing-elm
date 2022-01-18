@@ -8,6 +8,7 @@ import App.Ports as Ports
 import Array
 import Array.Extra as Array
 import Core.KeyedTape as KeyedTape exposing (..)
+import Core.Rule as Rule
 import Core.Turing as Turing exposing (..)
 import Delay
 import Dict as Dict exposing (..)
@@ -41,8 +42,23 @@ update msg model =
             )
 
         UpdateRule index newValue ->
+            let
+                turing =
+                    model.turing
+
+                sanitizedValue =
+                    String.trim newValue
+
+                validationError =
+                    Model.validateRuleString sanitizedValue
+
+                newRule =
+                    Maybe.unpack (\() -> Rule.fromString identity identity sanitizedValue) (\_ -> Nothing) validationError
+            in
             ( { model
                 | ruleStrings = List.setAt index newValue model.ruleStrings
+                , ruleValidationErrors = Array.set index validationError model.ruleValidationErrors
+                , turing = { turing | rules = Maybe.unwrap model.turing.rules (\r -> List.setAt index r model.turing.rules) newRule }
               }
             , Cmd.none
             )
