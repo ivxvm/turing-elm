@@ -157,6 +157,7 @@ input:focus {
     border-radius: 16px;
     color: #45A29E;
     user-select: none;
+    -webkit-user-select: none;
     overflow: hidden;
 }
 
@@ -281,6 +282,7 @@ input:focus {
     box-sizing: border-box;
     padding-bottom: 2px;
     user-select: none;
+    -webkit-user-select: none;
 }
 
 .save-machine-button:hover {
@@ -353,11 +355,11 @@ input:focus {
     color: #45A29E;
     opacity: 0.25;
     user-select: none;
+    -webkit-user-select: none;
     z-index: -1;
 }
 
 .saved-machine-link:hover {
-    /* text-decoration: underline; */
     opacity: 1;
     cursor: pointer;
     z-index: 1;
