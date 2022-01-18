@@ -18,8 +18,21 @@ type alias Tape ext sym =
 
 
 setEmptySymbol : a -> Tape ext a -> Tape ext a
-setEmptySymbol symbol tape =
-    { tape | emptySymbol = symbol }
+setEmptySymbol newEmptySymbol tape =
+    let
+        replaceIfEmpty symbol =
+            if symbol == tape.emptySymbol then
+                newEmptySymbol
+
+            else
+                symbol
+    in
+    { tape
+        | left = List.map replaceIfEmpty tape.left
+        , right = List.map replaceIfEmpty tape.right
+        , currentSymbol = replaceIfEmpty tape.currentSymbol
+        , emptySymbol = newEmptySymbol
+    }
 
 
 asEmptySymbolIn : Tape ext a -> a -> Tape ext a
