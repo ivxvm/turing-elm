@@ -36,3 +36,7 @@ Other notes:
 * Vdom creates a lot of tricky issues with css transitions, because of implicit element insertions and deletions.
 
 * Trick for opacity gradients using "mix-blend-mode: hard-light" and gray color stops: https://stackoverflow.com/a/15624692
+
+* Safari doesn't support outlines with rounded corners, the same can be achieved with box-shadow as a workaround
+
+* Safari needs prefix for user-select: "-webkit-user-select"
