@@ -61,10 +61,7 @@ init name turing =
         , isInitialState = True
         , isEditingStateAndTape = False
         }
-    , Cmd.batch
-        [ Ports.centerCurrentTapeCell ()
-        , Ports.getSavedMachines ()
-        ]
+    , Ports.centerCurrentTapeCell ()
     )
 
 

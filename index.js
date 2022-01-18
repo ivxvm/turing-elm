@@ -40,6 +40,13 @@ app.ports.getSavedMachines.subscribe(() => {
     app.ports.onGetSavedMachinesSuccess.send(Array.from(Object.entries(localStorage)));
 });
 
+app.ports.provideBuiltinMachines.subscribe((builtinMachines) => {
+    for (const [name, data] of builtinMachines) {
+        localStorage.setItem(name, JSON.stringify(data));
+    }
+    app.ports.onProvideBuiltinMachinesSuccess.send(null);
+});
+
 /******************************************************************************
  * Saved machine links positioning
  */
@@ -85,8 +92,8 @@ const invalidateSavedMachineLinkPositions = () => {
                 top > rootBounds.top - 64 &&
                 top < rootBounds.bottom
             ) {
-                left = rng() * window.innerWidth - 64;
-                top = rng() * window.innerHeight - 64;
+                left = rng() * (window.innerWidth - 128);
+                top = rng() * (window.innerHeight - 64);
             }
             node.setAttribute("style", `left:${left}px;top:${top}px`);
             node.setAttribute("positioned", "true");

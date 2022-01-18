@@ -176,7 +176,8 @@ update msg model =
             in
             ( Model.invalidateEditFields
                 { initialModel
-                    | activeComputationWorkflow = newComputationWorkflow
+                    | savedMachines = model.savedMachines
+                    , activeComputationWorkflow = newComputationWorkflow
                     , isEditingStateAndTape = model.isEditingStateAndTape
                     , isRunning = model.isRunning
                 }
@@ -257,7 +258,8 @@ update msg model =
             in
             ( Model.invalidateEditFields
                 { newModel
-                    | activeComputationWorkflow = ComputationWorkflow.reset model.activeComputationWorkflow
+                    | savedMachines = model.savedMachines
+                    , activeComputationWorkflow = ComputationWorkflow.reset model.activeComputationWorkflow
                     , isEditingStateAndTape = model.isEditingStateAndTape
                     , isRunning = False
                 }
