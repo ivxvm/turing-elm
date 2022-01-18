@@ -4,6 +4,10 @@ const app = Elm.Main.init({
     node: root
 });
 
+/******************************************************************************
+ * Port subscriptions
+ */
+
 app.ports.centerCurrentTapeCell.subscribe(() => {
     setTimeout(() => {
         const tape = document.querySelector(".tape");
@@ -35,6 +39,10 @@ app.ports.saveMachine.subscribe(([name, data]) => {
 app.ports.getSavedMachines.subscribe(() => {
     app.ports.onGetSavedMachinesSuccess.send(Array.from(Object.entries(localStorage)));
 });
+
+/******************************************************************************
+ * Saved machine links positioning
+ */
 
 const hashCode = (string) =>
     string.split('').reduce((a, b) => {
@@ -91,6 +99,12 @@ window.addEventListener("resize", () => {
     resetSavedMachineLinkPositions();
 });
 
+invalidateSavedMachineLinkPositions();
+
+/******************************************************************************
+ * Saved machines removal
+ */
+
 let currentlyHoveredSavedMachineLink = null;
 
 window.addEventListener("mouseover", (e) => {
@@ -110,5 +124,3 @@ window.addEventListener("keydown", (e) => {
         }
     }
 });
-
-invalidateSavedMachineLinkPositions();
