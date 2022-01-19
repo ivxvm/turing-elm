@@ -8,8 +8,8 @@ Elm notes:
 This works: `{ obj | field = newValue }`
 This doesn't: `{ obj | field = { obj.field | other = ... } }`
 
-* There is a neat idiom for field setters that plays well (insert link) with pipeline operator `(|>)`: 
-    
+* There is a neat idiom for field setters that plays well (insert link) with pipeline operator `(|>)`:
+
   ```elm
   setSomething : FieldType -> RecordType -> RecordType
   setSomething ... = ...
@@ -30,11 +30,13 @@ This doesn't: `{ obj | field = { obj.field | other = ... } }`
 
 * Tooling is decent and everything works as intended out of the box on Mac M1. There are minor issues in VSCode Elm language server, like type errors sometimes not showing up until you edit and save file again, but it doesn't happen often and isn't too annoying.
 
-* Builtin elm reactor doesn't seem to support external CSS. I generally have to spend a lot of time messing around with CSS to get things right and this is why I'm not a fan of doing CSS in code. It's ofcourse great to keep things locally scoped but it's very time consuming for me to edit styles without proper CSS intellisense and figuring out how to rephrase combinations of selectors and pseudoselectors in code. The only one time I liked it is Styled Components library which provides template literals containing just straight CSS (making it easy to repurpose existing CSS syntax highlighting and intellisense) but with few extra features like variable interpolation (and ofcourse renaming everything making it effectively locally scoped). There is an alternative to elm reactor called elm-live which makes it easy to use external CSS and it works just fine for me.
+* Builtin "elm reactor" doesn't seem to support external CSS. I generally have to spend a lot of time messing around with CSS to get things right and this is why I'm not a fan of doing CSS in code. It's ofcourse great to keep things locally scoped but it's very time consuming for me to edit styles without proper CSS intellisense and figuring out how to rephrase combinations of selectors and pseudoselectors in code. The only one time I liked this approach is Styled Components library which provides template literals containing just straight CSS (making it easy to repurpose existing CSS syntax highlighting and intellisense) but with few extra features like variable interpolation (and ofcourse renaming everything making it effectively locally scoped). There is an alternative to elm reactor called elm-live which makes it easy to use external CSS and it works just fine for me.
+
+* Turns out, some things I implemented on JavaScript side are doable in Elm by using APIs from Browser.* modules, which I initially overlooked. Watching youtube presentations and reading code in publicly available github repositories helps a lot to discover new things about Elm.
 
 Other notes:
 
-* Vdom creates a lot of tricky issues with css transitions, because of implicit element insertions and deletions.
+* Vdom creates a lot of tricky issues with CSS transitions, because of implicit element insertions and deletions. At one point I had to write the whole new KeyedTape replacing Tape just to keep track of cell keys for rendering. Later I also realized I needed to render some elements prematurely. All to be able to do CSS transitions.
 
 * Trick for opacity gradients using "mix-blend-mode: hard-light" and gray color stops: https://stackoverflow.com/a/15624692
 
