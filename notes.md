@@ -8,16 +8,17 @@ Elm notes:
 This works: `{ obj | field = newValue }`
 This doesn't: `{ obj | field = { obj.field | other = ... } }`
 
-* There is a neat idiom for field setters that plays well (insert link) with pipeline operator `(|>)`:
-```elm
-setSomething : FieldType -> RecordType -> RecordType
-setSomething ... = ...
+* There is a neat idiom for field setters that plays well (insert link) with pipeline operator `(|>)`: 
+    
+  ```elm
+  setSomething : FieldType -> RecordType -> RecordType
+  setSomething ... = ...
 
-asSomethingIn : RecordType -> FieldType -> RecordType
-asSomethingIn = flip setSomething
-```
+  asSomethingIn : RecordType -> FieldType -> RecordType
+  asSomethingIn = flip setSomething
+  ```
 
-* Elm does have row polymorphism which enables some interesting code composition and reuse patterns (see Tape / KeyedTape (insert links) in repo), but it's limited and can't achieve certain things like polymorphic record merge (like `Object.assign` from JavaScript).
+* Elm does have row polymorphism which enables some interesting code separation, composition and reuse patterns (see Tape / KeyedTape (insert links) in repo), but it's limited and can't achieve certain things like polymorphic record merge (like `Object.assign` from JavaScript).
 
 * Elm doesn't have anything like typeclasses (Haskell), traits (Rust), or module signatures / functors (Standard ML / OCaml), which penalizes certain kinds of polymorphism and generic programming. For example when I realized I need keys in Tape, I was able to easily make an adapter KeyedTape using row polymorphism and composition, but I couldn't easily change Turing to use KeyedTape instead of Tape, I had to modify code and make it hardwired to new KeyedTape. It's possible to achieve the same by passing all overloadable functions as parameters, which I sometimes did for toString/fromString and encode/decode, but for the former case I was too lazy to try given the fact that I don't actually need it to be polymorphic atm. I think this approach is worth exploring further though. It has a benefit of everything being simple functions which means it might be possible to come up with systematic set of higher order functions automating the hassle.
 
