@@ -244,34 +244,19 @@ input:focus {
     opacity: 1;
 }
 
-.current-state-input {
-    width: 133px;
-    padding-left: 16px;
-    border-top-left-radius: 16px;
-    border-bottom-left-radius: 16px;
-}
-
-.current-empty-symbol-input {
-    width: 133px;
+.configuration-row > input:not(:first-child),
+.configuration-row > div:not(:first-child) {
     margin-left: 5px;
-    margin-right: 5px;
-}
-
-.current-tape-input {
-    width: 133px;
-    border-top-right-radius: 16px;
-    border-bottom-right-radius: 16px;
 }
 
 .machine-name-input {
-    width: calc(266px + 5px);
+    width: 250px;
     border-top-left-radius: 16px;
     border-bottom-left-radius: 16px;
-    margin-right: 5px;
 }
 
 .save-machine-button {
-    display:flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     border: 2px solid #45A29E;
@@ -282,7 +267,7 @@ input:focus {
     font-size: 20px;
     font-weight: bold;
     line-height: 16px;
-    width: 133px;
+    width: 150px;
     text-align: center;
     box-sizing: border-box;
     padding-bottom: 2px;
@@ -294,6 +279,26 @@ input:focus {
     color: #66FCF1;
     cursor: pointer;
     background-color: #45A29E;
+}
+
+.current-tape-input {
+    width: 250px;
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
+}
+
+.current-state-input {
+    width: 50px;
+}
+
+.current-empty-symbol-input {
+    width: 45px;
+}
+
+.current-final-state-input {
+    width: 45px;
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
 }
 
 .rules-container {

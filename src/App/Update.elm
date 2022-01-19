@@ -108,6 +108,29 @@ update msg model =
             , Cmd.none
             )
 
+        UpdateFinalState newValue ->
+            let
+                sanitizedValue =
+                    String.trim newValue
+
+                validationError =
+                    Model.validateFinalStateString sanitizedValue
+
+                turing =
+                    model.turing
+            in
+            ( { model
+                | currentFinalStateString = newValue
+                , currentFinalStateValidationError = validationError
+                , turing =
+                    Maybe.unpack
+                        (\() -> { turing | finalState = sanitizedValue })
+                        (\_ -> turing)
+                        validationError
+              }
+            , Cmd.none
+            )
+
         UpdateTape newValue ->
             let
                 sanitizedValue =

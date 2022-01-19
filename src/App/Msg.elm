@@ -9,6 +9,7 @@ type Msg
     | UpdateRule Int String
     | UpdateState String
     | UpdateEmptySymbol String
+    | UpdateFinalState String
     | UpdateTape String
     | UpdateMachineName String
     | ToggleEditConfiguration

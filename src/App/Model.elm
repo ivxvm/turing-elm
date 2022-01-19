@@ -19,6 +19,8 @@ type alias Model =
     , currentStateValidationError : Maybe String
     , currentEmptySymbolString : String
     , currentEmptySymbolValidationError : Maybe String
+    , currentFinalStateString : String
+    , currentFinalStateValidationError : Maybe String
     , currentTapeString : String
     , currentTapeValidationError : Maybe String
     , turing : Turing String String
@@ -48,6 +50,8 @@ init name turing =
         , currentStateValidationError = Nothing
         , currentEmptySymbolString = ""
         , currentEmptySymbolValidationError = Nothing
+        , currentFinalStateString = ""
+        , currentFinalStateValidationError = Nothing
         , currentTapeString = ""
         , currentTapeValidationError = Nothing
         , turing = { turing | tape = KeyedTape.lookahead turing.tape }
@@ -78,6 +82,15 @@ validateEmptySymbolString : String -> Maybe String
 validateEmptySymbolString emptySymbol =
     if String.isEmpty emptySymbol then
         Just "Empty symbol unspecified"
+
+    else
+        Nothing
+
+
+validateFinalStateString : String -> Maybe String
+validateFinalStateString emptySymbol =
+    if String.isEmpty emptySymbol then
+        Just "Final state unspecified"
 
     else
         Nothing
@@ -129,6 +142,8 @@ invalidateEditFields model =
         , currentStateValidationError = Nothing
         , currentEmptySymbolString = model.turing.tape.emptySymbol
         , currentEmptySymbolValidationError = Nothing
+        , currentFinalStateString = model.turing.finalState
+        , currentFinalStateValidationError = Nothing
         , currentTapeString = KeyedTape.toTapeString identity model.turing.tape
         , currentTapeValidationError = Nothing
     }

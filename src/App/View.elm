@@ -192,6 +192,7 @@ configurationHtml model =
             ]
             [ input
                 [ placeholder "Machine name"
+                , title "Machine name"
                 , value model.machineName
                 , class "machine-name-input"
                 , classIf (Maybe.isJust model.machineNameValidationError) "invalid"
@@ -209,7 +210,20 @@ configurationHtml model =
             , classIf (not model.isEditingStateAndTape) "disabled"
             ]
             [ input
+                [ placeholder "Tape"
+                , title "Current tape"
+                , value model.currentTapeString
+                , class "current-tape-input"
+                , classIf (Maybe.isJust model.currentTapeValidationError) "invalid"
+                , onInput UpdateTape
+                ]
+                []
+            , span
+                [ attribute "error" (Maybe.withDefault "" model.currentTapeValidationError) ]
+                []
+            , input
                 [ placeholder "State"
+                , title "Current state"
                 , value model.currentStateString
                 , class "current-state-input"
                 , classIf (Maybe.isJust model.currentStateValidationError) "invalid"
@@ -221,6 +235,7 @@ configurationHtml model =
                 []
             , input
                 [ placeholder "∅"
+                , title "Empty symbol"
                 , value model.currentEmptySymbolString
                 , class "current-empty-symbol-input"
                 , classIf (Maybe.isJust model.currentEmptySymbolValidationError) "invalid"
@@ -231,15 +246,16 @@ configurationHtml model =
                 [ attribute "error" (Maybe.withDefault "" model.currentEmptySymbolValidationError) ]
                 []
             , input
-                [ placeholder "Tape"
-                , value model.currentTapeString
-                , class "current-tape-input"
-                , classIf (Maybe.isJust model.currentTapeValidationError) "invalid"
-                , onInput UpdateTape
+                [ placeholder "X"
+                , title "Final state"
+                , value model.currentFinalStateString
+                , class "current-final-state-input"
+                , classIf (Maybe.isJust model.currentFinalStateValidationError) "invalid"
+                , onInput UpdateFinalState
                 ]
                 []
             , span
-                [ attribute "error" (Maybe.withDefault "" model.currentTapeValidationError) ]
+                [ attribute "error" (Maybe.withDefault "" model.currentFinalStateValidationError) ]
                 []
             ]
         ]
