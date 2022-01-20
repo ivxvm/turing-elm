@@ -25,7 +25,7 @@ toString symbolToString stateToString rule =
         ]
 
 
-fromString : (String -> sym) -> (String -> st) -> String -> Maybe (Rule sym st)
+fromString : (String -> sym) -> (String -> st) -> String -> Result String (Rule sym st)
 fromString symbolFromString stateFromString string =
     let
         parts =
@@ -34,19 +34,21 @@ fromString symbolFromString stateFromString string =
     in
     case parts of
         [ currentStateString, currentSymbolString, newSymbolString, newStateString, moveDirectionString ] ->
-            Direction.fromString moveDirectionString
-                |> Maybe.map
-                    (\direction ->
+            case Direction.fromString moveDirectionString of
+                Just direction ->
+                    Ok
                         { currentState = stateFromString currentStateString
                         , currentSymbol = symbolFromString currentSymbolString
                         , newSymbol = symbolFromString newSymbolString
                         , newState = stateFromString newStateString
                         , moveDirection = direction
                         }
-                    )
+
+                Nothing ->
+                    Err ("Wrong direction: " ++ moveDirectionString)
 
         _ ->
-            Nothing
+            Err ("Rule should contain 5 parts, currently " ++ String.fromInt (List.length parts))
 
 
 encode : (sym -> E.Value) -> (st -> E.Value) -> Rule sym st -> E.Value

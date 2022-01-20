@@ -3,7 +3,6 @@ module App.View exposing (..)
 import App.ComputationWorkflow.Step exposing (..)
 import App.Model exposing (..)
 import App.Msg exposing (..)
-import Array
 import Core.KeyedTape as KeyedTape exposing (..)
 import Core.Turing as Turing exposing (..)
 import Dict
@@ -21,7 +20,7 @@ rulesListEntryHtml : Model -> Int -> String -> Html Msg
 rulesListEntryHtml model ruleIndex ruleString =
     let
         validationError =
-            Maybe.join (Array.get ruleIndex model.ruleValidationErrors)
+            Maybe.join (List.getAt ruleIndex model.ruleValidationErrors)
 
         validationClass =
             Maybe.unwrap "valid" (\_ -> "invalid") validationError

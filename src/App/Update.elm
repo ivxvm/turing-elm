@@ -5,10 +5,8 @@ import App.ComputationWorkflow.Type exposing (..)
 import App.Model as Model exposing (..)
 import App.Msg exposing (..)
 import App.Ports as Ports
-import Array
-import Array.Extra as Array
 import Core.KeyedTape as KeyedTape exposing (..)
-import Core.Rule as Rule
+import Core.Rule as Rule exposing (..)
 import Core.Turing as Turing exposing (..)
 import Delay
 import Dict as Dict exposing (..)
@@ -28,7 +26,7 @@ update msg model =
         AddRule ->
             ( { model
                 | ruleStrings = model.ruleStrings ++ [ "" ]
-                , ruleValidationErrors = Array.push Nothing model.ruleValidationErrors
+                , ruleValidationErrors = model.ruleValidationErrors ++ [ Nothing ]
               }
             , Cmd.none
             )
@@ -36,7 +34,7 @@ update msg model =
         RemoveRule index ->
             ( { model
                 | ruleStrings = List.removeAt index model.ruleStrings
-                , ruleValidationErrors = Array.removeAt index model.ruleValidationErrors
+                , ruleValidationErrors = List.removeAt index model.ruleValidationErrors
                 , turing =
                     List.removeAt index model.turing.rules
                         |> asRulesIn model.turing
@@ -46,21 +44,22 @@ update msg model =
 
         UpdateRule index newValue ->
             let
-                sanitizedValue =
-                    String.trim newValue
+                newRuleStrings =
+                    List.setAt index newValue model.ruleStrings
 
-                validationError =
-                    Model.validateRuleString sanitizedValue
+                newRuleParses =
+                    List.map (Rule.fromString identity identity) newRuleStrings
 
-                newRule =
-                    Maybe.unpack (\() -> Rule.fromString identity identity sanitizedValue) (\_ -> Nothing) validationError
+                newRuleValidationErrors =
+                    List.map Result.error newRuleParses
+
+                newRules =
+                    List.filterMap Result.toMaybe newRuleParses
             in
             ( { model
-                | ruleStrings = List.setAt index newValue model.ruleStrings
-                , ruleValidationErrors = Array.set index validationError model.ruleValidationErrors
-                , turing =
-                    Maybe.unwrap model.turing.rules (\r -> List.setAt index r model.turing.rules) newRule
-                        |> asRulesIn model.turing
+                | ruleStrings = newRuleStrings
+                , ruleValidationErrors = newRuleValidationErrors
+                , turing = Turing.setRules newRules model.turing
               }
             , Cmd.none
             )

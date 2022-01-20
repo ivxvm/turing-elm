@@ -33,7 +33,7 @@ ruleFromString =
     test "Rule.fromString" <|
         \_ ->
             Expect.equal
-                (Just testRule)
+                (Ok testRule)
                 (Rule.fromString identity identity testRuleStringFormArbitrary)
 
 

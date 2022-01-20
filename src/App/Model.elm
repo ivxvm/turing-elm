@@ -2,7 +2,6 @@ module App.Model exposing (..)
 
 import App.ComputationWorkflow.Type as ComputationWorkflow exposing (..)
 import App.Ports as Ports
-import Array exposing (Array)
 import Core.KeyedTape as KeyedTape exposing (..)
 import Core.Rule as Rule exposing (..)
 import Core.Turing exposing (..)
@@ -14,7 +13,7 @@ type alias Model =
     , machineNameValidationError : Maybe String
     , savedMachines : Dict String (Turing String String)
     , ruleStrings : List String
-    , ruleValidationErrors : Array (Maybe String)
+    , ruleValidationErrors : List (Maybe String)
     , currentStateString : String
     , currentStateValidationError : Maybe String
     , currentEmptySymbolString : String
@@ -45,7 +44,7 @@ init name turing =
         , ruleStrings =
             turing.rules
                 |> List.map (Rule.toString identity identity)
-        , ruleValidationErrors = Array.repeat (List.length turing.rules) Nothing
+        , ruleValidationErrors = List.repeat (List.length turing.rules) Nothing
         , currentStateString = ""
         , currentStateValidationError = Nothing
         , currentEmptySymbolString = ""
@@ -112,27 +111,6 @@ validateTapeString tapeString =
 
     else
         Nothing
-
-
-validateRuleString : String -> Maybe String
-validateRuleString ruleString =
-    if String.isEmpty ruleString then
-        Just "Rule unspecified"
-
-    else
-        let
-            parts =
-                String.split " " ruleString
-                    |> List.filter (not << String.isEmpty)
-
-            len =
-                List.length parts
-        in
-        if len /= 5 then
-            Just ("Rule should contain 5 parts, currently " ++ String.fromInt len)
-
-        else
-            Nothing
 
 
 invalidateEditFields : Model -> Model
