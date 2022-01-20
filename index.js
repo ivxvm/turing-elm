@@ -131,3 +131,92 @@ window.addEventListener("keydown", (e) => {
         }
     }
 });
+
+/******************************************************************************
+ * Builtins
+ */
+
+localStorage.setItem("Copy-Simple", JSON.stringify({
+    "tape": { "left": ["0"], "right": ["1", "1"], "currentSymbol": "1", "emptySymbol": "0" },
+    "currentState": "A",
+    "finalState": "X",
+    "rules": [
+        { "currentState": "A", "currentSymbol": "0", "newSymbol": "0", "newState": "X", "moveDirection": "right" },
+        { "currentState": "A", "currentSymbol": "1", "newSymbol": "_", "newState": "B", "moveDirection": "left" },
+        { "currentState": "B", "currentSymbol": "1", "newSymbol": "1", "newState": "B", "moveDirection": "left" },
+        { "currentState": "B", "currentSymbol": "0", "newSymbol": "1", "newState": "C", "moveDirection": "right" },
+        { "currentState": "C", "currentSymbol": "1", "newSymbol": "1", "newState": "C", "moveDirection": "right" },
+        { "currentState": "C", "currentSymbol": "0", "newSymbol": "0", "newState": "C", "moveDirection": "right" },
+        { "currentState": "C", "currentSymbol": "_", "newSymbol": "1", "newState": "A", "moveDirection": "right" }
+    ]
+}));
+
+localStorage.setItem("Copy-Interspace", JSON.stringify({
+    "tape": { "left": ["0"], "right": ["1", "1"], "currentSymbol": "1", "emptySymbol": "0" },
+    "currentState": "A",
+    "finalState": "X",
+    "rules": [
+        { "currentState": "A", "currentSymbol": "0", "newSymbol": "0", "newState": "X", "moveDirection": "right" },
+        { "currentState": "A", "currentSymbol": "1", "newSymbol": "_", "newState": "B1", "moveDirection": "left" },
+        { "currentState": "B1", "currentSymbol": "1", "newSymbol": "1", "newState": "B1", "moveDirection": "left" },
+        { "currentState": "B1", "currentSymbol": "0", "newSymbol": "_", "newState": "B2", "moveDirection": "left" },
+        { "currentState": "B2", "currentSymbol": "1", "newSymbol": "1", "newState": "B2", "moveDirection": "left" },
+        { "currentState": "B2", "currentSymbol": "0", "newSymbol": "1", "newState": "C1", "moveDirection": "right" },
+        { "currentState": "C1", "currentSymbol": "1", "newSymbol": "1", "newState": "C1", "moveDirection": "right" },
+        { "currentState": "C1", "currentSymbol": "0", "newSymbol": "0", "newState": "C1", "moveDirection": "right" },
+        { "currentState": "C1", "currentSymbol": "_", "newSymbol": "0", "newState": "C2", "moveDirection": "right" },
+        { "currentState": "C2", "currentSymbol": "1", "newSymbol": "1", "newState": "C2", "moveDirection": "right" },
+        { "currentState": "C2", "currentSymbol": "0", "newSymbol": "0", "newState": "C2", "moveDirection": "right" },
+        { "currentState": "C2", "currentSymbol": "_", "newSymbol": "1", "newState": "A", "moveDirection": "right" }
+    ]
+}));
+
+localStorage.setItem("C=A+B (Decimal)", JSON.stringify({
+    "tape": { "left": ["3", "0"], "right": ["_"], "currentSymbol": "2", "emptySymbol": "_" },
+    "currentState": "A",
+    "finalState": "X",
+    "rules": [
+        { "currentState": "A", "currentSymbol": "4", "newSymbol": "3", "newState": "B+A", "moveDirection": "left" },
+        { "currentState": "A", "currentSymbol": "3", "newSymbol": "2", "newState": "B+A", "moveDirection": "left" },
+        { "currentState": "A", "currentSymbol": "2", "newSymbol": "1", "newState": "B+A", "moveDirection": "left" },
+        { "currentState": "A", "currentSymbol": "1", "newSymbol": "0", "newState": "B+A", "moveDirection": "left" },
+        { "currentState": "A", "currentSymbol": "0", "newSymbol": "0", "newState": "B", "moveDirection": "left" },
+        { "currentState": "B+A", "currentSymbol": "0", "newSymbol": "1", "newState": "A", "moveDirection": "right" },
+        { "currentState": "B+A", "currentSymbol": "1", "newSymbol": "2", "newState": "A", "moveDirection": "right" },
+        { "currentState": "B+A", "currentSymbol": "2", "newSymbol": "3", "newState": "A", "moveDirection": "right" },
+        { "currentState": "B+A", "currentSymbol": "3", "newSymbol": "4", "newState": "A", "moveDirection": "right" },
+        { "currentState": "B+A", "currentSymbol": "4", "newSymbol": "5", "newState": "A", "moveDirection": "right" },
+        { "currentState": "B+A", "currentSymbol": "5", "newSymbol": "6", "newState": "A", "moveDirection": "right" },
+        { "currentState": "B+A", "currentSymbol": "6", "newSymbol": "7", "newState": "A", "moveDirection": "right" },
+        { "currentState": "B+A", "currentSymbol": "7", "newSymbol": "8", "newState": "A", "moveDirection": "right" },
+        { "currentState": "B", "currentSymbol": "8", "newSymbol": "7", "newState": "C+B", "moveDirection": "left" },
+        { "currentState": "B", "currentSymbol": "7", "newSymbol": "6", "newState": "C+B", "moveDirection": "left" },
+        { "currentState": "B", "currentSymbol": "6", "newSymbol": "5", "newState": "C+B", "moveDirection": "left" },
+        { "currentState": "B", "currentSymbol": "5", "newSymbol": "4", "newState": "C+B", "moveDirection": "left" },
+        { "currentState": "B", "currentSymbol": "4", "newSymbol": "3", "newState": "C+B", "moveDirection": "left" },
+        { "currentState": "B", "currentSymbol": "3", "newSymbol": "2", "newState": "C+B", "moveDirection": "left" },
+        { "currentState": "B", "currentSymbol": "2", "newSymbol": "1", "newState": "C+B", "moveDirection": "left" },
+        { "currentState": "B", "currentSymbol": "1", "newSymbol": "0", "newState": "C+B", "moveDirection": "left" },
+        { "currentState": "B", "currentSymbol": "0", "newSymbol": "0", "newState": "X", "moveDirection": "left" },
+        { "currentState": "C+B", "currentSymbol": "0", "newSymbol": "1", "newState": "B", "moveDirection": "right" },
+        { "currentState": "C+B", "currentSymbol": "1", "newSymbol": "2", "newState": "B", "moveDirection": "right" },
+        { "currentState": "C+B", "currentSymbol": "2", "newSymbol": "3", "newState": "B", "moveDirection": "right" },
+        { "currentState": "C+B", "currentSymbol": "3", "newSymbol": "4", "newState": "B", "moveDirection": "right" },
+        { "currentState": "C+B", "currentSymbol": "4", "newSymbol": "5", "newState": "B", "moveDirection": "right" },
+        { "currentState": "C+B", "currentSymbol": "5", "newSymbol": "6", "newState": "B", "moveDirection": "right" },
+        { "currentState": "C+B", "currentSymbol": "6", "newSymbol": "7", "newState": "B", "moveDirection": "right" },
+        { "currentState": "C+B", "currentSymbol": "7", "newSymbol": "8", "newState": "B", "moveDirection": "right" }
+    ]
+}));
+
+localStorage.setItem("Invert-Two-Zeroes", JSON.stringify({
+    "tape": { "left": ["1", "1", "0", "1"], "right": ["0"], "currentSymbol": "1", "emptySymbol": "0" },
+    "currentState": "+2",
+    "finalState": "X",
+    "rules": [
+        { "currentState": "+2", "currentSymbol": "1", "newSymbol": "1", "newState": "+2", "moveDirection": "left" },
+        { "currentState": "+2", "currentSymbol": "0", "newSymbol": "1", "newState": "+1", "moveDirection": "left" },
+        { "currentState": "+1", "currentSymbol": "1", "newSymbol": "1", "newState": "+1", "moveDirection": "left" },
+        { "currentState": "+1", "currentSymbol": "0", "newSymbol": "1", "newState": "X", "moveDirection": "left" }
+    ]
+}));
