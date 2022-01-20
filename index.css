@@ -39,7 +39,6 @@ input:focus {
 .app-container {
     position: relative;
     width: 480px;
-    min-height: 300px;
     background-color: #1F2833;
     margin-top: 8px;
     padding: 16px;
