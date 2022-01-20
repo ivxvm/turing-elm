@@ -3,6 +3,7 @@ module Main exposing (..)
 import App.Model as App exposing (..)
 import App.Msg exposing (..)
 import App.Ports as Ports
+import App.Turing.BitInverter as BitInverter
 import App.Turing.BusyBeaver as BusyBeaver
 import App.Update as App
 import App.UpdateScroll exposing (withScrollUpdate)
@@ -26,6 +27,7 @@ main =
                     [ initCmd
                     , Ports.provideBuiltinMachines
                         [ ( "Busy Beaver", Turing.encodeSimple BusyBeaver.turing )
+                        , ( "Bit Inverter", Turing.encodeSimple BitInverter.turing )
                         ]
                     ]
                 )
