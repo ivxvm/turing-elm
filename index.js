@@ -48,67 +48,6 @@ app.ports.provideBuiltinMachines.subscribe((builtinMachines) => {
 });
 
 /******************************************************************************
- * Saved machine links positioning
- */
-
-const hashCode = (string) =>
-    string.split('').reduce((a, b) => {
-        a = ((a << 5) - a) + b.charCodeAt(0);
-        return a & a
-    }, 0);
-
-const RNG = (seed) => {
-    let x = hashCode(seed);
-    return () => {
-        x = Math.sin(x) * 10000;
-        return x - Math.floor(x);
-    };
-};
-
-const resetSavedMachineLinkPositions = () => {
-    for (const node of root.childNodes) {
-        if (node.nodeName == "A") {
-            node.removeAttribute("positioned");
-        }
-    }
-};
-
-const invalidateSavedMachineLinkPositions = () => {
-    for (const node of root.childNodes) {
-        if (node.nodeName == "A" && !node.getAttribute("positioned")) {
-            resetSavedMachineLinkPositions();
-            break;
-        }
-    }
-    const rootBounds = root.getBoundingClientRect();
-    for (const node of root.childNodes) {
-        if (node.nodeName == "A") {
-            const rng = RNG(node.textContent);
-            let left = rootBounds.left + rootBounds.width / 2;
-            let top = rootBounds.top + rootBounds.height / 2;
-            while (
-                left > rootBounds.left - 64 &&
-                left < rootBounds.right &&
-                top > rootBounds.top - 64 &&
-                top < rootBounds.bottom
-            ) {
-                left = rng() * (window.innerWidth - 128);
-                top = rng() * (window.innerHeight - 64);
-            }
-            node.setAttribute("style", `left:${left}px;top:${top}px`);
-            node.setAttribute("positioned", "true");
-        }
-    }
-    requestAnimationFrame(invalidateSavedMachineLinkPositions);
-};
-
-window.addEventListener("resize", () => {
-    resetSavedMachineLinkPositions();
-});
-
-invalidateSavedMachineLinkPositions();
-
-/******************************************************************************
  * Saved machines removal
  */
 

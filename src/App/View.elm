@@ -309,7 +309,6 @@ savedMachinesHtmls model =
             (\name ->
                 a
                     [ class "saved-machine-link"
-                    , attribute "style" "display:none"
                     , onClick (LoadMachine name)
                     ]
                     [ text name ]
@@ -319,11 +318,49 @@ savedMachinesHtmls model =
 view : Model -> Html Msg
 view model =
     div
-        [ class "app-container" ]
-        (savedMachinesHtmls model
-            ++ [ stateAndTapeHtml model
-               , configurationHtml model
-               , controlsHtml model
-               , rulesListHtml model
-               ]
-        )
+        [ class "app-layout" ]
+        [ section
+            [ class "info-container" ]
+            [ header [] [ text "overview" ]
+            , text
+                """
+                A Turing machine is a mathematical model of computation that defines an abstract machine that manipulates symbols
+                on a strip of tape according to a table of rules. Despite the model's simplicity, given any computer algorithm,
+                a Turing machine capable of implementing that algorithm's logic can be constructed.
+                The machine operates on an infinite memory tape divided into discrete "cells".
+                The machine positions its "head" over a cell and "reads" or "scans" the symbol there.
+                Then, based on the symbol and the machine's own present state in a "finite table" of user-specified instructions,
+                the machine first writes a symbol into the cell, then moves the tape one cell left or right,
+                then, based on the observed symbol and the machine's own state in the table, either proceeds to another instruction
+                or halts computation.
+                """
+            ]
+        , section
+            [ class "options-container" ]
+            [ text "" ]
+        , section
+            [ class "header-container" ]
+            [ header [] [ text "turing.elm" ] ]
+        , section
+            [ class "app-container" ]
+            [ header [] [ text "simulation" ]
+            , div [ class "simulation-controls" ]
+                [ stateAndTapeHtml model
+                , configurationHtml model
+                , controlsHtml model
+                , rulesListHtml model
+                ]
+            ]
+        , section
+            [ class "saved-machines-container" ]
+            (header [] [ text "examples" ] :: savedMachinesHtmls model)
+        , section
+            [ class "footer-container" ]
+            [ hr [] []
+            , span [] [ text "Source code available at " ]
+            , a [ href "https://github.com/ivxvm/turing-elm" ] [ text "github" ]
+            , span [] [ text ", together with dev " ]
+            , a [ href "https://github.com/ivxvm/turing-elm" ] [ text "notes" ]
+            , span [] [ text "." ]
+            ]
+        ]
