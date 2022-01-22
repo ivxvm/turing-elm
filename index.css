@@ -40,7 +40,7 @@ input:focus {
 .app-layout {
     display: grid;
     width: 100%;
-    height: 100%;
+    min-height: 100%;
     column-gap: 96px;
 }
 
@@ -59,9 +59,13 @@ input:focus {
     .app-container {
         margin-bottom: 32px;
     }
+
+    .footer-container {
+        text-align: right;
+    }
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1279px) {
     .app-layout {
         grid-template-areas:
         "header-area"
@@ -74,12 +78,24 @@ input:focus {
     }
 
     .footer-container {
+        text-align: center;
         max-width: 480px;
     }
 
     section {
         text-align: center;
         margin-bottom: 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 0;
+    }
+
+    .app-container {
+        width: 100% !important;
+        overflow: hidden;
     }
 }
 
@@ -98,6 +114,10 @@ input:focus {
 .header-container {
     grid-area: header-area;
     margin-bottom: 16px;
+}
+
+.header-container header {
+    text-decoration: underline;
 }
 
 .saved-machines-container {
@@ -130,9 +150,7 @@ input:focus {
     grid-area: footer-area;
     color: #45A29E;
     font-size: 36px;
-    text-align: right;
     opacity: 0.75;
-    /* padding-bottom: 32px; */
 }
 
 .footer-container:hover {
