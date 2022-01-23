@@ -360,7 +360,7 @@ view model =
             , span [] [ text "Source code available at " ]
             , a [ href "https://github.com/ivxvm/turing-elm" ] [ text "github" ]
             , span [] [ text ", together with dev " ]
-            , a [ href "https://github.com/ivxvm/turing-elm" ] [ text "notes" ]
+            , a [ href "https://github.com/ivxvm/turing-elm/blob/master/notes.md" ] [ text "notes" ]
             , span [] [ text "." ]
             ]
         ]
