@@ -20,14 +20,14 @@ main =
             \() ->
                 let
                     ( model, initCmd ) =
-                        App.init "Busy Beaver" BusyBeaver.turing
+                        App.init "Bit-Inverter" BitInverter.turing
                 in
                 ( model
                 , Cmd.batch
                     [ initCmd
                     , Ports.provideBuiltinMachines
-                        [ ( "Busy Beaver", Turing.encodeSimple BusyBeaver.turing )
-                        , ( "Bit Inverter", Turing.encodeSimple BitInverter.turing )
+                        [ ( "Busy-Beaver", Turing.encodeSimple BusyBeaver.turing )
+                        , ( "Bit-Inverter", Turing.encodeSimple BitInverter.turing )
                         ]
                     ]
                 )

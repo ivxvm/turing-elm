@@ -110,7 +110,7 @@ localStorage.setItem("Copy-Interspace", JSON.stringify({
     ]
 }));
 
-localStorage.setItem("C=A+B (Decimal)", JSON.stringify({
+localStorage.setItem("C=A+B", JSON.stringify({
     "tape": { "left": ["3", "0"], "right": ["_"], "currentSymbol": "2", "emptySymbol": "_" },
     "currentState": "A",
     "finalState": "X",
@@ -157,5 +157,43 @@ localStorage.setItem("Invert-Two-Zeroes", JSON.stringify({
         { "currentState": "+2", "currentSymbol": "0", "newSymbol": "1", "newState": "+1", "moveDirection": "left" },
         { "currentState": "+1", "currentSymbol": "1", "newSymbol": "1", "newState": "+1", "moveDirection": "left" },
         { "currentState": "+1", "currentSymbol": "0", "newSymbol": "1", "newState": "X", "moveDirection": "left" }
+    ]
+}));
+
+localStorage.setItem("Infinite-Increment", JSON.stringify({
+    "tape": { "left": ["0"], "right": ["0"], "currentSymbol": ".", "emptySymbol": "0" },
+    "currentState": ">>.",
+    "finalState": "X",
+    "rules": [
+        { "currentState": ">>.", "currentSymbol": "0", "newSymbol": "0", "newState": ">>.", "moveDirection": "right" },
+        { "currentState": ">>.", "currentSymbol": "1", "newSymbol": "0", "newState": ">>.", "moveDirection": "right" },
+        { "currentState": ">>.", "currentSymbol": ".", "newSymbol": ".", "newState": "++", "moveDirection": "left" },
+        { "currentState": "++", "currentSymbol": "0", "newSymbol": "1", "newState": ">>.", "moveDirection": "right" },
+        { "currentState": "++", "currentSymbol": "1", "newSymbol": "1", "newState": "++", "moveDirection": "left" }
+    ]
+}));
+
+localStorage.setItem("Infinite-Decrement", JSON.stringify({
+    "tape": { "left": ["0", "0", "1"], "right": ["0"], "currentSymbol": ".", "emptySymbol": "0" },
+    "currentState": ">>.",
+    "finalState": "X",
+    "rules": [
+        { "currentState": ">>.", "currentSymbol": "0", "newSymbol": "1", "newState": ">>.", "moveDirection": "right" },
+        { "currentState": ">>.", "currentSymbol": "1", "newSymbol": "1", "newState": ">>.", "moveDirection": "right" },
+        { "currentState": ">>.", "currentSymbol": ".", "newSymbol": ".", "newState": "--", "moveDirection": "left" },
+        { "currentState": "--", "currentSymbol": "0", "newSymbol": "0", "newState": "--", "moveDirection": "left" },
+        { "currentState": "--", "currentSymbol": "1", "newSymbol": "0", "newState": ">>.", "moveDirection": "right" }
+    ]
+}));
+
+localStorage.setItem("Flood-Fill", JSON.stringify({
+    "tape": { "left": [], "right": [], "currentSymbol": "0", "emptySymbol": "0" },
+    "currentState": "<<",
+    "finalState": "X",
+    "rules": [
+        { "currentState": "<<", "currentSymbol": "0", "newSymbol": "1", "newState": ">>", "moveDirection": "right" },
+        { "currentState": "<<", "currentSymbol": "1", "newSymbol": "1", "newState": "<<", "moveDirection": "left" },
+        { "currentState": ">>", "currentSymbol": "0", "newSymbol": "1", "newState": "<<", "moveDirection": "left" },
+        { "currentState": ">>", "currentSymbol": "1", "newSymbol": "1", "newState": ">>", "moveDirection": "right" }
     ]
 }));
