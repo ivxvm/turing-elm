@@ -8,7 +8,7 @@ Elm notes:
 This works: `{ obj | field = newValue }`
 This doesn't: `{ obj | field = { obj.field | other = ... } }`
 
-* There is a neat idiom for field setters that plays well (insert link) with pipeline operator `(|>)`:
+* There is a neat idiom for field setters that [plays well](https://github.com/ivxvm/turing-elm/blob/master/src/App/Update.elm#L155) with pipeline operator `(|>)`:
 
   ```elm
   setSomething : FieldType -> RecordType -> RecordType
