@@ -110,7 +110,7 @@ localStorage.setItem("Copy-Interspace", JSON.stringify({
     ]
 }));
 
-localStorage.setItem("C=A+B", JSON.stringify({
+localStorage.setItem("Sum-Decimal", JSON.stringify({
     "tape": { "left": ["3", "0"], "right": ["_"], "currentSymbol": "2", "emptySymbol": "_" },
     "currentState": "A",
     "finalState": "X",
@@ -195,5 +195,38 @@ localStorage.setItem("Flood-Fill", JSON.stringify({
         { "currentState": "<<", "currentSymbol": "1", "newSymbol": "1", "newState": "<<", "moveDirection": "left" },
         { "currentState": ">>", "currentSymbol": "0", "newSymbol": "1", "newState": "<<", "moveDirection": "left" },
         { "currentState": ">>", "currentSymbol": "1", "newSymbol": "1", "newState": ">>", "moveDirection": "right" }
+    ]
+}));
+
+localStorage.setItem("Sum-Binary", JSON.stringify({
+    "tape": { "left": ["1", "0", "0", ";", "1", "1", "1", "0", ";"], "right": [";"], "currentSymbol": "1", "emptySymbol": "0" },
+    "currentState": "S",
+    "finalState": "X",
+    "rules": [
+        { "currentState": "S", "currentSymbol": "0", "newSymbol": "0", "newState": "S", "moveDirection": "left" },
+        { "currentState": "S", "currentSymbol": "1", "newSymbol": "0", "newState": "L4", "moveDirection": "left" },
+        { "currentState": "L4", "currentSymbol": "0", "newSymbol": "0", "newState": "L3", "moveDirection": "left" },
+        { "currentState": "L4", "currentSymbol": "1", "newSymbol": "1", "newState": "L3", "moveDirection": "left" },
+        { "currentState": "L4", "currentSymbol": ";", "newSymbol": ";", "newState": "L3", "moveDirection": "left" },
+        { "currentState": "L3", "currentSymbol": "0", "newSymbol": "0", "newState": "L2", "moveDirection": "left" },
+        { "currentState": "L3", "currentSymbol": "1", "newSymbol": "1", "newState": "L2", "moveDirection": "left" },
+        { "currentState": "L3", "currentSymbol": ";", "newSymbol": ";", "newState": "L2", "moveDirection": "left" },
+        { "currentState": "L2", "currentSymbol": "0", "newSymbol": "0", "newState": "L1", "moveDirection": "left" },
+        { "currentState": "L2", "currentSymbol": "1", "newSymbol": "1", "newState": "L1", "moveDirection": "left" },
+        { "currentState": "L2", "currentSymbol": ";", "newSymbol": ";", "newState": "L1", "moveDirection": "left" },
+        { "currentState": "L1", "currentSymbol": "0", "newSymbol": "0", "newState": "W", "moveDirection": "left" },
+        { "currentState": "L1", "currentSymbol": "1", "newSymbol": "1", "newState": "W", "moveDirection": "left" },
+        { "currentState": "L1", "currentSymbol": ";", "newSymbol": ";", "newState": "W", "moveDirection": "left" },
+        { "currentState": "W", "currentSymbol": "0", "newSymbol": "1", "newState": ">>;2", "moveDirection": "right" },
+        { "currentState": "W", "currentSymbol": "1", "newSymbol": "0", "newState": "W", "moveDirection": "left" },
+        { "currentState": ">>;2", "currentSymbol": "1", "newSymbol": "1", "newState": ">>;2", "moveDirection": "right" },
+        { "currentState": ">>;2", "currentSymbol": "0", "newSymbol": "0", "newState": ">>;2", "moveDirection": "right" },
+        { "currentState": ">>;2", "currentSymbol": ";", "newSymbol": ";", "newState": ">>;1", "moveDirection": "right" },
+        { "currentState": ">>;1", "currentSymbol": "1", "newSymbol": "1", "newState": ">>;1", "moveDirection": "right" },
+        { "currentState": ">>;1", "currentSymbol": "0", "newSymbol": "0", "newState": ">>;1", "moveDirection": "right" },
+        { "currentState": ">>;1", "currentSymbol": ";", "newSymbol": ";", "newState": "1<<", "moveDirection": "left" },
+        { "currentState": "1<<", "currentSymbol": "0", "newSymbol": "0", "newState": "1<<", "moveDirection": "left" },
+        { "currentState": "1<<", "currentSymbol": "1", "newSymbol": "1", "newState": "S", "moveDirection": "right" },
+        { "currentState": "1<<", "currentSymbol": ";", "newSymbol": ";", "newState": "X", "moveDirection": "left" }
     ]
 }));
