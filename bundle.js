@@ -4525,6 +4525,12 @@ var $author$project$App$Msg$GetSavedMachines = {$: 'GetSavedMachines'};
 var $author$project$App$Msg$GetSavedMachinesSuccess = function (a) {
 	return {$: 'GetSavedMachinesSuccess', a: a};
 };
+var $author$project$App$Msg$KeyDown = function (a) {
+	return {$: 'KeyDown', a: a};
+};
+var $author$project$App$Msg$KeyUp = function (a) {
+	return {$: 'KeyUp', a: a};
+};
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -5342,6 +5348,7 @@ var $author$project$Core$Turing$encode = F3(
 				]));
 	});
 var $author$project$Core$Turing$encodeSimple = A2($author$project$Core$Turing$encode, $elm$json$Json$Encode$string, $elm$json$Json$Encode$string);
+var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Encode$null = _Json_encodeNull;
 var $author$project$App$Ports$centerCurrentTapeCell = _Platform_outgoingPort(
 	'centerCurrentTapeCell',
@@ -5543,6 +5550,8 @@ var $author$project$App$Model$init = F2(
 					currentTapeValidationError: $elm$core$Maybe$Nothing,
 					isEditingStateAndTape: false,
 					isInitialState: true,
+					isMajorStepSpeedupOn: false,
+					isMinorStepSpeedupOn: false,
 					isRunning: false,
 					lastAppliedRuleIndex: -1,
 					machineName: name,
@@ -5588,25 +5597,33 @@ var $author$project$App$Ports$onGetSavedMachinesSuccess = _Platform_incomingPort
 					A2($elm$json$Json$Decode$index, 1, $elm$json$Json$Decode$string));
 			},
 			A2($elm$json$Json$Decode$index, 0, $elm$json$Json$Decode$string))));
-var $elm$json$Json$Decode$null = _Json_decodeNull;
-var $author$project$App$Ports$onProvideBuiltinMachinesSuccess = _Platform_incomingPort(
-	'onProvideBuiltinMachinesSuccess',
-	$elm$json$Json$Decode$null(_Utils_Tuple0));
-var $author$project$App$Ports$provideBuiltinMachines = _Platform_outgoingPort(
-	'provideBuiltinMachines',
-	$elm$json$Json$Encode$list(
-		function ($) {
-			var a = $.a;
-			var b = $.b;
-			return A2(
-				$elm$json$Json$Encode$list,
-				$elm$core$Basics$identity,
-				_List_fromArray(
-					[
-						$elm$json$Json$Encode$string(a),
-						$elm$core$Basics$identity(b)
-					]));
-		}));
+var $elm$browser$Browser$Events$Document = {$: 'Document'};
+var $elm$browser$Browser$Events$MySub = F3(
+	function (a, b, c) {
+		return {$: 'MySub', a: a, b: b, c: c};
+	});
+var $elm$browser$Browser$Events$State = F2(
+	function (subs, pids) {
+		return {pids: pids, subs: subs};
+	});
+var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
+	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
+var $elm$browser$Browser$Events$nodeToKey = function (node) {
+	if (node.$ === 'Document') {
+		return 'd_';
+	} else {
+		return 'w_';
+	}
+};
+var $elm$browser$Browser$Events$addKey = function (sub) {
+	var node = sub.a;
+	var name = sub.b;
+	return _Utils_Tuple2(
+		_Utils_ap(
+			$elm$browser$Browser$Events$nodeToKey(node),
+			name),
+		sub);
+};
 var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
@@ -5716,6 +5733,289 @@ var $elm$core$Dict$insert = F3(
 			return x;
 		}
 	});
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $elm$core$Process$kill = _Scheduler_kill;
+var $elm$core$Dict$foldl = F3(
+	function (func, acc, dict) {
+		foldl:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return acc;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$func = func,
+					$temp$acc = A3(
+					func,
+					key,
+					value,
+					A3($elm$core$Dict$foldl, func, acc, left)),
+					$temp$dict = right;
+				func = $temp$func;
+				acc = $temp$acc;
+				dict = $temp$dict;
+				continue foldl;
+			}
+		}
+	});
+var $elm$core$Dict$merge = F6(
+	function (leftStep, bothStep, rightStep, leftDict, rightDict, initialResult) {
+		var stepState = F3(
+			function (rKey, rValue, _v0) {
+				stepState:
+				while (true) {
+					var list = _v0.a;
+					var result = _v0.b;
+					if (!list.b) {
+						return _Utils_Tuple2(
+							list,
+							A3(rightStep, rKey, rValue, result));
+					} else {
+						var _v2 = list.a;
+						var lKey = _v2.a;
+						var lValue = _v2.b;
+						var rest = list.b;
+						if (_Utils_cmp(lKey, rKey) < 0) {
+							var $temp$rKey = rKey,
+								$temp$rValue = rValue,
+								$temp$_v0 = _Utils_Tuple2(
+								rest,
+								A3(leftStep, lKey, lValue, result));
+							rKey = $temp$rKey;
+							rValue = $temp$rValue;
+							_v0 = $temp$_v0;
+							continue stepState;
+						} else {
+							if (_Utils_cmp(lKey, rKey) > 0) {
+								return _Utils_Tuple2(
+									list,
+									A3(rightStep, rKey, rValue, result));
+							} else {
+								return _Utils_Tuple2(
+									rest,
+									A4(bothStep, lKey, lValue, rValue, result));
+							}
+						}
+					}
+				}
+			});
+		var _v3 = A3(
+			$elm$core$Dict$foldl,
+			stepState,
+			_Utils_Tuple2(
+				$elm$core$Dict$toList(leftDict),
+				initialResult),
+			rightDict);
+		var leftovers = _v3.a;
+		var intermediateResult = _v3.b;
+		return A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v4, result) {
+					var k = _v4.a;
+					var v = _v4.b;
+					return A3(leftStep, k, v, result);
+				}),
+			intermediateResult,
+			leftovers);
+	});
+var $elm$browser$Browser$Events$Event = F2(
+	function (key, event) {
+		return {event: event, key: key};
+	});
+var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
+var $elm$browser$Browser$Events$spawn = F3(
+	function (router, key, _v0) {
+		var node = _v0.a;
+		var name = _v0.b;
+		var actualNode = function () {
+			if (node.$ === 'Document') {
+				return _Browser_doc;
+			} else {
+				return _Browser_window;
+			}
+		}();
+		return A2(
+			$elm$core$Task$map,
+			function (value) {
+				return _Utils_Tuple2(key, value);
+			},
+			A3(
+				_Browser_on,
+				actualNode,
+				name,
+				function (event) {
+					return A2(
+						$elm$core$Platform$sendToSelf,
+						router,
+						A2($elm$browser$Browser$Events$Event, key, event));
+				}));
+	});
+var $elm$core$Dict$union = F2(
+	function (t1, t2) {
+		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
+	});
+var $elm$browser$Browser$Events$onEffects = F3(
+	function (router, subs, state) {
+		var stepRight = F3(
+			function (key, sub, _v6) {
+				var deads = _v6.a;
+				var lives = _v6.b;
+				var news = _v6.c;
+				return _Utils_Tuple3(
+					deads,
+					lives,
+					A2(
+						$elm$core$List$cons,
+						A3($elm$browser$Browser$Events$spawn, router, key, sub),
+						news));
+			});
+		var stepLeft = F3(
+			function (_v4, pid, _v5) {
+				var deads = _v5.a;
+				var lives = _v5.b;
+				var news = _v5.c;
+				return _Utils_Tuple3(
+					A2($elm$core$List$cons, pid, deads),
+					lives,
+					news);
+			});
+		var stepBoth = F4(
+			function (key, pid, _v2, _v3) {
+				var deads = _v3.a;
+				var lives = _v3.b;
+				var news = _v3.c;
+				return _Utils_Tuple3(
+					deads,
+					A3($elm$core$Dict$insert, key, pid, lives),
+					news);
+			});
+		var newSubs = A2($elm$core$List$map, $elm$browser$Browser$Events$addKey, subs);
+		var _v0 = A6(
+			$elm$core$Dict$merge,
+			stepLeft,
+			stepBoth,
+			stepRight,
+			state.pids,
+			$elm$core$Dict$fromList(newSubs),
+			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
+		var deadPids = _v0.a;
+		var livePids = _v0.b;
+		var makeNewPids = _v0.c;
+		return A2(
+			$elm$core$Task$andThen,
+			function (pids) {
+				return $elm$core$Task$succeed(
+					A2(
+						$elm$browser$Browser$Events$State,
+						newSubs,
+						A2(
+							$elm$core$Dict$union,
+							livePids,
+							$elm$core$Dict$fromList(pids))));
+			},
+			A2(
+				$elm$core$Task$andThen,
+				function (_v1) {
+					return $elm$core$Task$sequence(makeNewPids);
+				},
+				$elm$core$Task$sequence(
+					A2($elm$core$List$map, $elm$core$Process$kill, deadPids))));
+	});
+var $elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _v0 = f(mx);
+		if (_v0.$ === 'Just') {
+			var x = _v0.a;
+			return A2($elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var $elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			$elm$core$List$foldr,
+			$elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
+var $elm$browser$Browser$Events$onSelfMsg = F3(
+	function (router, _v0, state) {
+		var key = _v0.key;
+		var event = _v0.event;
+		var toMessage = function (_v2) {
+			var subKey = _v2.a;
+			var _v3 = _v2.b;
+			var node = _v3.a;
+			var name = _v3.b;
+			var decoder = _v3.c;
+			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
+		};
+		var messages = A2($elm$core$List$filterMap, toMessage, state.subs);
+		return A2(
+			$elm$core$Task$andThen,
+			function (_v1) {
+				return $elm$core$Task$succeed(state);
+			},
+			$elm$core$Task$sequence(
+				A2(
+					$elm$core$List$map,
+					$elm$core$Platform$sendToApp(router),
+					messages)));
+	});
+var $elm$browser$Browser$Events$subMap = F2(
+	function (func, _v0) {
+		var node = _v0.a;
+		var name = _v0.b;
+		var decoder = _v0.c;
+		return A3(
+			$elm$browser$Browser$Events$MySub,
+			node,
+			name,
+			A2($elm$json$Json$Decode$map, func, decoder));
+	});
+_Platform_effectManagers['Browser.Events'] = _Platform_createManager($elm$browser$Browser$Events$init, $elm$browser$Browser$Events$onEffects, $elm$browser$Browser$Events$onSelfMsg, 0, $elm$browser$Browser$Events$subMap);
+var $elm$browser$Browser$Events$subscription = _Platform_leaf('Browser.Events');
+var $elm$browser$Browser$Events$on = F3(
+	function (node, name, decoder) {
+		return $elm$browser$Browser$Events$subscription(
+			A3($elm$browser$Browser$Events$MySub, node, name, decoder));
+	});
+var $elm$browser$Browser$Events$onKeyDown = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'keydown');
+var $elm$browser$Browser$Events$onKeyUp = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'keyup');
+var $elm$json$Json$Decode$null = _Json_decodeNull;
+var $author$project$App$Ports$onProvideBuiltinMachinesSuccess = _Platform_incomingPort(
+	'onProvideBuiltinMachinesSuccess',
+	$elm$json$Json$Decode$null(_Utils_Tuple0));
+var $author$project$App$Ports$provideBuiltinMachines = _Platform_outgoingPort(
+	'provideBuiltinMachines',
+	$elm$json$Json$Encode$list(
+		function ($) {
+			var a = $.a;
+			var b = $.b;
+			return A2(
+				$elm$json$Json$Encode$list,
+				$elm$core$Basics$identity,
+				_List_fromArray(
+					[
+						$elm$json$Json$Encode$string(a),
+						$elm$core$Basics$identity(b)
+					]));
+		}));
 var $elm$core$List$isEmpty = function (xs) {
 	if (!xs.b) {
 		return true;
@@ -8057,6 +8357,18 @@ var $author$project$Core$Turing$setTape = F2(
 			{tape: tape});
 	});
 var $author$project$Core$Turing$asTapeIn = $elm_community$basics_extra$Basics$Extra$flip($author$project$Core$Turing$setTape);
+var $author$project$App$Model$calculateStepsFromModifiers = function (model) {
+	var _v0 = _Utils_Tuple2(model.isMinorStepSpeedupOn, model.isMajorStepSpeedupOn);
+	if (_v0.b) {
+		return 100;
+	} else {
+		if (_v0.a) {
+			return 10;
+		} else {
+			return 1;
+		}
+	}
+};
 var $elm$core$Result$map = F2(
 	function (func, ra) {
 		if (ra.$ === 'Ok') {
@@ -8099,7 +8411,6 @@ var $author$project$Core$Turing$Turing = F4(
 	function (tape, currentState, finalState, rules) {
 		return {currentState: currentState, finalState: finalState, rules: rules, tape: tape};
 	});
-var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$map4 = _Json_map4;
 var $author$project$Core$Tape$decoder = function (symbolDecoder) {
 	return A5(
@@ -8177,24 +8488,6 @@ var $elm_community$result_extra$Result$Extra$error = function (result) {
 		return $elm$core$Maybe$Just(err);
 	}
 };
-var $elm$core$List$maybeCons = F3(
-	function (f, mx, xs) {
-		var _v0 = f(mx);
-		if (_v0.$ === 'Just') {
-			var x = _v0.a;
-			return A2($elm$core$List$cons, x, xs);
-		} else {
-			return xs;
-		}
-	});
-var $elm$core$List$filterMap = F2(
-	function (f, xs) {
-		return A3(
-			$elm$core$List$foldr,
-			$elm$core$List$maybeCons(f),
-			_List_Nil,
-			xs);
-	});
 var $author$project$Core$Turing$findApplicableRule = function (turing) {
 	var recurse = F2(
 		function (rules, index) {
@@ -8221,18 +8514,6 @@ var $author$project$Core$Turing$findApplicableRule = function (turing) {
 			}
 		});
 	return A2(recurse, turing.rules, 0);
-};
-var $elm$core$Dict$fromList = function (assocs) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, dict) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($elm$core$Dict$insert, key, value, dict);
-			}),
-		$elm$core$Dict$empty,
-		assocs);
 };
 var $elm$core$Result$andThen = F2(
 	function (callback, result) {
@@ -9376,70 +9657,102 @@ var $author$project$App$Update$update = F2(
 				var workflow = msg.a;
 				return A2($author$project$App$ComputationWorkflow$Impl$update, workflow, model);
 			case 'StepFw':
-				var _v8 = $author$project$Core$Turing$findApplicableRule(model.turing);
-				if (_v8.$ === 'Just') {
-					var _v9 = _v8.a;
-					var currentlyApplicableRuleIndex = _v9.a;
-					var currentlyApplicableRule = _v9.b;
-					var newTuring = A2(
-						$elm$core$Maybe$withDefault,
-						model.turing,
-						A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, model.turing));
-					var _v10 = $author$project$App$Update$restartComputationIfRunning(model);
-					var newComputationWorkflow = _v10.a;
-					var cmd = _v10.b;
-					return _Utils_Tuple2(
-						$author$project$App$Model$invalidateEditFields(
-							_Utils_update(
-								model,
-								{
-									activeComputationWorkflow: newComputationWorkflow,
-									isInitialState: false,
-									lastAppliedRuleIndex: currentlyApplicableRuleIndex,
-									pendingRuleIndex: -1,
-									pendingTuring: $elm$core$Maybe$Nothing,
-									prevAppliedRuleIndexes: A2($elm$core$List$cons, model.lastAppliedRuleIndex, model.prevAppliedRuleIndexes),
-									prevTurings: A2($elm$core$List$cons, model.turing, model.prevTurings),
-									turing: _Utils_update(
-										newTuring,
+				var stepsToPerform = $author$project$App$Model$calculateStepsFromModifiers(model);
+				var step = F2(
+					function (stepsLeft, steppedModel) {
+						step:
+						while (true) {
+							if (!stepsLeft) {
+								return steppedModel;
+							} else {
+								var _v8 = $author$project$Core$Turing$findApplicableRule(steppedModel.turing);
+								if (_v8.$ === 'Just') {
+									var _v9 = _v8.a;
+									var currentlyApplicableRuleIndex = _v9.a;
+									var currentlyApplicableRule = _v9.b;
+									var newTuring = A2(
+										$elm$core$Maybe$withDefault,
+										steppedModel.turing,
+										A2($author$project$Core$Turing$applyRule, currentlyApplicableRule, steppedModel.turing));
+									var $temp$stepsLeft = stepsLeft - 1,
+										$temp$steppedModel = _Utils_update(
+										steppedModel,
 										{
-											tape: $author$project$Core$KeyedTape$lookahead(newTuring.tape)
-										})
-								})),
-						cmd);
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
+											lastAppliedRuleIndex: currentlyApplicableRuleIndex,
+											prevAppliedRuleIndexes: A2($elm$core$List$cons, steppedModel.lastAppliedRuleIndex, steppedModel.prevAppliedRuleIndexes),
+											prevTurings: A2($elm$core$List$cons, steppedModel.turing, steppedModel.prevTurings),
+											turing: _Utils_update(
+												newTuring,
+												{
+													tape: $author$project$Core$KeyedTape$lookahead(newTuring.tape)
+												})
+										});
+									stepsLeft = $temp$stepsLeft;
+									steppedModel = $temp$steppedModel;
+									continue step;
+								} else {
+									return steppedModel;
+								}
+							}
+						}
+					});
+				var newModel = A2(step, stepsToPerform, model);
+				var _v10 = $author$project$App$Update$restartComputationIfRunning(model);
+				var newComputationWorkflow = _v10.a;
+				var cmd = _v10.b;
+				return _Utils_Tuple2(
+					$author$project$App$Model$invalidateEditFields(
+						_Utils_update(
+							newModel,
+							{activeComputationWorkflow: newComputationWorkflow, isInitialState: false, pendingRuleIndex: -1, pendingTuring: $elm$core$Maybe$Nothing})),
+					cmd);
 			case 'StepBw':
+				var stepsToPerform = $author$project$App$Model$calculateStepsFromModifiers(model);
 				var _v11 = $author$project$App$Update$restartComputationIfRunning(model);
 				var newComputationWorkflow = _v11.a;
 				var cmd = _v11.b;
-				var _v12 = _Utils_Tuple2(model.prevTurings, model.prevAppliedRuleIndexes);
-				if (_v12.a.b && _v12.b.b) {
-					var _v13 = _v12.a;
-					var prevTuring = _v13.a;
-					var restPrevTurings = _v13.b;
-					var _v14 = _v12.b;
-					var prevRuleIndex = _v14.a;
-					var restPrevRuleIndexes = _v14.b;
-					return _Utils_Tuple2(
-						$author$project$App$Model$invalidateEditFields(
-							_Utils_update(
-								model,
-								{
-									activeComputationWorkflow: newComputationWorkflow,
-									isInitialState: $elm$core$List$isEmpty(restPrevTurings),
-									lastAppliedRuleIndex: prevRuleIndex,
-									pendingRuleIndex: -1,
-									pendingTuring: $elm$core$Maybe$Nothing,
-									prevAppliedRuleIndexes: restPrevRuleIndexes,
-									prevTurings: restPrevTurings,
-									turing: prevTuring
-								})),
-						cmd);
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
+				var step = F2(
+					function (stepsLeft, steppedModel) {
+						step:
+						while (true) {
+							if (!stepsLeft) {
+								return steppedModel;
+							} else {
+								var _v12 = _Utils_Tuple2(steppedModel.prevTurings, steppedModel.prevAppliedRuleIndexes);
+								if (_v12.a.b && _v12.b.b) {
+									var _v13 = _v12.a;
+									var prevTuring = _v13.a;
+									var restPrevTurings = _v13.b;
+									var _v14 = _v12.b;
+									var prevRuleIndex = _v14.a;
+									var restPrevRuleIndexes = _v14.b;
+									var $temp$stepsLeft = stepsLeft - 1,
+										$temp$steppedModel = _Utils_update(
+										steppedModel,
+										{
+											activeComputationWorkflow: newComputationWorkflow,
+											isInitialState: $elm$core$List$isEmpty(restPrevTurings),
+											lastAppliedRuleIndex: prevRuleIndex,
+											prevAppliedRuleIndexes: restPrevRuleIndexes,
+											prevTurings: restPrevTurings,
+											turing: prevTuring
+										});
+									stepsLeft = $temp$stepsLeft;
+									steppedModel = $temp$steppedModel;
+									continue step;
+								} else {
+									return steppedModel;
+								}
+							}
+						}
+					});
+				var newModel = A2(step, stepsToPerform, model);
+				return _Utils_Tuple2(
+					$author$project$App$Model$invalidateEditFields(
+						_Utils_update(
+							newModel,
+							{pendingRuleIndex: -1, pendingTuring: $elm$core$Maybe$Nothing})),
+					cmd);
 			case 'SaveMachine':
 				return _Utils_Tuple2(
 					model,
@@ -9485,7 +9798,7 @@ var $author$project$App$Update$update = F2(
 				return _Utils_Tuple2(
 					model,
 					$author$project$App$Ports$getSavedMachines(_Utils_Tuple0));
-			default:
+			case 'GetSavedMachinesSuccess':
 				var payload = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -9500,6 +9813,54 @@ var $author$project$App$Update$update = F2(
 										payload)).a)
 						}),
 					$elm$core$Platform$Cmd$none);
+			case 'KeyDown':
+				var key = msg.a;
+				switch (key) {
+					case 'Meta':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{isMinorStepSpeedupOn: true}),
+							$elm$core$Platform$Cmd$none);
+					case 'Control':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{isMinorStepSpeedupOn: true}),
+							$elm$core$Platform$Cmd$none);
+					case 'Shift':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{isMajorStepSpeedupOn: true}),
+							$elm$core$Platform$Cmd$none);
+					default:
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			default:
+				var key = msg.a;
+				switch (key) {
+					case 'Meta':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{isMinorStepSpeedupOn: false}),
+							$elm$core$Platform$Cmd$none);
+					case 'Control':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{isMinorStepSpeedupOn: false}),
+							$elm$core$Platform$Cmd$none);
+					case 'Shift':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{isMajorStepSpeedupOn: false}),
+							$elm$core$Platform$Cmd$none);
+					default:
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
 		}
 	});
 var $rtfeldman$elm_css$VirtualDom$Styled$Node = F3(
@@ -10476,7 +10837,17 @@ var $author$project$Main$main = $elm$browser$Browser$element(
 							return $author$project$App$Msg$GetSavedMachines;
 						}),
 						$author$project$App$Ports$onGetSavedMachinesSuccess($author$project$App$Msg$GetSavedMachinesSuccess),
-						$author$project$App$Ports$onDeleteMachineSuccess($author$project$App$Msg$DeleteMachine)
+						$author$project$App$Ports$onDeleteMachineSuccess($author$project$App$Msg$DeleteMachine),
+						$elm$browser$Browser$Events$onKeyDown(
+						A2(
+							$elm$json$Json$Decode$map,
+							$author$project$App$Msg$KeyDown,
+							A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string))),
+						$elm$browser$Browser$Events$onKeyUp(
+						A2(
+							$elm$json$Json$Decode$map,
+							$author$project$App$Msg$KeyUp,
+							A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string)))
 					]));
 		},
 		update: $author$project$App$UpdateScroll$withScrollUpdate($author$project$App$Update$update),
