@@ -227,56 +227,87 @@ update msg model =
             ComputationWorkflow.update workflow model
 
         StepFw ->
-            case Turing.findApplicableRule model.turing of
-                Just ( currentlyApplicableRuleIndex, currentlyApplicableRule ) ->
-                    let
-                        ( newComputationWorkflow, cmd ) =
-                            restartComputationIfRunning model
+            let
+                ( newComputationWorkflow, cmd ) =
+                    restartComputationIfRunning model
 
-                        newTuring =
-                            Turing.applyRule currentlyApplicableRule model.turing
-                                |> Maybe.withDefault model.turing
-                    in
-                    ( Model.invalidateEditFields
-                        { model
-                            | turing = { newTuring | tape = KeyedTape.lookahead newTuring.tape }
-                            , pendingTuring = Nothing
-                            , prevTurings = model.turing :: model.prevTurings
-                            , lastAppliedRuleIndex = currentlyApplicableRuleIndex
-                            , pendingRuleIndex = -1
-                            , prevAppliedRuleIndexes = model.lastAppliedRuleIndex :: model.prevAppliedRuleIndexes
-                            , activeComputationWorkflow = newComputationWorkflow
-                            , isInitialState = False
-                        }
-                    , cmd
-                    )
+                step stepsLeft steppedModel =
+                    if stepsLeft == 0 then
+                        steppedModel
 
-                Nothing ->
-                    ( model, Cmd.none )
+                    else
+                        case Turing.findApplicableRule steppedModel.turing of
+                            Just ( currentlyApplicableRuleIndex, currentlyApplicableRule ) ->
+                                let
+                                    newTuring =
+                                        Turing.applyRule currentlyApplicableRule steppedModel.turing
+                                            |> Maybe.withDefault steppedModel.turing
+                                in
+                                step (stepsLeft - 1)
+                                    { steppedModel
+                                        | turing = { newTuring | tape = KeyedTape.lookahead newTuring.tape }
+                                        , prevTurings = steppedModel.turing :: steppedModel.prevTurings
+                                        , lastAppliedRuleIndex = currentlyApplicableRuleIndex
+                                        , prevAppliedRuleIndexes = steppedModel.lastAppliedRuleIndex :: steppedModel.prevAppliedRuleIndexes
+                                    }
+
+                            Nothing ->
+                                steppedModel
+
+                stepsToPerform =
+                    Model.calculateStepsFromModifiers model
+
+                newModel =
+                    step stepsToPerform model
+            in
+            ( Model.invalidateEditFields
+                { newModel
+                    | pendingTuring = Nothing
+                    , pendingRuleIndex = -1
+                    , isInitialState = False
+                    , activeComputationWorkflow = newComputationWorkflow
+                }
+            , cmd
+            )
 
         StepBw ->
             let
                 ( newComputationWorkflow, cmd ) =
                     restartComputationIfRunning model
-            in
-            case ( model.prevTurings, model.prevAppliedRuleIndexes ) of
-                ( prevTuring :: restPrevTurings, prevRuleIndex :: restPrevRuleIndexes ) ->
-                    ( Model.invalidateEditFields
-                        { model
-                            | turing = prevTuring
-                            , pendingTuring = Nothing
-                            , prevTurings = restPrevTurings
-                            , lastAppliedRuleIndex = prevRuleIndex
-                            , pendingRuleIndex = -1
-                            , prevAppliedRuleIndexes = restPrevRuleIndexes
-                            , activeComputationWorkflow = newComputationWorkflow
-                            , isInitialState = List.isEmpty restPrevTurings
-                        }
-                    , cmd
-                    )
 
-                _ ->
-                    ( model, Cmd.none )
+                step stepsLeft steppedModel =
+                    if stepsLeft == 0 then
+                        steppedModel
+
+                    else
+                        case ( steppedModel.prevTurings, steppedModel.prevAppliedRuleIndexes ) of
+                            ( prevTuring :: restPrevTurings, prevRuleIndex :: restPrevRuleIndexes ) ->
+                                step (stepsLeft - 1)
+                                    { steppedModel
+                                        | turing = prevTuring
+                                        , prevTurings = restPrevTurings
+                                        , lastAppliedRuleIndex = prevRuleIndex
+                                        , prevAppliedRuleIndexes = restPrevRuleIndexes
+                                        , activeComputationWorkflow = newComputationWorkflow
+                                        , isInitialState = List.isEmpty restPrevTurings
+                                    }
+
+                            _ ->
+                                steppedModel
+
+                stepsToPerform =
+                    Model.calculateStepsFromModifiers model
+
+                newModel =
+                    step stepsToPerform model
+            in
+            ( Model.invalidateEditFields
+                { newModel
+                    | pendingTuring = Nothing
+                    , pendingRuleIndex = -1
+                }
+            , cmd
+            )
 
         SaveMachine ->
             ( model
@@ -326,6 +357,34 @@ update msg model =
               }
             , Cmd.none
             )
+
+        KeyDown key ->
+            case key of
+                "Meta" ->
+                    ( { model | isMinorStepSpeedupOn = True }, Cmd.none )
+
+                "Control" ->
+                    ( { model | isMinorStepSpeedupOn = True }, Cmd.none )
+
+                "Shift" ->
+                    ( { model | isMajorStepSpeedupOn = True }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        KeyUp key ->
+            case key of
+                "Meta" ->
+                    ( { model | isMinorStepSpeedupOn = False }, Cmd.none )
+
+                "Control" ->
+                    ( { model | isMinorStepSpeedupOn = False }, Cmd.none )
+
+                "Shift" ->
+                    ( { model | isMajorStepSpeedupOn = False }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
 
 restartComputationIfRunning : Model -> ( ComputationWorkflow, Cmd Msg )

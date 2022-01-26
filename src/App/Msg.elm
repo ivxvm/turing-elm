@@ -23,3 +23,5 @@ type Msg
     | DeleteMachine String
     | GetSavedMachines
     | GetSavedMachinesSuccess (List ( String, String ))
+    | KeyDown String
+    | KeyUp String

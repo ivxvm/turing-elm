@@ -32,6 +32,8 @@ type alias Model =
     , isRunning : Bool
     , isInitialState : Bool
     , isEditingStateAndTape : Bool
+    , isMinorStepSpeedupOn : Bool
+    , isMajorStepSpeedupOn : Bool
     }
 
 
@@ -63,6 +65,8 @@ init name turing =
         , isRunning = False
         , isInitialState = True
         , isEditingStateAndTape = False
+        , isMinorStepSpeedupOn = False
+        , isMajorStepSpeedupOn = False
         }
     , Ports.centerCurrentTapeCell ()
     )
@@ -125,3 +129,16 @@ invalidateEditFields model =
         , currentTapeString = KeyedTape.toTapeString identity model.turing.tape
         , currentTapeValidationError = Nothing
     }
+
+
+calculateStepsFromModifiers : Model -> Int
+calculateStepsFromModifiers model =
+    case ( model.isMinorStepSpeedupOn, model.isMajorStepSpeedupOn ) of
+        ( _, True ) ->
+            100
+
+        ( True, _ ) ->
+            10
+
+        _ ->
+            1

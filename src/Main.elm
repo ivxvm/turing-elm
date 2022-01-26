@@ -9,8 +9,10 @@ import App.Update as App
 import App.UpdateScroll exposing (withScrollUpdate)
 import App.View as App
 import Browser
+import Browser.Events exposing (onKeyDown, onKeyUp)
 import Core.Turing as Turing
 import Html.Styled exposing (toUnstyled)
+import Json.Decode as D
 
 
 main : Program () Model Msg
@@ -41,5 +43,7 @@ main =
                     [ Ports.onProvideBuiltinMachinesSuccess (\() -> GetSavedMachines)
                     , Ports.onGetSavedMachinesSuccess GetSavedMachinesSuccess
                     , Ports.onDeleteMachineSuccess DeleteMachine
+                    , onKeyDown (D.map KeyDown (D.field "key" D.string))
+                    , onKeyUp (D.map KeyUp (D.field "key" D.string))
                     ]
         }
