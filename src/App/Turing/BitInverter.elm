@@ -15,10 +15,10 @@ turing =
             , currentSymbol = "0"
             , emptySymbol = "0"
             }
-    , currentState = "~>"
+    , currentState = ">>_"
     , finalState = "X"
     , rules =
-        [ Rule "~>" "0" "1" "~>" Right
-        , Rule "~>" "1" "0" "~>" Right
+        [ Rule ">>_" "0" "1" ">>_" Right
+        , Rule ">>_" "1" "0" ">>_" Right
         ]
     }
