@@ -33,7 +33,9 @@ body {
 
 @media (min-width: 1280px) {
     body {
-        background-image: linear-gradient(to bottom right, var(--bg-color-1), var(--bg-color-2));
+        background: linear-gradient(to bottom right, var(--bg-color-1), var(--bg-color-2));
+        background-repeat: no-repeat;
+        background-attachment: fixed;
     }
 }
 
