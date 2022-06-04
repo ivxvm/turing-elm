@@ -1,8 +1,88 @@
+:root {
+    /* palette colors */
+    /* subset of NA16 palette by Nauris https://lospec.com/palette-list/na16 */
+    --palette-color-1: #584563;
+    --palette-color-2: #3e2137;
+    --palette-color-3: #d79b7d;
+    --palette-color-4: #f5edba;
+    --palette-color-5: #c0c741;
+    --palette-color-6: #9d303b;
+    --palette-color-7: #7ec4c1;
+    --palette-color-8: #34859d;
+
+    /* semantic colors */
+    --bg-color-1: var(--palette-color-2);
+    --bg-color-2: var(--palette-color-8);
+    --bg-color-3: var(--palette-color-1);
+
+    --fg-color-1: var(--palette-color-4);
+    --fg-color-2: var(--palette-color-3);
+    --fg-color-3: var(--palette-color-7);
+    --fg-color-4: var(--palette-color-5);
+
+    --fg-color-disabled: transparent;
+    --fg-color-error: var(--palette-color-6);
+}
+
+/* theme styles */
+
 html,
 body {
-    background: linear-gradient(135deg, rgba(2,0,36,1) 0%, rgba(11,12,16,1) 35%, rgba(4,36,42,1) 100%);
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+    color: var(--fg-color-1);
+}
+
+@media (min-width: 1280px) {
+    body {
+        background-image: linear-gradient(to bottom right, var(--bg-color-1), var(--bg-color-2));
+    }
+}
+
+@media (max-width: 1279px) {
+    body {
+        background: linear-gradient(to bottom, var(--bg-color-1), var(--bg-color-2));
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+}
+
+.header-container,
+.info-container,
+.app-container,
+.saved-machines-container,
+.footer-container {
+    color: var(--fg-color-2);
+}
+
+.header-container:hover,
+.info-container:hover,
+.app-container:hover,
+.saved-machines-container:hover header,
+.saved-machines-container *:hover,
+.footer-container:hover,
+.footer-container:hover a {
+    color: var(--fg-color-1);
+}
+
+.footer-container:hover a:hover {
+    color: var(--fg-color-4);
+}
+
+
+.footer-container hr {
+    border: 0;
+    border-top: 2px solid var(--fg-color-2);
+}
+
+.footer-container:hover hr {
+    border: 0;
+    border-top: 2px solid var(--fg-color-1);
+}
+
+
+/* regular styles */
+
+html,
+body {
     margin: 0;
     width: 100%;
     height: 100%;
@@ -15,7 +95,6 @@ body {
 }
 
 header {
-    color: #66FCF1;
     font-size: 48px;
     font-weight: bold;
     margin-bottom: 12px;
@@ -24,11 +103,12 @@ header {
 input {
     font-family: monospace;
     font-size: 14px;
+    border-width: 0;
 }
 
 input:focus {
     outline: 0;
-    box-shadow: 0 0 0 1px #66FCF1 !important;
+    box-shadow: 0 0 0 1px var(--fg-color-1) !important;
 }
 
 .centered {
@@ -47,11 +127,11 @@ input:focus {
 @media (min-width: 1280px) {
     .app-layout {
         grid-template-areas:
-        "header-area  header-area header-area"
-        "info-area    app-area    saved-machines-area"
-        "options-area app-area    saved-machines-area"
-        ".            .           ."
-        "footer-area  footer-area footer-area";
+            "header-area  header-area header-area"
+            "info-area    app-area    saved-machines-area"
+            "options-area app-area    saved-machines-area"
+            ".            .           ."
+            "footer-area  footer-area footer-area";
         grid-template-columns: 1fr 1fr 1fr;
         grid-template-rows: min-content min-content min-content auto min-content;
     }
@@ -68,12 +148,12 @@ input:focus {
 @media (max-width: 1279px) {
     .app-layout {
         grid-template-areas:
-        "header-area"
-        "info-area"
-        "app-area"
-        "saved-machines-area"
-        "options-area"
-        "footer-area";
+            "header-area"
+            "info-area"
+            "app-area"
+            "saved-machines-area"
+            "options-area"
+            "footer-area";
         justify-items: center;
     }
 
@@ -101,14 +181,8 @@ input:focus {
 
 .info-container {
     grid-area: info-area;
-    color: #45A29E;
-    opacity: 0.5;
     max-width: 480px;
     font-size: 18px;
-}
-
-.info-container:hover {
-    opacity: 0.75;
 }
 
 .header-container {
@@ -124,62 +198,39 @@ input:focus {
     grid-area: saved-machines-area;
     display: flex;
     flex-direction: column;
-    opacity: 0.5;
-}
-
-.saved-machines-container:hover {
-    opacity: 0.75;
 }
 
 .saved-machine-link {
     text-decoration: none;
     font-size: 36px;
-    color: #45A29E;
     user-select: none;
     -webkit-user-select: none;
-    opacity: 0.75;
 }
 
 .saved-machine-link:hover {
     cursor: pointer;
     z-index: 1;
-    opacity: 1;
 }
 
 .footer-container {
     grid-area: footer-area;
-    color: #45A29E;
     font-size: 36px;
-    opacity: 0.75;
-}
-
-.footer-container:hover {
-    opacity: 1;
 }
 
 .footer-container hr {
     display: block;
-    border: 0;
-    border-top: 2px solid #45A29E;
     margin-top: 16px;
     margin-bottom: 32px;
-    opacity: 0.5;
-}
-
-.footer-container span {
-    opacity: 0.33;
 }
 
 .footer-container a {
-    color: #45A29E;
+    color: var(--fg-color-2);
     user-select: none;
     -webkit-user-select: none;
-    opacity: 0.33;
 }
 
 .footer-container a:hover {
     cursor: pointer;
-    opacity: 1;
 }
 
 .app-container {
@@ -187,18 +238,8 @@ input:focus {
     width: 480px;
 }
 
-.app-container header {
-    opacity: 0.5;
-}
-
-.app-container:hover header {
-    opacity: 0.75;
-}
-
 .simulation-controls {
-    background-color: #1F2833;
     margin-top: 8px;
-    padding: 16px;
     padding-top: 24px;
 }
 
@@ -215,8 +256,8 @@ input:focus {
     min-height: 64px;
     max-height: 64px;
     font-weight: bold;
-    color: #C5C6C7;
-    border: 4px double #C5C6C7;
+    color: var(--fg-color-3);
+    border: 4px double var(--fg-color-3);
 }
 
 .state.onechar {
@@ -233,8 +274,8 @@ input:focus {
 
 .state.editing-toggled,
 .state:hover {
-    color: #66FCF1;
-    border: 4px double #66FCF1;
+    color: var(--fg-color-1);
+    border: 4px double var(--fg-color-1);
 }
 
 .state:hover {
@@ -281,16 +322,16 @@ input:focus {
 .tape-cell {
     min-width: 48px;
     min-height: 48px;
-    border: 2px solid #C5C6C7;
+    border: 2px solid var(--fg-color-3);
     border-right: 0;
     font-size: 24px;
-    color: #C5C6C7;
+    color: var(--fg-color-3);
     transition: color 1s ease, border 1s ease;
 }
 
 .tape-cell.current {
-    color: #66FCF1;
-    border: 2px solid #66FCF1;
+    color: var(--fg-color-1);
+    border: 2px solid var(--fg-color-1);
     border-right: 0;
 }
 
@@ -299,11 +340,11 @@ input:focus {
 }
 
 .tape-cell.current.fadein {
-    color: #66FCF1;
+    color: var(--fg-color-1);
 }
 
-.tape-cell.current + * {
-    border-left: 2px solid #66FCF1;
+.tape-cell.current+* {
+    border-left: 2px solid var(--fg-color-1);
 }
 
 .controls {
@@ -314,31 +355,31 @@ input:focus {
     margin-bottom: 20px;
     font-size: 24px;
     font-weight: bold;
-    border: 2px solid #45A29E;
+    border: 2px solid var(--fg-color-1);
     border-radius: 16px;
-    color: #45A29E;
+    color: var(--fg-color-1);
     user-select: none;
     -webkit-user-select: none;
     overflow: hidden;
 }
 
-.controls > * {
+.controls>* {
     padding-left: 8px;
     padding-right: 8px;
 }
 
- .controls > *:not(:first-child) {
-    border-left: 2px solid #45A29E;
+.controls>*:not(:first-child) {
+    border-left: 2px solid var(--fg-color-1);
 }
 
-.controls > *.disabled {
-    color: #1F2833;
+.controls>*.disabled {
+    color: var(--fg-color-disabled);
 }
 
-.controls > *:hover:not(.disabled) {
-    color: #66FCF1;
+.controls>*:hover:not(.disabled) {
+    color: var(--fg-color-2);
     cursor: pointer;
-    background-color: #45A29E;
+    background-color: var(--fg-color-1);
 }
 
 .configuration-container {
@@ -364,44 +405,44 @@ input:focus {
 }
 
 .configuration-row input {
-    border: 0;
     font-weight: bold;
-    background-color: #0B0C10;
-    color: #C5C6C7;
+    background-color: var(--bg-color-1);
+    color: var(--fg-color-3);
     height: 28px;
     text-align: center;
     box-sizing: border-box;
 }
 
 .configuration-row input.invalid {
-    box-shadow: 0 0 0 1px red !important;
+    box-shadow: 0 0 0 1px var(--fg-color-error) !important;
 }
 
-.configuration-row input + span {
+.configuration-row input+span {
     position: relative;
 }
 
-.configuration-row input + span::before {
+.configuration-row input+span::before {
     position: absolute;
+    color: var(--fg-color-error);
+    content: attr(error);
+    width: 160px;
+    overflow: hidden;
+    font-size: 12px;
+    font-weight: bold;
     bottom: -16px;
     right: -1px;
-    border-radius: 5px;
-    color: red;
-    content: attr(error);
-    width: 133px;
-    font-size: 12px;
-    text-align: center;
+    text-align: right;
     text-transform: lowercase;
     transition: all 0.1s ease;
     opacity: 0;
 }
 
-.configuration-row input:hover + span::before {
+.configuration-row input:hover+span::before {
     opacity: 1;
 }
 
-.configuration-row > input:not(:first-child),
-.configuration-row > div:not(:first-child) {
+.configuration-row>input:not(:first-child),
+.configuration-row>div:not(:first-child) {
     margin-left: 5px;
 }
 
@@ -415,11 +456,11 @@ input:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #45A29E;
-    border-left: 2px solid #45A29E;
+    border: 2px solid var(--fg-color-1);
+    border-left: 2px solid var(--fg-color-1);
     border-top-right-radius: 16px;
     border-bottom-right-radius: 16px;
-    color: #45A29E;
+    color: var(--fg-color-1);
     font-size: 20px;
     font-weight: bold;
     line-height: 16px;
@@ -432,9 +473,9 @@ input:focus {
 }
 
 .save-machine-button:hover {
-    color: #66FCF1;
+    color: var(--fg-color-2);
+    background-color: var(--fg-color-1);
     cursor: pointer;
-    background-color: #45A29E;
 }
 
 .current-tape-input {
@@ -475,8 +516,8 @@ input:focus {
     border-radius: 16px;
     padding-left: 16px;
     font-weight: bold;
-    background-color: #0B0C10;
-    color: #C5C6C7;
+    background-color: var(--bg-color-1);
+    color: var(--fg-color-3);
 }
 
 .rule-input.invalid {
@@ -484,7 +525,7 @@ input:focus {
 }
 
 .rule-input.highlighted-rule {
-    box-shadow: 0 0 0 1px #45A29E;
+    box-shadow: 0 0 0 1px var(--fg-color-1);
 }
 
 .add-rule,
@@ -493,14 +534,14 @@ input:focus {
     border: 0;
     border-radius: 0;
     background-color: transparent;
-    color: #45A29E;
+    color: var(--fg-color-1);
     font-weight: bold;
     min-width: 24px;
 }
 
 .add-rule:hover,
 .remove-rule:hover {
-    color: #66FCF1;
+    color: var(--fg-color-2);
 }
 
 .add-rule {
