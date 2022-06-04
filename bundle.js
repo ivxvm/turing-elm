@@ -8255,12 +8255,12 @@ var $author$project$Core$KeyedTape$fromTape = function (tape) {
 	};
 };
 var $author$project$App$Turing$BitInverter$turing = {
-	currentState: '~>',
+	currentState: '>>_',
 	finalState: 'X',
 	rules: _List_fromArray(
 		[
-			A5($author$project$Core$Rule$Rule, '~>', '0', '1', '~>', $author$project$Core$Direction$Right),
-			A5($author$project$Core$Rule$Rule, '~>', '1', '0', '~>', $author$project$Core$Direction$Right)
+			A5($author$project$Core$Rule$Rule, '>>_', '0', '1', '>>_', $author$project$Core$Direction$Right),
+			A5($author$project$Core$Rule$Rule, '>>_', '1', '0', '>>_', $author$project$Core$Direction$Right)
 		]),
 	tape: $author$project$Core$KeyedTape$fromTape(
 		{
@@ -10619,7 +10619,7 @@ var $author$project$App$View$view = function (model) {
 							[
 								$rtfeldman$elm_css$Html$Styled$text('overview')
 							])),
-						$rtfeldman$elm_css$Html$Styled$text('\n                A Turing machine is a mathematical model of computation that defines an abstract machine that manipulates symbols\n                on a strip of tape according to a table of rules. Despite the model\'s simplicity, given any computer algorithm,\n                a Turing machine capable of implementing that algorithm\'s logic can be constructed.\n                The machine operates on an infinite memory tape divided into discrete "cells".\n                The machine positions its "head" over a cell and "reads" or "scans" the symbol there.\n                Then, based on the symbol and the machine\'s own present state in a "finite table" of user-specified instructions,\n                the machine first writes a symbol into the cell, then moves the tape one cell left or right,\n                then, based on the observed symbol and the machine\'s own state in the table, either proceeds to another instruction\n                or halts computation.\n                ')
+						$rtfeldman$elm_css$Html$Styled$text('\r\n                A Turing machine is a mathematical model of computation that defines an abstract machine that manipulates symbols\r\n                on a strip of tape according to a table of rules. Despite the model\'s simplicity, given any computer algorithm,\r\n                a Turing machine capable of implementing that algorithm\'s logic can be constructed.\r\n                The machine operates on an infinite memory tape divided into discrete "cells".\r\n                The machine positions its "head" over a cell and "reads" or "scans" the symbol there.\r\n                Then, based on the symbol and the machine\'s own present state in a "finite table" of user-specified instructions,\r\n                the machine first writes a symbol into the cell, then moves the tape one cell left or right,\r\n                then, based on the observed symbol and the machine\'s own state in the table, either proceeds to another instruction\r\n                or halts computation.\r\n                ')
 					])),
 				A2(
 				$rtfeldman$elm_css$Html$Styled$section,
